@@ -310,7 +310,7 @@ function defaultState() {
 
     // 'ae' | 'hellerick' | 'blank'. Affects only the map art; physics
     // always runs in the AE frame.
-    MapProjection: 'ae',
+    MapProjection: 'proportional',
     MapProjectionGe: 'hq_equirect_night',
 
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav'
