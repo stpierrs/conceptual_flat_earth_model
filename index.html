@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0e121a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FE CONCEPTUAL MODEL</title>
+<meta name="description" content="Browser-based conceptual flat-earth astronomy simulator. Five ephemeris pipelines (DE405, GeoC, HelioC, VSOP87, Ptolemy), eclipse demos, observer pan, and a kinematic Vault of Heavens projection.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="assets/ac_logo.png">
+<link rel="apple-touch-icon" href="assets/ac_logo.png">
+<link rel="preload" href="css/styles.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/styles.min.css"></noscript>
+<!-- The importmap MUST be declared before any <link rel="modulepreload">
+     or <script type="module">. Firefox enforces this strictly: a
+     modulepreload kicks off the module-load pipeline, after which
+     importmaps are rejected (warning "Import maps are not allowed
+     after a module load or preload has started") and any bare
+     specifier (`import 'three'`) fails to resolve. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./assets/vendor/three.module.min.js"
+  }
+}
+</script>
+<link rel="modulepreload" href="assets/vendor/three.module.min.js">
+<link rel="preload" href="assets/ne_110m_land.geojson" as="fetch" type="application/geo+json" crossorigin>
+<link rel="modulepreload" href="js/main.js">
+<link rel="modulepreload" href="js/render/index.js">
+<link rel="modulepreload" href="js/render/worldObjects.js">
+<link rel="modulepreload" href="js/core/app.js">
+<link rel="modulepreload" href="js/core/ephemerisAstropixels.js">
+<link rel="modulepreload" href="js/data/astropixels.js">
+<link rel="modulepreload" href="js/ui/controlPanel.js">
+<link rel="modulepreload" href="js/ui/i18n.js">
+</head>
+<body>
+
+<main id="app">
+  <header>
+    <h1 id="app-title">FE CONCEPTUAL MODEL</h1>
+    <p class="sub" id="app-subtitle">Modular port. All distances are unitless (FE radius = 1).</p>
+    <div class="info-box">
+      <button class="info-btn" type="button" aria-label="About this model" id="about-btn">ⓘ <span data-i18n="about_btn">About</span></button>
+      <button class="info-btn" type="button" aria-label="Feature legend" id="legend-btn">📖 <span data-i18n="legend_btn">Legend</span></button>
+      <div class="info-popup" id="about-popup" hidden>
+        <p data-i18n="about_p1">This is a conceptual model. The positions of the stars are based purely on kinematics; the observer's optical vault defines the limit of vision onto which the starfield is projected.</p>
+        <p data-i18n="about_p2">Any conceptual model that uses the lat/long graticule is no better or worse than any other projection. The graticule is internally consistent and self-referential to a fictitious observer at the center of the earth — it is that fictitious observer that binds the 60 NMi / 1° relationship to the ground positions of the stars.</p>
+        <p data-i18n="about_p3">"Fictitious observer" is not mutually exclusive with the conceptual model: every such model is ultimately grounded in what a single real observer sees in their own hemisphere of vision, and the graticule is simply one bookkeeping convention on top of that.</p>
+      </div>
+      <div class="info-popup legend-popup" id="legend-popup" hidden></div>
+    </div>
+  </header>
+
+  <div id="view">
+    <canvas id="feCanvas"></canvas>
+    <div id="hud"></div>
+    <!-- S009 — Tracker HUD panel, sits below #hud. Hidden unless the
+         user picks a TrackerTarget in the Tracker tab. -->
+    <div id="tracker-hud"></div>
+    <!-- Tracking-info pop-up. Shows pixel-art for the selected body
+         + its readout panel. Populated by `buildTrackingInfoPopup`
+         in `js/ui/trackingInfoPopup.js`. -->
+    <div id="tracking-info-popup" hidden></div>
+    <!-- S200 — Meeus warning banner. Visible only when the active
+         BodySource uses Meeus-based luminaries (HelioC, GeoC, VSOP87
+         which delegates moon to Meeus). The Meeus moon is ~2.5° off
+         DE405; eclipse demos in those modes will land at the wrong
+         UTC moment. -->
+    <div id="meeus-warning" hidden></div>
+    <picture>
+      <source srcset="assets/ac_logo.webp" type="image/webp">
+      <img id="logo" src="assets/ac_logo.png" alt="Aether Cosmology" width="180" height="180" decoding="async" fetchpriority="high">
+    </picture>
+  </div>
+
+  <footer id="desc">
+    <!-- Static placeholder matches the format of the live status
+         readout (`defaultStatus` in main.js). Renders as the LCP
+         element on first paint so LCP isn't blocked on the JS
+         module graph; main.js overwrites it once the model has
+         computed the real status string. -->
+    <p class="desc-dynamic">0.0°N — within observer's optical vault — daylight.</p>
+  </footer>
+</main>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
