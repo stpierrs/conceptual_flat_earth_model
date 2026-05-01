@@ -4949,54 +4949,52 @@ export class MtMeru {
 
 // Discworld cosmology: Great A'Tuin the star turtle swimming through
 // space, with four elephants (Berilia, Tubul, Great T'Phon, Jerakeen)
-// arranged in a cross on its back holding the FE disc aloft. Nod to
-// Terry Pratchett's *The Colour of Magic*.
+// standing on its back, holding the FE disc aloft.
 //
 // Z layout (disc underside = 0, positive Z = up):
-//   Disc bottom            Z =  0.00
-//   Elephant backs         Z =  0.00  (touching disc underside)
-//   Elephant feet          Z = -0.32  (stand on shell top)
-//   Shell top              Z = -0.32
-//   Shell dome centre      Z = -0.62  (shell dome semi-Z = 0.30)
-//   Turtle body/flippers   Z ~ -0.65 to -0.90
+//   Disc bottom         Z =  0.00
+//   Elephant backs      Z =  0.00  (touching disc underside)
+//   Elephant feet       Z = -0.32  (stand on shell top)
+//   Shell top           Z = -0.32
+//   Shell dome centre   Z = -0.62  (shell dome semi-Z = 0.30)
 export class Discworld {
   constructor() {
     this.group = new THREE.Group();
     this.group.name = 'discworld';
 
-    // Phong materials respond to the scene's ambient + directional light
-    const shellMat  = new THREE.MeshPhongMaterial({ color: 0x7a6828, shininess: 18 });
-    const scuteMat  = new THREE.MeshPhongMaterial({ color: 0x4a3a10, shininess: 10 });
-    const skinMat   = new THREE.MeshPhongMaterial({ color: 0x5a4820, shininess: 8  });
-    const eyeMat    = new THREE.MeshPhongMaterial({ color: 0x1a1408, shininess: 40 });
-    const elephMat  = new THREE.MeshPhongMaterial({ color: 0x888888, shininess: 12 });
-    const ivoryMat  = new THREE.MeshPhongMaterial({ color: 0xf0ead6, shininess: 25 });
+    // Materials — MeshPhongMaterial responds to the scene's ambient + directional light
+    const shellMat = new THREE.MeshPhongMaterial({ color: 0x7a6828, shininess: 18 });
+    const scuteMat = new THREE.MeshPhongMaterial({ color: 0x4a3a10, shininess: 10 });
+    const skinMat  = new THREE.MeshPhongMaterial({ color: 0x5a4820, shininess: 8  });
+    const eyeMat   = new THREE.MeshPhongMaterial({ color: 0x1a1408, shininess: 40 });
+    const elephMat = new THREE.MeshPhongMaterial({ color: 0x888888, shininess: 12 });
+    const ivoryMat = new THREE.MeshPhongMaterial({ color: 0xf0ead6, shininess: 25 });
 
-    // ── Dimensional constants ─────────────────────────────────────────
-    const elephH   = 0.32;           // elephant height (feet → back)
-    const sTZ      = -elephH;        // shell top Z  = -0.32
-    const sSX      = 0.78;           // shell half-width  (X)
-    const sSY      = 0.95;           // shell half-length (Y)  sea turtles longer than wide
-    const sSZ      = 0.30;           // shell dome half-height (Z)
-    const sCZ      = sTZ - sSZ;      // shell dome centre Z  = -0.62
+    // Dimensional constants
+    const elephH = 0.32;          // elephant height (feet to back)
+    const sTZ    = -elephH;       // shell top Z = -0.32
+    const sSX    = 0.78;          // shell half-width  (X)
+    const sSY    = 0.95;          // shell half-length (Y)
+    const sSZ    = 0.30;          // shell dome half-height (Z)
+    const sCZ    = sTZ - sSZ;     // shell dome centre Z = -0.62
 
-    // ── A'Tuin — shell carapace (upper dome) ──────────────────────────
+    // Shell carapace (upper dome)
     const shellGeo = new THREE.SphereGeometry(1, 36, 20, 0, Math.PI * 2, 0, Math.PI / 2);
     shellGeo.scale(sSX, sSY, sSZ);
     shellGeo.translate(0, 0, sCZ);
     this.group.add(new THREE.Mesh(shellGeo, shellMat));
 
-    // Shell scute-plate overlays — raised patches across the carapace
+    // Scute-plate overlays — raised patches across the carapace
     const scuteData = [
-      [0,     0,     0.01],   // central boss
-      [0,     0.38,  0.00],   // forward-centre
-      [0,    -0.38,  0.00],   // rear-centre
-      [ 0.30, 0.22, -0.01],   // right-forward
-      [-0.30, 0.22, -0.01],   // left-forward
-      [ 0.30,-0.22, -0.01],   // right-rear
-      [-0.30,-0.22, -0.01],   // left-rear
-      [ 0.28, 0,    -0.02],   // right-mid
-      [-0.28, 0,    -0.02],   // left-mid
+      [0,     0,     0.01],
+      [0,     0.38,  0.00],
+      [0,    -0.38,  0.00],
+      [ 0.30, 0.22, -0.01],
+      [-0.30, 0.22, -0.01],
+      [ 0.30,-0.22, -0.01],
+      [-0.30,-0.22, -0.01],
+      [ 0.28, 0,    -0.02],
+      [-0.28, 0,    -0.02],
     ];
     for (const [ox, oy, oz] of scuteData) {
       const sg = new THREE.SphereGeometry(1, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2);
@@ -5005,15 +5003,14 @@ export class Discworld {
       this.group.add(new THREE.Mesh(sg, scuteMat));
     }
 
-    // ── Plastron (belly) ──────────────────────────────────────────────
+    // Plastron (belly)
     const bellyGeo = new THREE.SphereGeometry(1, 28, 14, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
     bellyGeo.scale(sSX * 0.82, sSY * 0.78, sSZ * 0.65);
     bellyGeo.translate(0, 0, sCZ);
     this.group.add(new THREE.Mesh(bellyGeo, skinMat));
 
-    // ── Front flippers (large, swept forward like a sea turtle) ───────
+    // Front flippers (large, swept forward)
     for (const side of [1, -1]) {
-      // Upper surface
       const fGeo = new THREE.SphereGeometry(1, 18, 10);
       fGeo.scale(0.58, 0.15, 0.065);
       const flip = new THREE.Mesh(fGeo, skinMat);
@@ -5023,25 +5020,25 @@ export class Discworld {
       this.group.add(flip);
     }
 
-    // ── Rear flippers (smaller, angled back) ──────────────────────────
+    // Rear flippers (smaller, angled back)
     for (const side of [1, -1]) {
-      const fGeo = new THREE.SphereGeometry(1, 14, 8);
-      fGeo.scale(0.35, 0.11, 0.055);
-      const flip = new THREE.Mesh(fGeo, skinMat);
-      flip.position.set(side * (sSX + 0.14), -sSY * 0.58, sCZ - 0.06);
-      flip.rotation.z = side * 0.18;
-      flip.rotation.y = side * 0.28;
-      this.group.add(flip);
+      const fGeo2 = new THREE.SphereGeometry(1, 14, 8);
+      fGeo2.scale(0.35, 0.11, 0.055);
+      const flip2 = new THREE.Mesh(fGeo2, skinMat);
+      flip2.position.set(side * (sSX + 0.14), -sSY * 0.58, sCZ - 0.06);
+      flip2.rotation.z = side * 0.18;
+      flip2.rotation.y = side * 0.28;
+      this.group.add(flip2);
     }
 
-    // ── Neck ──────────────────────────────────────────────────────────
+    // Neck
     const neckGeo = new THREE.CylinderGeometry(0.10, 0.16, 0.42, 14);
     const neckMesh = new THREE.Mesh(neckGeo, skinMat);
     neckMesh.rotation.x = Math.PI / 2;
     neckMesh.position.set(0, sSY + 0.14, sCZ + 0.05);
     this.group.add(neckMesh);
 
-    // ── Head ──────────────────────────────────────────────────────────
+    // Head
     const headGeo = new THREE.SphereGeometry(0.18, 20, 14);
     headGeo.scale(1.0, 1.15, 0.82);
     const headMesh = new THREE.Mesh(headGeo, skinMat);
@@ -5056,54 +5053,51 @@ export class Discworld {
       this.group.add(eMesh);
     }
 
-    // ── Tail ──────────────────────────────────────────────────────────
+    // Tail
     const tailGeo = new THREE.ConeGeometry(0.07, 0.28, 10);
     tailGeo.rotateX(-Math.PI / 2);
     const tailMesh = new THREE.Mesh(tailGeo, skinMat);
     tailMesh.position.set(0, -(sSY + 0.12), sCZ - 0.04);
     this.group.add(tailMesh);
 
-    // ── Four elephants ────────────────────────────────────────────────
-    // Each elephant stands on the shell top (feet at Z = sTZ = -0.32) with
-    // its back just reaching the disc underside (Z = 0). Heads face radially
-    // outward (local +X = outward after rotation.z = theta).
-    const legH   = elephH * 0.52;    // leg height ≈ 0.166
-    const bodyZ  = legH + 0.12;      // body centre Z in local space ≈ 0.286
-    const headZ  = legH + 0.10;      // head centre Z
-    const headX  = 0.24;             // head forward offset
+    // Four elephants — feet at Z = sTZ, backs at Z = 0, heads face outward
+    const legH  = elephH * 0.52;
+    const bodyZ = legH + 0.12;
+    const headZ = legH + 0.10;
+    const headX = 0.24;
 
     const buildElephant = () => {
-      const g = new THREE.Group();
+      const eg = new THREE.Group();
 
       // Body
       const bGeo = new THREE.SphereGeometry(1, 18, 12);
       bGeo.scale(0.22, 0.14, 0.14);
       const body = new THREE.Mesh(bGeo, elephMat);
       body.position.z = bodyZ;
-      g.add(body);
+      eg.add(body);
 
-      // Shoulder hump (reaches toward disc)
-      const hGeo = new THREE.SphereGeometry(0.11, 12, 10);
-      hGeo.scale(0.85, 0.85, 1.4);
-      const hump = new THREE.Mesh(hGeo, elephMat);
+      // Shoulder hump
+      const hmGeo = new THREE.SphereGeometry(0.11, 12, 10);
+      hmGeo.scale(0.85, 0.85, 1.4);
+      const hump = new THREE.Mesh(hmGeo, elephMat);
       hump.position.set(-0.06, 0, bodyZ + 0.12);
-      g.add(hump);
+      eg.add(hump);
 
       // Head
       const hdGeo = new THREE.SphereGeometry(0.12, 16, 12);
       hdGeo.scale(0.90, 0.88, 0.95);
       const hdMesh = new THREE.Mesh(hdGeo, elephMat);
       hdMesh.position.set(headX, 0, headZ);
-      g.add(hdMesh);
+      eg.add(hdMesh);
 
-      // Trunk (tapered cylinder, drooping slightly down)
+      // Trunk
       const trGeo = new THREE.CylinderGeometry(0.024, 0.044, 0.22, 10);
       trGeo.translate(0, -0.08, 0);
       trGeo.rotateZ(0.35);
       const trunk = new THREE.Mesh(trGeo, elephMat);
       trunk.position.set(headX + 0.10, 0, headZ - 0.06);
       trunk.rotation.x = Math.PI / 2;
-      g.add(trunk);
+      eg.add(trunk);
 
       // Tusks
       for (const dy of [0.055, -0.055]) {
@@ -5111,44 +5105,43 @@ export class Discworld {
         tkGeo.rotateZ(-Math.PI / 2);
         const tusk = new THREE.Mesh(tkGeo, ivoryMat);
         tusk.position.set(headX + 0.12, dy, headZ - 0.03);
-        g.add(tusk);
+        eg.add(tusk);
       }
 
-      // Ears (large flat ellipses — African elephant)
+      // Ears
       for (const dy of [0.17, -0.17]) {
         const earGeo = new THREE.SphereGeometry(0.10, 10, 8);
         earGeo.scale(0.18, 1.0, 0.88);
         const ear = new THREE.Mesh(earGeo, elephMat);
         ear.position.set(headX - 0.04, dy, headZ + 0.02);
-        g.add(ear);
+        eg.add(ear);
       }
 
-      // Four legs (oriented along Z — vertical in world space)
+      // Four legs
       for (const [lx, ly] of [[0.10, 0.07], [0.10, -0.07], [-0.09, 0.07], [-0.09, -0.07]]) {
         const lgGeo = new THREE.CylinderGeometry(0.036, 0.042, legH, 8);
         const lgMesh = new THREE.Mesh(lgGeo, elephMat);
         lgMesh.position.set(lx, ly, legH / 2);
         lgMesh.rotation.x = Math.PI / 2;
-        g.add(lgMesh);
+        eg.add(lgMesh);
       }
 
       // Tail
-      const tGeo = new THREE.ConeGeometry(0.016, 0.10, 6);
-      tGeo.rotateX(-Math.PI / 2);
-      const tMesh = new THREE.Mesh(tGeo, elephMat);
-      tMesh.position.set(-0.24, 0, bodyZ - 0.04);
-      g.add(tMesh);
+      const etGeo = new THREE.ConeGeometry(0.016, 0.10, 6);
+      etGeo.rotateX(-Math.PI / 2);
+      const etMesh = new THREE.Mesh(etGeo, elephMat);
+      etMesh.position.set(-0.24, 0, bodyZ - 0.04);
+      eg.add(etMesh);
 
-      return g;
+      return eg;
     };
 
-    // Arrange 4 elephants in a cross; spread slightly so they don't overlap
     const elephRad = 0.30;
     for (let i = 0; i < 4; i++) {
       const theta = (i / 4) * Math.PI * 2;
       const e = buildElephant();
       e.position.set(Math.cos(theta) * elephRad, Math.sin(theta) * elephRad, sTZ);
-      e.rotation.z = theta;   // local +X faces radially outward
+      e.rotation.z = theta;
       this.group.add(e);
     }
 
@@ -6510,4 +6503,95 @@ export class GPTracer {
     if (!on) return;
 
     const trackerArr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
-    const targets    = [...new S
+    const targets    = [...new Set(trackerArr)];
+    const key = targets.slice().sort().join(',');
+    if (key !== this._lastTargetsKey) {
+      const want = new Set(targets);
+      for (const k of [...this._lines.keys()]) {
+        if (!want.has(k)) this._resetRec(this._lines.get(k));
+      }
+    }
+    this._lastTargetsKey = key;
+
+    const ge = s.WorldModel === 'ge';
+    const obs = ge
+      ? (c.GlobeObserverCoord || [0, 0, 0])
+      : (c.ObserverFeCoord    || [0, 0, 0]);
+    this.skyGroup.position.set(obs[0], obs[1], obs[2]);
+
+    // Earth-fixed (default): subtract GMST so the trace is the
+    // body's GP on the rotating Earth. Celestial-frame trace skips
+    // the subtraction, so over a year the planet traces its
+    // apparent ecliptic motion (Mercury's 4 retrograde loops, etc.)
+    // instead of 365 nested daily circles.
+    const skyRot = (s.TraceCelestialFrame === true) ? 0 : (c.SkyRotAngle || 0);
+    for (const name of targets) {
+      let lat, lon, optical, color;
+      if (name === 'sun') {
+        lat = c.SunCelestLatLong.lat;
+        lon = _wrapLon(c.SunRA * 180 / Math.PI - skyRot);
+        optical = ge ? c.SunGlobeOpticalVaultCoord : c.SunOpticalVaultCoord;
+        color = GP_TRACER_COLORS.sun;
+      } else if (name === 'moon') {
+        lat = c.MoonCelestLatLong.lat;
+        lon = _wrapLon(c.MoonRA * 180 / Math.PI - skyRot);
+        optical = ge ? c.MoonGlobeOpticalVaultCoord : c.MoonOpticalVaultCoord;
+        color = GP_TRACER_COLORS.moon;
+      } else if (c.Planets && c.Planets[name]) {
+        const p = c.Planets[name];
+        lat = p.celestLatLong.lat;
+        lon = _wrapLon(p.ra * 180 / Math.PI - skyRot);
+        optical = ge ? (p.globeOpticalVaultCoord || p.opticalVaultCoord) : p.opticalVaultCoord;
+        color = GP_TRACER_COLORS[name] || 0xffffff;
+      } else if (name.startsWith('star:')) {
+        const starId = name.slice(5);
+        let entry = null;
+        let starColor = 0xffffff;
+        if (c.CelNavStars && (entry = c.CelNavStars.find((x) => x.id === starId))) {
+          starColor = 0xffe8a0;
+        } else if (c.CataloguedStars && (entry = c.CataloguedStars.find((x) => x.id === starId))) {
+          starColor = 0xffffff;
+        } else if (c.BlackHoles && (entry = c.BlackHoles.find((x) => x.id === starId))) {
+          starColor = 0x9966ff;
+        } else if (c.Quasars && (entry = c.Quasars.find((x) => x.id === starId))) {
+          starColor = 0x40e0d0;
+        } else if (c.Galaxies && (entry = c.Galaxies.find((x) => x.id === starId))) {
+          starColor = 0xff80c0;
+        } else if (c.CelTheoStars && (entry = c.CelTheoStars.find((x) => x.id === starId))) {
+          starColor = 0xff8c00;
+        } else if (c.Satellites && (entry = c.Satellites.find((x) => x.id === starId))) {
+          starColor = 0x66ff88;
+        }
+        if (!entry) continue;
+        lat = entry.celestLatLong.lat;
+        lon = _wrapLon(entry.ra * 180 / Math.PI - skyRot);
+        optical = ge ? (entry.globeOpticalVaultCoord || entry.opticalVaultCoord) : entry.opticalVaultCoord;
+        color = starColor;
+      } else {
+        continue;
+      }
+      const rec = this._ensureRec(name, color);
+
+      // Disc / ground trace. FE projects via AE onto the disc; GE
+      // projects onto the terrestrial sphere surface at the body's
+      // GP `(lat, lon)` with a tiny outward lift to avoid z-fight.
+      if (ge) {
+        const phi = lat * Math.PI / 180;
+        const lam = lon * Math.PI / 180;
+        const cp = Math.cos(phi);
+        const Rg = FE_RADIUS * 1.001;
+        this._appendPoint(rec.disc, Rg * cp * Math.cos(lam), Rg * cp * Math.sin(lam), Rg * Math.sin(phi));
+      } else {
+        const [dx, dy] = canonicalLatLongToDisc(lat, lon, FE_RADIUS);
+        this._appendPoint(rec.disc, dx, dy, 0.003);
+      }
+
+      if (optical) {
+        const lx = optical[0] - obs[0];
+        const ly = optical[1] - obs[1];
+        const lz = optical[2] - obs[2];
+        this._appendPoint(rec.sky, lx, ly, lz);
+      }
+    }
+  }
+}
