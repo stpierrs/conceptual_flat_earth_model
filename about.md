@@ -182,13 +182,12 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 
 ## Ephemeris
 
-- **Source** — picks which of five sun/moon/planet ephemeris pipelines drives the actual rendered positions. All five run every frame internally so the comparison panel stays valid; this dropdown only chooses which one *renders*.
-  - **HelioC** — Schlyter simplified Kepler composed with the Sun's geocentric orbit. Lightweight; ~degree-level for inner planets, fast.
-  - **GeoC** — Earth-focus single-ellipse Kepler per planet, no Sun stage. Conceptually clean, deliberately less accurate.
+- **Source** — picks which of four sun/moon/planet ephemeris pipelines drives the actual rendered positions. All four run every frame internally so the comparison panel stays valid; this dropdown only chooses which one *renders*.
+  - **HelioC** — Angular-element planet positions composed with the Sun's geocentric position. Lightweight; ~degree-level for inner planets, fast.
+  - **GeoC** — Earth-focus single-ellipse per planet, no Sun stage. Conceptually clean, comparison-mode only.
   - **Ptolemy** — Deferent + epicycle from the *Almagest*, ported via the Almagest Ephemeris Calculator. Lands ~5–10° off modern positions, exactly as in the original sources.
   - **DE405** — Fred Espenak's AstroPixels daily ephemeris tables, 2019–2030. Modern reference; the default.
-  - **VSOP87** — Bretagnon & Francou 1988 analytical theory. Moon delegated to Meeus. High-accuracy for planets; Meeus moon has a ~2.5° known offset vs DE405.
-- **Ephemeris comparison** — when on, each tracker card in the Live Ephemeris HUD shows up to five rows of RA / Dec, one per pipeline. Useful for seeing how far Ptolemy drifts vs DE405, or how close VSOP87 is, in real time.
+- **Ephemeris comparison** — when on, each tracker card in the Live Ephemeris HUD shows up to four rows of RA / Dec, one per pipeline. Useful for seeing how far Ptolemy drifts vs DE405 in real time.
 - **Precession** — classical J2000-to-date precession applied to fixed-star RA / Dec. Off = stars stay at J2000 catalog values; On = they walk forward to the displayed date.
 - **Nutation** — short-period wobble of the celestial pole (~18.6 yr term). Small (~10″) but visible on tight tracker readouts.
 - **Aberration** — annual aberration: stars apparently shift up to ~20″ in the direction of Earth's motion through the year. Off = catalog-mean positions.
@@ -197,12 +196,11 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 > **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Planet pipelines bake in their own corrections:
 > - **DE405 (Fred Espenak)**: apparent geocentric — precession + nutation + aberration all included. Default source.
 > - **GeoC / HelioC** (Meeus): apparent-of-date — precession + nutation + aberration all included.
-> - **VSOP87**: mean equinox of date — **precession built-in**, **nutation NOT applied**, **aberration NOT applied**. FK5 frame correction is included. Use this if you want a clean theoretical reference position that you can layer your own nutation / aberration on.
 > - **Ptolemy**: deferent + epicycle (Almagest) — none of the modern corrections apply; readings are intentionally historical.
 
-> **Source coverage + fallback chain.** Each pipeline reports its supported bodies and date range. `bodyRADec(name, date, source)` tries the active source first; if it can't deliver (body not in its set or date out of range), it walks the fallback chain `DE405 → GeoC → VSOP87 → Ptolemy` until something covers the request. Manually picking a pipeline that doesn't cover Uranus / Neptune (VSOP87 / GeoC / HelioC / Ptolemy — only DE405 ships them) auto-prunes those planets from `TrackerTargets`; switching back to DE405 doesn't auto-restore. Comparison-mode auto-loads of all five pipelines are independent of `TrackerTargets`.
+> **Source coverage + fallback chain.** Each pipeline reports its supported bodies and date range. `bodyRADec(name, date, source)` tries the active source first; if it can't deliver (body not in its set or date out of range), it walks the fallback chain `DE405 → GeoC → Ptolemy` until something covers the request. Manually picking a pipeline that doesn't cover Uranus / Neptune (GeoC / HelioC / Ptolemy — only DE405 ships them) auto-prunes those planets from `TrackerTargets`; switching back to DE405 doesn't auto-restore. Comparison-mode auto-loads of all four pipelines are independent of `TrackerTargets`.
 
-> **Comparison off → only one pipeline runs.** With `Ephemeris comparison` unchecked the tracker HUD only computes the active source. The other four pipelines stay imported but aren't queried per frame, so the per-frame compute drops to a single `bodyGeocentric` call per body. Toggle the comparison row on to bring the side-by-side rows back.
+> **Comparison off → only one pipeline runs.** With `Ephemeris comparison` unchecked the tracker HUD only computes the active source. The other three pipelines stay imported but aren't queried per frame, so the per-frame compute drops to a single `bodyGeocentric` call per body. Toggle the comparison row on to bring the side-by-side rows back.
 
 ## Starfield
 
@@ -338,13 +336,11 @@ The sim ships a PWA `manifest.webmanifest`, `theme-color`, and the `mobile-web-a
 
 - **Fred Espenak** (NASA GSFC retired, AstroPixels) — DE405 daily ephemeris, eclipse catalogues.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, source for the Ptolemy port.
-- **Bretagnon & Francou** — VSOP87 planetary theory.
-- **Sonia Keys / commenthol** — MIT-licensed JS coefficient port of VSOP87.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — conceptual framing and the push to actually build a working interactive demonstration.
-- **Walter Bislin** — visualization inspiration.
 - **HYG v41** (David Nash / astronexus) — bright-star data.
 - **OpenNGC** (Mattia Verga) — galaxy catalog.
 - **VizieR / CDS** (Véron-Cetty & Véron 2010) — quasar catalog.
 - **CelesTrak** (Dr. T.S. Kelso) — TLE feeds for satellites.
 - **Roohif** — flight-path KMZ data (Southern Non-Stop city/leg list and the QF27/28 actual-flight tracks with per-waypoint air speed, ground speed, heading, wind, and altitude). Powers the Flight Routes demo group and every QF27/28 actual-flight playback.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      

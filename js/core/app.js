@@ -308,13 +308,13 @@ function defaultState() {
     // 'none' | 'yggdrasil' | 'meru' | 'vortex' | 'vortex2' | 'discworld'
     Cosmology: 'none',
 
-    // 'ae' | 'hellerick' | 'blank'. Affects only the map art; physics
+    // 'proportional' | 'ae' | 'hellerick' | 'blank'. Affects only the map art; physics
     // always runs in the AE frame.
-    MapProjection: 'ae',
+    MapProjection: 'proportional',
     MapProjectionGe: 'hq_equirect_night',
 
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav'
-    StarfieldType: 'celnav',
+    StarfieldType: 'random',
 
     // 'heliocentric' | 'geocentric' | 'ptolemy' | 'astropixels'
     BodySource: 'astropixels',
@@ -602,9 +602,7 @@ export class FeModel extends EventTarget {
     this._timeLast = s.Time;
 
     const utcDate = dateTimeToDate(s.DateTime);
-    // Legacy 'heliocentric' BodySource (removed) maps to 'geocentric'
-    // — the underlying pipeline always returned geocentric apparent
-    // anyway, so no behaviour shift for users with old URL state.
+    // URL-state compatibility: old 'heliocentric' key maps to 'geocentric'.
     const bodySource = (s.BodySource === 'heliocentric')
       ? 'geocentric'
       : (s.BodySource || 'geocentric');
@@ -1602,4 +1600,4 @@ export class FeModel extends EventTarget {
     }
   }
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     

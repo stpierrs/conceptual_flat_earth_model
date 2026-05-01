@@ -157,13 +157,12 @@ El Rastreador es la única fuente de verdad para la visibilidad de los cuerpos. 
 
 ## Efemérides
 
-- **Fuente** — elige cuál de los cinco pipelines de efemérides Sol/Luna/planeta dirige las posiciones realmente renderizadas. Los cinco se ejecutan internamente cada cuadro para que el panel de comparación siga válido; este desplegable solo elige cuál se *renderiza*.
-  - **HelioC** — Kepler simplificado de Schlyter compuesto con la órbita geocéntrica del Sol. Ligero; nivel de grado para planetas interiores, rápido.
-  - **GeoC** — Kepler con foco en la Tierra (una sola elipse por planeta, sin etapa de Sol). Conceptualmente limpio, deliberadamente menos preciso.
+- **Fuente** — elige cuál de los cuatro pipelines de efemérides Sol/Luna/planeta dirige las posiciones realmente renderizadas. Los cuatro se ejecutan internamente cada cuadro para que el panel de comparación siga válido; este desplegable solo elige cuál se *renderiza*.
+  - **HelioC** — Posiciones planetarias desde elementos angulares compuestos con la posición geocéntrica del Sol. Ligero; nivel de grado para planetas interiores, rápido.
+  - **GeoC** — Elipse única con foco en la Tierra por planeta, sin etapa de Sol. Conceptualmente limpio, solo para modo comparación.
   - **Ptolomeo** — Deferente + epiciclo del *Almagesto*, portado vía Almagest Ephemeris Calculator. Cae ~5–10° de las posiciones modernas, exactamente como en las fuentes originales.
   - **DE405** — Tablas de efemérides diarias AstroPixels de Fred Espenak, 2019–2030. Referencia moderna; el predeterminado.
-  - **VSOP87** — Teoría analítica de Bretagnon & Francou 1988. Luna delegada a Meeus. Alta precisión para planetas; la luna de Meeus tiene un desfase conocido de ~2,5° vs DE405.
-- **Comparación de efemérides** — cuando está activado, cada tarjeta del rastreador en el HUD Live Ephemeris muestra hasta cinco filas de RA / Dec, una por pipeline. Útil para ver cuánto deriva Ptolomeo vs DE405, o cuán cerca está VSOP87, en tiempo real.
+- **Comparación de efemérides** — cuando está activado, cada tarjeta del rastreador en el HUD Live Ephemeris muestra hasta cuatro filas de RA / Dec, una por pipeline. Útil para ver cuánto deriva Ptolomeo vs DE405 en tiempo real.
 - **Precesión** — precesión clásica J2000-a-fecha aplicada a RA / Dec de estrellas fijas. Apagado = las estrellas permanecen en valores del catálogo J2000; Activado = avanzan a la fecha mostrada.
 - **Nutación** — oscilación de período corto del polo celeste (~18,6 años). Pequeña (~10″) pero visible en lecturas precisas del rastreador.
 - **Aberración** — aberración anual: las estrellas aparentemente se desplazan hasta ~20″ en la dirección del movimiento de la Tierra durante el año. Apagado = posiciones medias del catálogo.
@@ -244,7 +243,7 @@ Grupos de enlaces externos a comunidades y creadores en torno a este trabajo (Sp
 - **HUD principal (arriba a la izquierda, colapsable)** — encabezado `Fases Lunares en Vivo`. El cuerpo contiene DateTime, az/el de Sol + Luna, % fase lunar, cuenta atrás del próximo eclipse solar + lunar, lienzo de fase lunar (ilustración + barra de iluminación + nombre de fase).
 - **HUD del rastreador Live Ephemeris** — alternado por el botón debajo del HUD. Una tarjeta por cuerpo rastreado con az/el y filas RA/Dec por pipeline.
 - **Tira de info inferior** — Lat · Lon · El · Az · Mouse El · Mouse Az · efem · tiempo · velocidad actual (`+0.042 d/s`) arriba; `Tracking: <nombre>` abajo.
-- **Banner de advertencia Meeus** — franja roja cuando BodySource activo depende de la luna de Meeus (HelioC / GeoC / VSOP87).
+- **Banner de advertencia Meeus** — franja roja cuando BodySource activo depende de la luna de Meeus (HelioC / GeoC).
 - **Cadence chip (solo Óptico)** — chip arriba a la derecha con cadencia activa (15° / 5° / 1°), FOV, dirección.
 - **Pie de descripción dinámico** — estado de una línea bajo el lienzo (latitud + estado del Sol + etapa del crepúsculo). Las demos sobrescriben con texto narrativo.
 
@@ -287,12 +286,10 @@ Cada campo de estado vive en el hash de la URL para que un setup del sim se pued
 
 - **Fred Espenak** (NASA GSFC retirado, AstroPixels) — efemérides diarias DE405, catálogos de eclipses.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, fuente para el port de Ptolomeo.
-- **Bretagnon & Francou** — teoría planetaria VSOP87.
-- **Sonia Keys / commenthol** — port JS con licencia MIT de coeficientes de VSOP87.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — encuadre conceptual y el empuje para realmente construir una demostración interactiva funcional.
-- **Walter Bislin** — inspiración de visualización.
 - **HYG v41** (David Nash / astronexus) — datos de estrellas brillantes.
 - **OpenNGC** (Mattia Verga) — catálogo de galaxias.
 - **VizieR / CDS** (Véron-Cetty & Véron 2010) — catálogo de cuásares.
 - **CelesTrak** (Dr. T.S. Kelso) — feeds TLE para satélites.
+                                                                                                                                                                                                                                                                                                                                                                                                                           

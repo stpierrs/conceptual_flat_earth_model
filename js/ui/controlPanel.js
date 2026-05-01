@@ -679,9 +679,8 @@ const FIELD_GROUPS = [
   },
   // dedicated Tracker tab. Manual-select dropdown (sun, moon,
   // five planets, 58 Cel Nav stars) feeds the second HUD panel's
-  // azimuth/elevation/RA/Dec readout. Also exposes BodySource so the
-  // can toggle the helioc vs geoc pipeline and see readouts are
-  // consistent.
+  // azimuth/elevation/RA/Dec readout. Also exposes BodySource for
+  // selecting the active ephemeris pipeline.
   // Tracker tab. Multi-select button grid; toggling
   // each button adds/removes its id from `TrackerTargets`. Every
   // tracked object gets a block in the HUD with both ephemerides and
@@ -3257,4 +3256,4 @@ export function buildTrackerHud(trackerEl, model) {
   model.addEventListener('update', refresh);
   refresh();
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
