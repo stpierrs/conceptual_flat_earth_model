@@ -338,9 +338,10 @@ The sim ships a PWA `manifest.webmanifest`, `theme-color`, and the `mobile-web-a
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, source for the Ptolemy port.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — conceptual framing and the push to actually build a working interactive demonstration.
+- **Walter Bislin** — visual style and layout inspiration for the interactive model.
 - **HYG v41** (David Nash / astronexus) — bright-star data.
 - **OpenNGC** (Mattia Verga) — galaxy catalog.
 - **VizieR / CDS** (Véron-Cetty & Véron 2010) — quasar catalog.
 - **CelesTrak** (Dr. T.S. Kelso) — TLE feeds for satellites.
 - **Roohif** — flight-path KMZ data (Southern Non-Stop city/leg list and the QF27/28 actual-flight tracks with per-waypoint air speed, ground speed, heading, wind, and altitude). Powers the Flight Routes demo group and every QF27/28 actual-flight playback.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

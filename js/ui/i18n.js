@@ -88,7 +88,7 @@ const STRINGS = {
     btn_pause: 'Pause', btn_play: 'Play',
     status_running: 'running', status_paused: 'paused',
     btn_day: 'Day', btn_week: 'Week', btn_month: 'Month', btn_year: 'Year',
-    app_title: 'FE CONCEPTUAL MODEL',
+    app_title: "Shane's Model 2.0",
     app_subtitle: 'Modular port. All distances are unitless (FE radius = 1).',
     panel_live_moon_phases: 'Live Moon Phases',
     panel_live_ephemeris_data: 'Live Ephemeris Data',
@@ -1745,3 +1745,4 @@ export const LANGUAGES = [
 
 const RTL_LANGS = new Set(['ar', 'he']);
 export function isRtl(id) { return RTL_LANGS.has(id || _lang); }
+  

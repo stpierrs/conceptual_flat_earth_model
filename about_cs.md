@@ -288,8 +288,9 @@ Každé pole stavu žije v hash URL, takže nastavení sim může být sdíleno 
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, zdroj pro Ptolemaiovský port.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — koncepční rámcování a podnět skutečně vybudovat funkční interaktivní demonstraci.
+- **Walter Bislin** — vizuální styl a inspirace pro rozvržení interaktivního modelu.
 - **HYG v41** (David Nash / astronexus) — data jasných hvězd.
 - **OpenNGC** (Mattia Verga) — katalog galaxií.
 - **VizieR / CDS** (Véron-Cetty & Véron 2010) — katalog kvazarů.
 - **CelesTrak** (Dr. T.S. Kelso) — TLE kanály pro satelity.
-                                                                                                                                                                                                                                                                                                                                                                                                                   
+                                                                                                                                                                                                                                                                                                                       
