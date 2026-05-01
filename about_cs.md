@@ -157,12 +157,13 @@ Sledovač je jediný zdroj pravdy pro viditelnost těles. Zaškrtávací políč
 
 ## Efemeridy
 
-- **Zdroj** — vybírá, který ze čtyř efemeridových potrubí Slunce/Měsíce/planet pohání skutečně vykreslené pozice. Všechna čtyři běží na pozadí každý snímek, takže srovnávací panel zůstává platný; tato rozbalovací nabídka pouze volí, který se *vykreslí*.
-  - **HelioC** — Planetární pozice z úhlových elementů složené s geocentrickou polohou Slunce. Lehký; ~stupňová úroveň pro vnitřní planety, rychlý.
-  - **GeoC** — Jednoduchá elipsa s ohniskem v Zemi na planetu, žádná fáze Slunce. Koncepčně čistý, pouze pro srovnávací režim.
+- **Zdroj** — vybírá, který z pěti efemeridových potrubí Slunce/Měsíce/planet pohání skutečně vykreslené pozice. Všech pět běží na pozadí každý snímek, takže srovnávací panel zůstává platný; tato rozbalovací nabídka pouze volí, který se *vykreslí*.
+  - **HelioC** — Schlyterův zjednodušený Kepler kombinovaný se geocentrickou orbitou Slunce. Lehký; ~stupňová úroveň pro vnitřní planety, rychlý.
+  - **GeoC** — Kepler s ohniskem v Zemi, jediná elipsa na planetu, žádná fáze Slunce. Koncepčně čistý, záměrně méně přesný.
   - **Ptolemaios** — Deferent + epicykl z *Almagestu*, portováno přes Almagest Ephemeris Calculator. Dopadá ~5–10° od moderních pozic, přesně jako v původních zdrojích.
   - **DE405** — Denní efemeridy AstroPixels od Freda Espenaka 2019–2030. Moderní reference; výchozí.
-- **Srovnání efemerid** — když je zapnuto, každá karta sledovače v Live Ephemeris HUD zobrazuje až čtyři řádky RA / Dec, jeden na potrubí. Užitečné pro pozorování, jak daleko Ptolemaios driftuje vs DE405 v reálném čase.
+  - **VSOP87** — Bretagnonova a Francouova analytická teorie z roku 1988. Měsíc delegován na Meeuse. Vysoká přesnost pro planety; Meeusův Měsíc má známý posun ~2,5° vs DE405.
+- **Srovnání efemerid** — když je zapnuto, každá karta sledovače v Live Ephemeris HUD zobrazuje až pět řádků RA / Dec, jeden na potrubí. Užitečné pro pozorování, jak daleko Ptolemaios driftuje vs DE405, nebo jak blízko je VSOP87, v reálném čase.
 - **Precese** — klasická precese J2000-do-data aplikovaná na fixní RA / Dec hvězd. Vypnuto = hvězdy zůstávají na hodnotách katalogu J2000; Zapnuto = posouvají se vpřed k zobrazenému datu.
 - **Nutace** — krátkoperiodické kolísání nebeského pólu (~18,6 r). Malé (~10″), ale viditelné na přesných čteních sledovače.
 - **Aberace** — roční aberace: hvězdy zdánlivě posunuté až ~20″ ve směru pohybu Země během roku. Vypnuto = katalogové průměrné pozice.
@@ -243,7 +244,7 @@ Skupiny externích odkazů na komunity a tvůrce kolem této práce (Space Audit
 - **Hlavní HUD (vlevo nahoře, sbalitelný)** — záhlaví `Živé fáze Měsíce`. Tělo obsahuje DateTime, az/el Slunce + Měsíce, % fáze Měsíce, odpočet do dalšího zatmění Slunce + Měsíce, plátno fáze Měsíce (ilustrace + lišta osvětlení + název fáze).
 - **Live Ephemeris tracker HUD** — přepíná tlačítkem pod HUD. Jedna karta na sledované těleso s az/el a řádky RA/Dec na potrubí.
 - **Spodní info pruh** — Šíř · Dél · El · Az · Mouse El · Mouse Az · efem · čas · aktuální rychlost (`+0.042 d/s`) nahoře; `Tracking: <jméno>` dole.
-- **Varovný banner Meeus** — červený pruh, když aktivní BodySource závisí na Meeusově Měsíci (HelioC / GeoC).
+- **Varovný banner Meeus** — červený pruh, když aktivní BodySource závisí na Meeusově Měsíci (HelioC / GeoC / VSOP87).
 - **Cadence chip (pouze Optický)** — chip vpravo nahoře s aktivní kadencí (15° / 5° / 1°), FOV, směr.
 - **Dynamická popisná zápatí** — jednořádkový stav pod plátnem (zeměpisná šířka + stav Slunce + fáze soumraku). Ukázky to přepisují vyprávěcím textem.
 
@@ -286,11 +287,12 @@ Každé pole stavu žije v hash URL, takže nastavení sim může být sdíleno 
 
 - **Fred Espenak** (NASA GSFC v důchodu, AstroPixels) — denní efemeridy DE405, katalogy zatmění.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, zdroj pro Ptolemaiovský port.
+- **Bretagnon & Francou** — VSOP87 planetární teorie.
+- **Sonia Keys / commenthol** — MIT-licencovaný JS port koeficientů VSOP87.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — koncepční rámcování a podnět skutečně vybudovat funkční interaktivní demonstraci.
-- **Walter Bislin** — vizuální styl a inspirace pro rozvržení interaktivního modelu.
+- **Walter Bislin** — vizualizační inspirace.
 - **HYG v41** (David Nash / astronexus) — data jasných hvězd.
 - **OpenNGC** (Mattia Verga) — katalog galaxií.
 - **VizieR / CDS** (Véron-Cetty & Véron 2010) — katalog kvazarů.
 - **CelesTrak** (Dr. T.S. Kelso) — TLE kanály pro satelity.
-                                                                                                                                                                                                                                                                                                                       
