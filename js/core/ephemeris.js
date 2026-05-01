@@ -1,208 +1,86 @@
-// Ephemeris dispatcher.
+// Ephemeris — Ptolemy only.
 //
-// Loading order / runtime contract
-// --------------------------------
-//   • **Default ephem = Fred Espenak (DE405 / AstroPixels).** That's
-//     the only pipeline guaranteed to be queried per frame. State
-//     defaults `BodySource: 'astropixels'`; the rendered sun / moon /
-//     planet positions all come from `apix.bodyGeocentric` for any
-//     date inside Espenak's 2019–2030 window.
-//   • **Comparison ephems (GeoC / HelioC / Ptolemy) stay
-//     dormant** until the Tracker tab's "Ephemeris comparison" toggle
-//     (`state.ShowEphemerisReadings`) is on. With it off, `app.update`
-//     never invokes them — only the active source runs each frame.
-//     Toggling the comparison off again drops the per-frame calls so
-//     the three extra pipelines effectively "unload" from the hot
-//     path even if the JS engine keeps the module objects cached.
-//   • **Fallback chain** (only triggered when the active source can't
-//     deliver a body / date pair): `astropixels → geocentric →
-//     ptolemy`. GeoC is the seamless fallback when Espenak's
-//     2019–2030 table runs out — its Schlyter Earth-focus Kepler
-//     elements span effectively unlimited dates. Ptolemy is the
-//     historical last resort.
+// This whole model runs off ONE pipeline: the Ptolemaic deferent +
+// epicycle math in `ephemerisPtolemy.js`, ported from R.H. van Gent's
+// "Almagest Ephemeris Calculator". Every sun, moon, and planet
+// position you see on screen — every chip in the tracker HUD, every
+// trace, every eclipse refinement — comes from that one source.
 //
-// Pipelines
-// ---------
-//   'astropixels'  → ephemerisAstropixels.js — Espenak / DE405 daily
-//                                              tables. Default. The
-//                                              only pipeline ALWAYS
-//                                              loaded.
-//   'geocentric'   → ephemerisGeo.js         — Schlyter Earth-focus
-//                                              Kepler. Wide-date
-//                                              fallback. Loaded by
-//                                              the static import
-//                                              chain so the dispatcher
-//                                              can route to it from
-//                                              the fallback path
-//                                              without an async wait.
-//   'heliocentric' → ephemerisHelio.js       — Schlyter heliocentric
-//                                              Kepler, composed with
-//                                              the Sun's geocentric
-//                                              orbit. Comparison-mode
-//                                              only.
-//   'ptolemy'      → ephemerisPtolemy.js     — Almagest deferent +
-//                                              epicycle, ported via
-//                                              R.H. van Gent's
-//                                              Almagest Ephemeris
-//                                              Calculator. Comparison
-//                                              -mode only.
+// There used to be four pipelines plugged in here (DE405 / GeoC /
+// HelioC / Ptolemy) with a fallback chain and a comparison HUD. They
+// got cut. The point of the model is to show the kinematics, and
+// once you commit to a single classical pipeline the comparison
+// stops being the lesson — the predictions are.
+//
+// Coverage is whatever Ptolemy covers: sun, moon, mercury, venus,
+// mars, jupiter, saturn. Uranus, Neptune, Pluto aren't in the
+// Almagest, so they aren't here. Date range is unbounded in both
+// directions; precision degrades far from epoch the way you'd expect
+// from a 2nd-century model.
 //
 // Ptolemy port credit:
 //   R.H. van Gent, "Almagest Ephemeris Calculator"
 //   https://webspace.science.uu.nl/~gent0113/astro/almagestephemeris.htm
-//
-// Common Meeus-based Sun/Moon, GMST, eclipse-finder, and frame-rotation
-// helpers live in `ephemerisCommon.js` and are shared by the Helio and
-// GeoC pipelines (both use Meeus Ch.25/Ch.47 for the luminaries, only
-// their planet treatments differ). The Ptolemy pipeline is fully
-// self-contained — it has its own Sun and Moon models drawn from the
-// Almagest.
-//
-// All four pipelines expose the same API shape: `bodyGeocentric`,
-// `planetEquatorial`, `sunEquatorial`, `moonEquatorial`, plus
-// `SUPPORTED_BODIES` / `coversBody` / `coversDate` / `BUILTIN_CORRECTIONS`
-// metadata. The router `bodyRADec(name, date, source)` selects one,
-// walking the fallback chain if the requested source can't deliver.
-//
-// Legacy exports (`bodyGeocentric`, `bodyFromHeliocentric`, single-arg
-// `planetEquatorial`, etc.) are preserved so downstream code can keep
-// importing the names it already uses; they default to the `'geocentric'`
-// (Earth-focus Kepler) pipeline. The `bodyFromHeliocentric` alias
-// collapsed to `bodyGeocentric` in remains available.
 
-import * as helio from './ephemerisHelio.js';
-import * as geo   from './ephemerisGeo.js';
-import * as ptol  from './ephemerisPtolemy.js';
-import * as apix  from './ephemerisAstropixels.js';
+import * as ptol from './ephemerisPtolemy.js';
+import {
+  findNextEclipses as _findNextEclipses,
+} from './ephemerisCommon.js';
 
 export {
-  sunEquatorial as meeusSunEquatorial,
-  moonEquatorial as meeusMoonEquatorial,
   greenwichSiderealDeg,
   equatorialToCelestCoord,
-  findNextEclipses,
   julianDay,
   meanObliquityDeg,
   norm360,
 } from './ephemerisCommon.js';
 
-// The pipeline namespaces, exported so modules that want to compute
-// several readings simultaneously can do so without reimporting the
-// individual files.
-export { helio, geo, ptol, apix };
+// Re-export Ptolemy's sun and moon under the legacy "Meeus" names that
+// downstream callers still import. The Meeus implementations are gone;
+// these names now point at the Almagest sun/moon. Same shape, same
+// units, same callers.
+export const meeusSunEquatorial  = ptol.sunEquatorial;
+export const meeusMoonEquatorial = ptol.moonEquatorial;
 
-export const EPHEMERIS_SOURCES = ['geocentric', 'heliocentric', 'ptolemy', 'astropixels'];
-// Uranus + Neptune added. DE405 / AstroPixels carries
-// coverage 2019–2030; the other three pipelines (HelioC / GeoC /
-// Ptolemy) don't have the outer-planet elements or
-// coefficients yet, so their `bodyGeocentric` falls back to
-// `{ ra: NaN, dec: NaN }` for those two names. Consumers that
-// render comparison rows should treat NaN as "no data".
-// Pluto is absent — Espenak doesn't publish Pluto ephemerides
-// on AstroPixels, so there's no DE405 source to bundle here.
-export const PLANET_NAMES = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
-export const BODY_NAMES   = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+// Single pipeline, exported as `ptol` so any code that used to grab
+// `{ helio, geo, ptol, apix }` can keep grabbing `{ ptol }` cleanly.
+export { ptol };
 
-// Pipeline registry — id, namespace, supported-body predicate,
-// supported-date predicate. Used by the fallback chain below to
-// route around pipelines that can't deliver a given body / date.
-const PIPES = {
-  astropixels:  { ns: apix,  cb: (n) => apix.coversBody(n),  cd: (d) => apix.coversDate(d) },
-  geocentric:   { ns: geo,   cb: (n) => geo.coversBody(n),   cd: (d) => geo.coversDate(d) },
-  heliocentric: { ns: helio, cb: (n) => helio.coversBody(n), cd: (d) => helio.coversDate(d) },
-  ptolemy:      { ns: ptol,  cb: (n) => ptol.coversBody(n),  cd: (d) => ptol.coversDate(d) },
-};
+// What this model thinks of as "a body". Pluto / Uranus / Neptune
+// aren't in here — Ptolemy didn't know about them, so we don't either.
+export const PLANET_NAMES = ['mercury', 'venus', 'mars', 'jupiter', 'saturn'];
+export const BODY_NAMES   = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'];
 
-// Fallback order when the requested source can't deliver a given
-// body/date pair. DE405 first (it covers all 9 bodies in 2019–2030),
-// then GeoC (the wide-range Earth-focus Kepler with the 7 inner
-// bodies), then Ptolemy as the last historical resort.
-const FALLBACK_ORDER = ['astropixels', 'geocentric', 'ptolemy'];
+// Legacy name kept around so nothing else has to change. Used to list
+// four sources; now there's only the one.
+export const EPHEMERIS_SOURCES = ['ptolemy'];
 
-function _readingValid(r) {
-  return r && Number.isFinite(r.ra) && Number.isFinite(r.dec);
-}
-
-function _tryPipeline(id, name, date) {
-  const p = PIPES[id];
-  if (!p) return null;
-  if (!p.cb(name) || !p.cd(date)) return null;
-  const r = p.ns.bodyGeocentric(name, date);
-  return _readingValid(r) ? r : null;
-}
-
-// Primary router. Returns `{ ra, dec }` in radians, geocentric-apparent.
-// Tries the requested source first; if it can't deliver (body not
-// supported or date out of range), walks the fallback chain so the
-// caller always gets a usable reading. The exact pipeline that
-// produced the value can be retrieved via `bodyRADecRoute(...)`.
-export function bodyRADec(name, date, source = 'astropixels') {
+// Routers. They take a `source` argument for backward compatibility,
+// but it's ignored — every call lands in Ptolemy.
+export function bodyRADec(name, date, _source) {
   if (name === 'earth') return { ra: 0, dec: 0 };
-  const tried = new Set();
-  if (source) {
-    const r = _tryPipeline(source, name, date);
-    if (r) return r;
-    tried.add(source);
-  }
-  for (const id of FALLBACK_ORDER) {
-    if (tried.has(id)) continue;
-    const r = _tryPipeline(id, name, date);
-    if (r) return r;
-    tried.add(id);
-  }
-  // Nothing covered the request — surface NaN so downstream renderers
-  // can hide the body cleanly instead of pinning it at the vernal
-  // equinox.
+  const r = ptol.bodyGeocentric(name, date);
+  if (r && Number.isFinite(r.ra) && Number.isFinite(r.dec)) return r;
   return { ra: NaN, dec: NaN };
 }
 
-// Same as `bodyRADec` but also reports which pipeline supplied the
-// value, so the UI can light up a fallback indicator when DE405
-// dropped to GeoC etc.
-export function bodyRADecRoute(name, date, source = 'astropixels') {
-  if (name === 'earth') return { reading: { ra: 0, dec: 0 }, used: source };
-  const tried = new Set();
-  if (source) {
-    const r = _tryPipeline(source, name, date);
-    if (r) return { reading: r, used: source };
-    tried.add(source);
-  }
-  for (const id of FALLBACK_ORDER) {
-    if (tried.has(id)) continue;
-    const r = _tryPipeline(id, name, date);
-    if (r) return { reading: r, used: id };
-    tried.add(id);
-  }
-  return { reading: { ra: NaN, dec: NaN }, used: null };
+export function bodyRADecRoute(name, date, _source) {
+  if (name === 'earth') return { reading: { ra: 0, dec: 0 }, used: 'ptolemy' };
+  return { reading: bodyRADec(name, date), used: 'ptolemy' };
 }
 
-// Per-pipeline planet API (callers who already know which source they
-// want).
-export function planetEquatorial(name, date, source = 'geocentric') {
-  if (source === 'heliocentric') return helio.planetEquatorial(name, date);
-  if (source === 'ptolemy')      return ptol.planetEquatorial(name, date);
-  if (source === 'astropixels')  return apix.planetEquatorial(name, date);
-  return geo.planetEquatorial(name, date);
-}
+export function planetEquatorial(name, date, _source) { return ptol.planetEquatorial(name, date); }
+export function sunEquatorial   (date, _source)       { return ptol.sunEquatorial(date); }
+export function moonEquatorial  (date, _source)       { return ptol.moonEquatorial(date); }
 
-// Sun / Moon routers. HelioC and GeoC pipelines both use Meeus; Ptolemy
-// has its own Almagest implementations; Astropixels uses DE405-derived
-// tabulated data.
-export function sunEquatorial(date, source = 'geocentric') {
-  if (source === 'ptolemy')     return ptol.sunEquatorial(date);
-  if (source === 'astropixels') return apix.sunEquatorial(date);
-  return geo.sunEquatorial(date);
-}
-export function moonEquatorial(date, source = 'geocentric') {
-  if (source === 'ptolemy')     return ptol.moonEquatorial(date);
-  if (source === 'astropixels') return apix.moonEquatorial(date);
-  return geo.moonEquatorial(date);
-}
-
-// Legacy exports — downstream imports that pre-date the router.
-// `bodyGeocentric` defaults to the 'geocentric' pipeline (Earth-focus
-// Kepler, the behaviour). `bodyFromHeliocentric` is retained as
-// an alias for compatibility; use `bodyRADec(name, date,
-// 'heliocentric')` explicitly to route through the HelioC pipeline.
-export function bodyGeocentric(name, date) { return geo.bodyGeocentric(name, date); }
+// Legacy alias. Used to dispatch to the geocentric Kepler pipeline;
+// now goes straight through Ptolemy.
+export function bodyGeocentric(name, date) { return ptol.bodyGeocentric(name, date); }
 export const bodyFromHeliocentric = bodyGeocentric;
+
+// Eclipse finder. The shared finder lives in `ephemerisCommon.js`
+// and takes injected sun/moon functions — we hand it Ptolemy's so
+// the search runs end-to-end on the same pipeline as everything else.
+export function findNextEclipses(startDate, windowDays = 400) {
+  return _findNextEclipses(startDate, windowDays, ptol.sunEquatorial, ptol.moonEquatorial);
+}

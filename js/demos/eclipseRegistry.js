@@ -1,16 +1,16 @@
 // eclipse demo registry.
 //
-// Builds a demo definition for every real eclipse in
-// `js/data/astropixelsEclipses.js` (111 events 2021-2040, credit
-// Fred Espenak / AstroPixels / JPL DE405). Each demo refines its
-// landing time using whichever ephemeris pipeline the has
-// selected — so the same eclipse plays out differently under HelioC
-// vs DE405 vs Ptolemy, which is the pedagogy.
+// Anchors each demo to a real Espenak eclipse date in
+// `js/data/astropixelsEclipses.js` (111 events, 2021-2040, credit
+// Fred Espenak / AstroPixels). The dates are just bookmarks —
+// every body-position calculation runs through the Ptolemaic
+// pipeline. So the demo plays out under classical Ptolemaic
+// kinematics, anchored to a date you can look up.
 //
 // The registry exports two arrays (solar + lunar) of demo objects
 // matching the shape `js/demos/index.js` expects. `definitions.js`
-// concatenates them alongside the existing non-eclipse demos and an
-// FE-prediction placeholder track.
+// concatenates them alongside the existing non-eclipse demos and
+// an FE-prediction placeholder track.
 
 import { ASTROPIXELS_ECLIPSES } from '../data/astropixelsEclipses.js';
 import { Ttxt, Tval } from './animation.js';
@@ -21,25 +21,16 @@ import {
   greenwichSiderealDeg,
   refineEclipseByMinSeparation,
 } from '../core/ephemerisCommon.js';
-import { helio, geo, ptol, apix } from '../core/ephemeris.js';
+import { ptol } from '../core/ephemeris.js';
 
-// Pick (sunFn, moonFn) pair for a given BodySource value. Both the
-// finder (`refineEclipseByMinSeparation`) and the sky render use the
-// same pair — keeping the demo internally consistent with whatever
-// pipeline is active.
-function ephemerisPair(bodySource) {
-  switch (bodySource) {
-    case 'heliocentric': return { sunFn: (d) => helio.bodyGeocentric('sun', d),
-                                  moonFn: (d) => helio.bodyGeocentric('moon', d), label: 'HelioC' };
-    case 'ptolemy':      return { sunFn: (d) => ptol.bodyGeocentric('sun', d),
-                                  moonFn: (d) => ptol.bodyGeocentric('moon', d), label: 'Ptolemy' };
-    case 'astropixels':  return { sunFn: (d) => apix.bodyGeocentric('sun', d),
-                                  moonFn: (d) => apix.bodyGeocentric('moon', d), label: 'DE405' };
-    case 'geocentric':
-    default:             return { sunFn: (d) => geo.bodyGeocentric('sun', d),
-                                  moonFn: (d) => geo.bodyGeocentric('moon', d), label: 'GeoC' };
-  }
-}
+// Sun + moon under the Ptolemaic pipeline. Both the eclipse finder
+// (`refineEclipseByMinSeparation`) and the sky renderer use these,
+// so what the demo searches for is what you see on screen.
+const PTOLEMY_PAIR = {
+  sunFn:  (d) => ptol.bodyGeocentric('sun',  d),
+  moonFn: (d) => ptol.bodyGeocentric('moon', d),
+  label:  'Ptolemy',
+};
 
 // Convert a model DateTime-day value from a Date. The sim's DateTime
 // state is "days since TIME_ORIGIN.ZeroDate" (floating-point,
@@ -65,8 +56,7 @@ function buildEclipseDemo(event, kind) {
     event,            // preserve raw event for any consumer that wants it
     kind,
     intro: (model) => {
-      const src = model?.state?.BodySource || 'geocentric';
-      const { sunFn, moonFn, label } = ephemerisPair(src);
+      const { sunFn, moonFn, label } = PTOLEMY_PAIR;
       // Refine around the tabulated TD/UT to find what THIS pipeline
       // considers the closest syzygy (or anti-syzygy for lunar).
       const refined = refineEclipseByMinSeparation(anchor, sunFn, moonFn, { kind });
@@ -106,8 +96,7 @@ function buildEclipseDemo(event, kind) {
       };
     },
     tasks: (model) => {
-      const src = model?.state?.BodySource || 'geocentric';
-      const { sunFn, moonFn, label } = ephemerisPair(src);
+      const { sunFn, moonFn, label } = PTOLEMY_PAIR;
       const refined = refineEclipseByMinSeparation(anchor, sunFn, moonFn, { kind });
       const modelDT = dateToModelDT(refined.date);
       const minSepDeg = refined.minSeparationRad * 180 / Math.PI;

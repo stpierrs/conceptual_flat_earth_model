@@ -678,10 +678,9 @@ const FIELD_GROUPS = [
     ],
   },
   // dedicated Tracker tab. Manual-select dropdown (sun, moon,
-  // five planets, 58 Cel Nav stars) feeds the second HUD panel's
-  // azimuth/elevation/RA/Dec readout. Also exposes BodySource so the
-  // can toggle the helioc vs geoc pipeline and see readouts are
-  // consistent.
+  // five classical planets, 58 Cel Nav stars) feeds the second
+  // HUD panel's azimuth/elevation/RA/Dec readout. Every reading
+  // comes from the one Ptolemaic pipeline.
   // Tracker tab. Multi-select button grid; toggling
   // each button adds/removes its id from `TrackerTargets`. Every
   // tracked object gets a block in the HUD with both ephemerides and
@@ -689,12 +688,9 @@ const FIELD_GROUPS = [
   {
     tab: 'Tracker', groups: [
       { title: 'Ephemeris', rows: [
-        { key: 'BodySource', label: 'Source', select: [
-          { value: 'geocentric',   label: 'GeoC     (Earth-focus Kepler)' },
-          { value: 'ptolemy',      label: 'Ptolemy  (deferent + epicycle)' },
-          { value: 'astropixels',  label: 'DE405    (Espenak AstroPixels)' },
-        ]},
-        { key: 'ShowEphemerisReadings', label: 'Ephemeris comparison', bool: true },
+        // The model runs off the Ptolemaic epicycle pipeline.
+        // The pipeline-picker and comparison toggle that used to
+        // sit here are gone — there's nothing to compare.
         { key: 'StarApplyPrecession', label: 'Precession',  bool: true },
         { key: 'StarApplyNutation',   label: 'Nutation',    bool: true },
         { key: 'StarApplyAberration', label: 'Aberration',  bool: true },
@@ -1648,11 +1644,7 @@ export function buildControlPanel(host, model, demos) {
   const fmtLat = (v) => `Lat ${v >= 0 ? '+' : ''}${v.toFixed(4)}°`;
   const fmtLon = (v) => `Lon ${v >= 0 ? '+' : ''}${v.toFixed(4)}°`;
   const fmtSignedDeg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}°`;
-  const EPHEM_NAMES = {
-    geocentric:   'GeoC',
-    ptolemy:      'Ptolemy',
-    astropixels:  'DE405',
-  };
+
   const refreshInfoBar = () => {
     const s = model.state;
     slotLat.textContent = fmtLat(s.ObserverLat);
@@ -1665,7 +1657,8 @@ export function buildControlPanel(host, model, demos) {
     slotMaz.textContent = Number.isFinite(s.MouseAzimuth)
       ? `Mouse Az: ${s.MouseAzimuth.toFixed(2)}°`
       : 'Mouse Az: —';
-    slotEph.textContent = `ephem: ${EPHEM_NAMES[s.BodySource] || s.BodySource || '—'}`;
+    // Single pipeline; no need to look up a label per frame.
+    slotEph.textContent = 'ephem: Ptolemy';
     // Show the menu-bar clock in the observer's local zone (as set by
     // `TimezoneOffsetMinutes`) so a preset like PP that selects a
     // specific local-time event reads as the local clock the user
@@ -1796,7 +1789,7 @@ export function buildControlPanel(host, model, demos) {
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'default', MapArt: 'none',
       ShowPlanets: true, DarkBackground: true, ShowLogo: true,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       StarApplyPrecession: false, StarApplyNutation: false,
       StarApplyAberration: false, StarTrepidation: true,
       StarfieldType: 'celnav', DynamicStars: true, PermanentNight: false,
@@ -3108,8 +3101,8 @@ export function buildTrackerHud(trackerEl, model) {
     return `${sign}${String(dd).padStart(2, '0')}°${String(mm).padStart(2, '0')}′${ss.toFixed(1).padStart(4, '0')}″`;
   };
 
-  // target id → { block, title, azel, helio, geo, ptolemy, astropixels,
-  // foot } DOM nodes kept across refreshes.
+  // target id → { block, title, azel, refr, foot } DOM nodes kept
+  // across refreshes.
   const blockCache = new Map();
 
   function makeBlock() {
@@ -3124,19 +3117,10 @@ export function buildTrackerHud(trackerEl, model) {
     const refr = document.createElement('div');
     refr.className = 'line tracker-refr';
     block.appendChild(refr);
-    const geo = document.createElement('div');
-    geo.className = 'line source-line';
-    block.appendChild(geo);
-    const ptolemy = document.createElement('div');
-    ptolemy.className = 'line source-line';
-    block.appendChild(ptolemy);
-    const astropixels = document.createElement('div');
-    astropixels.className = 'line source-line';
-    block.appendChild(astropixels);
     const foot = document.createElement('div');
     foot.className = 'line tracker-foot';
     block.appendChild(foot);
-    return { block, title, azel, refr, geo, ptolemy, astropixels, foot };
+    return { block, title, azel, refr, foot };
   }
 
   const refresh = () => {
@@ -3165,8 +3149,6 @@ export function buildTrackerHud(trackerEl, model) {
       return;
     }
     trackerEl.style.display = '';
-    trackerEl.classList.toggle('expanded',
-      model.state.ShowEphemerisReadings === true);
 
     const stamp = dateTimeToString(model.state.DateTime);
 
@@ -3212,34 +3194,6 @@ export function buildTrackerHud(trackerEl, model) {
       } else {
         rec.refr.textContent = '';
         rec.refr.hidden = true;
-      }
-      // ephemeris-comparison block hides entirely for stars
-      // (their RA/Dec doesn't depend on pipeline) and for sun/moon/
-      // planets when `ShowEphemerisReadings` is off. Keeps the
-      // tracker HUD compact by default.
-      const showReadings = info.category !== 'star'
-        && model.state.ShowEphemerisReadings === true;
-      rec.geo.hidden = !showReadings;
-      rec.ptolemy.hidden = !showReadings;
-      rec.astropixels.hidden = !showReadings;
-      if (showReadings) {
-        // Each pipeline's RA / Dec is followed by its converted
-        // az / el so the user can see how a different RA / Dec
-        // value lands in the local sky frame, not just on the
-        // celestial sphere.
-        const lat = model.state.ObserverLat;
-        const lon = model.state.ObserverLong;
-        const gmst = model.computed.SkyRotAngle || 0;
-        const fmtRow = (label, reading) => {
-          const r = reading || { ra: NaN, dec: NaN };
-          const ae = raDecToAzEl(r.ra, r.dec, lat, lon, gmst);
-          const azStr = Number.isFinite(ae.azimuth)   ? fmtDmsDegAz(ae.azimuth)   : '—';
-          const elStr = Number.isFinite(ae.elevation) ? fmtDmsDegEl(ae.elevation) : '—';
-          return `${label.padEnd(6)}: RA ${fmtHours(r.ra)}   Dec ${fmtDms(r.dec)}   Az ${azStr}   El ${elStr}`;
-        };
-        rec.geo.textContent         = fmtRow('GeoC',   info.geoReading);
-        rec.ptolemy.textContent     = fmtRow('Ptol',   info.ptolemyReading);
-        rec.astropixels.textContent = fmtRow('DE405',  info.astropixelsReading);
       }
       const magTag = (info.mag != null) ? `   mag ${info.mag.toFixed(2)}` : '';
       rec.foot.textContent = `${stamp}${magTag}`;

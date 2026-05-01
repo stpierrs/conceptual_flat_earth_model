@@ -13,8 +13,7 @@ import { dateTimeToDate } from './time.js';
 import {
   sunEquatorial, moonEquatorial, greenwichSiderealDeg, equatorialToCelestCoord,
   planetEquatorial, PLANET_NAMES, bodyRADec, BODY_NAMES,
-  bodyGeocentric, geo as ephGeo, ptol as ephPtol,
-  apix as ephApix,
+  bodyGeocentric, ptol as ephPtol,
 } from './ephemeris.js';
 import { apparentStarPosition } from './ephemerisCommon.js';
 import { CEL_NAV_STARS, celNavStarById } from './celnavStars.js';
@@ -316,8 +315,10 @@ function defaultState() {
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav'
     StarfieldType: 'celnav',
 
-    // 'heliocentric' | 'geocentric' | 'ptolemy' | 'astropixels'
-    BodySource: 'astropixels',
+    // The model runs off ONE pipeline now: Ptolemaic deferent +
+    // epicycle. This field is locked to 'ptolemy' for backward
+    // compatibility with stored URL state.
+    BodySource: 'ptolemy',
 
     // StarTrepidation master forces all three on when true.
     StarApplyPrecession: false,
@@ -547,20 +548,11 @@ export class FeModel extends EventTarget {
     }
     this._lastWorldModel = s.WorldModel;
 
-    // BodySource transition: when the user picks a pipeline that
-    // doesn't cover certain planets (GeoC / HelioC /
-    // Ptolemy = no Uranus / Neptune; only DE405 has them), drop
-    // those bodies from `TrackerTargets` so they stop appearing in
-    // the tracker HUD + per-frame compute. Switching back to
-    // DE405 doesn't auto-restore them — the user picks them back
-    // explicitly.
-    if (this._lastBodySource !== undefined && this._lastBodySource !== s.BodySource) {
-      const src = (s.BodySource === 'heliocentric') ? 'heliocentric' : (s.BodySource || 'astropixels');
-      const supported =
-        src === 'astropixels'  ? ephApix.SUPPORTED_BODIES :
-        src === 'ptolemy'      ? ephPtol.SUPPORTED_BODIES :
-        src === 'heliocentric' ? new Set(['sun','moon','mercury','venus','mars','jupiter','saturn']) :
-                                 ephGeo.SUPPORTED_BODIES;
+    // Ptolemy covers sun, moon, and the five classical planets.
+    // Anything tracked outside that set (Uranus, Neptune) we drop
+    // once on first frame — they're not in the model.
+    if (!this._prunedForPtolemy) {
+      const supported = ephPtol.SUPPORTED_BODIES;
       const arr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
       const pruned = arr.filter((t) => {
         if (t === 'sun' || t === 'moon') return supported.has(t);
@@ -571,8 +563,8 @@ export class FeModel extends EventTarget {
       if (s.FollowTarget && (s.FollowTarget === 'sun' || s.FollowTarget === 'moon' || PLANET_NAMES.includes(s.FollowTarget))) {
         if (!supported.has(s.FollowTarget)) s.FollowTarget = null;
       }
+      this._prunedForPtolemy = true;
     }
-    this._lastBodySource = s.BodySource;
 
     // (Removed Optical → Heavenly auto-snap — observer position
     // now persists across InsideVault toggles. Manual teleport
@@ -602,12 +594,10 @@ export class FeModel extends EventTarget {
     this._timeLast = s.Time;
 
     const utcDate = dateTimeToDate(s.DateTime);
-    // Legacy 'heliocentric' BodySource (removed) maps to 'geocentric'
-    // — the underlying pipeline always returned geocentric apparent
-    // anyway, so no behaviour shift for users with old URL state.
-    const bodySource = (s.BodySource === 'heliocentric')
-      ? 'geocentric'
-      : (s.BodySource || 'geocentric');
+    // One pipeline. Always Ptolemy. The `bodySource` local stays
+    // around so the cache key and downstream calls keep their
+    // shape, but it no longer branches anywhere.
+    const bodySource = 'ptolemy';
     // Ephemeris cache: sun/moon/planet (ra, dec) depend only on date
     // and the selected source pipeline; observer pan / camera drag
     // don't move the cache key. Reusing the previous frame's
@@ -1350,9 +1340,9 @@ export class FeModel extends EventTarget {
     // (plus FollowTarget), so the disc doesn't fill with every star
     // circle when the user just wants to see a handful of paths.
     if (s.ShowGPPath) {
-      const activeEph = bodySource === 'geocentric'   ? ephGeo
-                      : bodySource === 'ptolemy'      ? ephPtol
-                      :                                 ephApix;
+      // Single pipeline: Ptolemy. GP traces sample the same math
+      // the renderer uses each frame.
+      const activeEph = ephPtol;
       const trackerTargetArr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
       const gpSet = new Set(trackerTargetArr);
       if (s.FollowTarget) gpSet.add(s.FollowTarget);
@@ -1423,39 +1413,20 @@ export class FeModel extends EventTarget {
     }
     const wrapLon = (x) => ((x + 180) % 360 + 360) % 360 - 180;
 
-    // Per-frame ephemeris loading order:
-    //   • Default (Espenak / DE405) is always loaded — it's what
-    //     `bodySource` resolves to upstream and what every rendered
-    //     sun / moon / planet position comes from.
-    //   • The three comparison pipelines (GeoC, HelioC,
-    //     Ptolemy) only get queried below when the Tracker tab's
-    //     "Ephemeris comparison" toggle (`ShowEphemerisReadings`) is
-    //     on. They effectively unload from the hot path the moment
-    //     the toggle flips off — NaN sentinels stand in for their
-    //     readings and the tracker HUD already hides those rows
-    //     when the toggle is off.
-    const compareOn = !!s.ShowEphemerisReadings;
-    const NAN_READING = { ra: NaN, dec: NaN };
-    // Comparison-mode readings depend only on (body, date) — none of
-    // the four pipelines is observer-aware. Cache the per-body
-    // bundle keyed on dateMs and reuse across drag ticks. Cache is
-    // rebuilt whenever the date changes (key miss).
+    // Single pipeline. The legacy three-row tracker HUD that used
+    // to compare GeoC / Ptolemy / DE405 is gone, so each body just
+    // gets one Ptolemy reading. Cached per (body, dateMs) so drag
+    // ticks don't re-run the math.
     const _compareKey = utcDate.getTime();
-    if (compareOn && (!this._compareReadingsCache || this._compareReadingsCache.key !== _compareKey)) {
+    if (!this._compareReadingsCache || this._compareReadingsCache.key !== _compareKey) {
       this._compareReadingsCache = { key: _compareKey, byBody: Object.create(null) };
     }
     const readingsFor = (body) => {
-      if (!compareOn) {
-        return { rGeo: NAN_READING, rPtol: NAN_READING, rApix: NAN_READING };
-      }
       const cache = this._compareReadingsCache.byBody;
       let entry = cache[body];
       if (!entry) {
-        entry = {
-          rGeo:  ephGeo.bodyGeocentric(body, utcDate),
-          rPtol: ephPtol.bodyGeocentric(body, utcDate),
-          rApix: ephApix.bodyGeocentric(body, utcDate),
-        };
+        const r = ephPtol.bodyGeocentric(body, utcDate);
+        entry = { rGeo: r, rPtol: r, rApix: r };
         cache[body] = entry;
       }
       return entry;

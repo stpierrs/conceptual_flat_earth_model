@@ -457,16 +457,12 @@ export function buildTrackingInfoPopup(panelEl, model) {
       ? fmtSignedDms(info.elevation + refrDeg)
       : elTrue;
     // Tracking-popup RA / Dec come from the **active** ephemeris
-    // pipeline (carried directly on `info` as `ra`/`dec`). The
-    // per-pipeline `*Reading` fields are only populated when the
-    // Tracker tab's "Ephemeris comparison" toggle is on, so falling
-    // back to them when comparison is off would show "—" even
-    // though the active source is computing a valid answer. Stars
-    // carry their own `info.ra`/`info.dec` directly.
+    // RA/Dec lives directly on `info`; the legacy `*Reading` slots
+    // are kept in sync by app.js but they're all the same Ptolemy
+    // value now, so we never need to hunt through them.
     const r = (Number.isFinite(info.ra) && Number.isFinite(info.dec))
       ? { ra: info.ra, dec: info.dec }
-      : (info.astropixelsReading || info.geoReading || info.helioReading
-         || info.ptolemyReading || null);
+      : (info.ptolemyReading || null);
     const ra  = r ? fmtH(r.ra)  : '—';
     const dec = r ? fmtSignedDms(r.dec * 180 / Math.PI) : '—';
     const mag = (info.mag != null && Number.isFinite(info.mag))

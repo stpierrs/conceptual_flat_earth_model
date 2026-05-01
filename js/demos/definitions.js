@@ -34,7 +34,7 @@ const GENERAL_DEMOS = [
       // and its optical-vault projection keeps rendering all demo.
       ObserverLat: 82.505, ObserverLong: -62.335,
       InsideVault: false,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       DateTime: 3093,                  // 2025-06-21 solstice
       CameraDirection: 0,
       CameraHeight: 89.9,              // straight-down on the disc
@@ -149,7 +149,7 @@ const GENERAL_DEMOS = [
       // 2022-06-22 21:40 UTC = day 1998 + 21.667/24 = 1998.903
       DateTime: 1998.903,
       ObserverLat: -8.05, ObserverLong: -34.88, ObserverHeading: 180,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       InsideVault: true,
       FollowTarget: 'star:sigmaoct',
       TrackerTargets: ['star:sigmaoct'],
@@ -190,7 +190,7 @@ const GENERAL_DEMOS = [
       // Sigma Octantis demo, this time framed on Crux instead.
       DateTime: 1998.903,
       ObserverLat: -8.05, ObserverLong: -34.88, ObserverHeading: 180,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       InsideVault: true,
       FollowTarget: 'star:acrux',
       // Crux's four stars — Acrux + Gacrux are celnav, Mimosa +
@@ -256,7 +256,7 @@ function makeAnalemma(label, lat, mode) {
     group: groupId,
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       DateTime: ANALEMMA_START,
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -363,7 +363,7 @@ function makeAnalemmaMonthly(label, lat, mode) {
     group: groupId,
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       DateTime: ANALEMMA_MONTH_DAYS[0],
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -452,7 +452,7 @@ function makeMoonSynodic(label, lat) {
     group: 'moon-synodic',
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       DateTime: startDay,
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -538,7 +538,7 @@ function makeSunAnalemmaPaired(label, lat) {
     group: 'sun-paired',
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'astropixels',
+      BodySource: 'ptolemy',
       DateTime: ANALEMMA_MONTH_DAYS[0],
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -641,7 +641,7 @@ const ECLIPSE_MAP_DEMO = {
   group: 'eclipse-map',
   intro: {
     ObserverLat: 0, ObserverLong: 0, ObserverHeading: 0,
-    BodySource: 'astropixels',
+    BodySource: 'ptolemy',
     DateTime: 2922,                      // 2025-01-01 00:00 UTC
     InsideVault: false,                  // orbital view
     Zoom: 1.6,
@@ -676,7 +676,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: 82.505, ObserverLong: -62.335,
-        BodySource: 'astropixels',
+        BodySource: 'ptolemy',
         DateTime: 3093,                        // 2025-06-21 00:00 UTC
         InsideVault: true,                     // Optical (first-person)
         FollowTarget: 'sun',                   // camera auto-aims at sun
@@ -700,7 +700,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: -79.76806, ObserverLong: -83.26167,
-        BodySource: 'astropixels',
+        BodySource: 'ptolemy',
         DateTime: 2911,                        // 2024-12-21 solstice
         InsideVault: true,                     // Optical (first-person)
         FollowTarget: 'sun',                   // camera auto-aims at sun
@@ -724,7 +724,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: 75, ObserverLong: 0,
-        BodySource: 'astropixels',
+        BodySource: 'ptolemy',
         DateTime: 3050,                 // ~2025-05-09 — polar day in effect
         ObserverHeading: 0,
         InsideVault: true,              // Optical
@@ -753,7 +753,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: -75, ObserverLong: 0,
-        BodySource: 'astropixels',
+        BodySource: 'ptolemy',
         DateTime: 3232,                 // ~2025-11-07 — polar day in effect
         ObserverHeading: 180,
         InsideVault: true,              // Optical
@@ -791,7 +791,7 @@ const MOON_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: 75, ObserverLong: 0,
-        BodySource: 'astropixels',
+        BodySource: 'ptolemy',
         DateTime: 2933,                 // ~2025-01-12 — moon near max +dec
         ObserverHeading: 0,
         InsideVault: true,
@@ -818,7 +818,7 @@ const MOON_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: -75, ObserverLong: 0,
-        BodySource: 'astropixels',
+        BodySource: 'ptolemy',
         DateTime: 2947,                 // ~2025-01-26 — moon near max -dec
         ObserverHeading: 180,
         InsideVault: true,

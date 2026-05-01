@@ -327,21 +327,12 @@ refreshI18nNodes();
 
 attachUrlState(model, demos);
 
-// Meeus-moon warning banner: Meeus Ch.47 moon is ~2.5° off DE405.
-// HelioC / GeoC use it directly.
-const MEEUS_BODY_SOURCES = new Set(['heliocentric', 'geocentric']);
+// Meeus-moon warning banner is obsolete — the model runs off the
+// Ptolemy pipeline now, no Meeus moon in the loop. We keep the
+// hook so the existing #meeus-warning element stays hidden.
 const meeusBannerEl = document.getElementById('meeus-warning');
 function syncMeeusBanner() {
-  if (!meeusBannerEl) return;
-  const src = model.state.BodySource || 'geocentric';
-  const isMeeus = MEEUS_BODY_SOURCES.has(src);
-  meeusBannerEl.hidden = !isMeeus;
-  if (isMeeus) {
-    meeusBannerEl.innerHTML =
-      `<strong>Meeus timing error.</strong> Active source uses the Meeus Ch.47 moon, `
-      + `which is ~2.5° off DE405. Eclipse demos in this mode land roughly 4 hours `
-      + `from the real UTC moment.`;
-  }
+  if (meeusBannerEl) meeusBannerEl.hidden = true;
 }
 model.addEventListener('update', syncMeeusBanner);
 syncMeeusBanner();
