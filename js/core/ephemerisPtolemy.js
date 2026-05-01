@@ -451,4 +451,3 @@ export const SUPPORTED_BODIES = new Set(['sun', 'moon', 'mercury', 'venus', 'mar
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
 export function coversDate(_date) { return true; }
 export const BUILTIN_CORRECTIONS = { precession: false, nutation: false, aberration: false, fk5: false };
-          
