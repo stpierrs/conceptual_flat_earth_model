@@ -466,7 +466,7 @@ export function buildTrackingInfoPopup(panelEl, model) {
     const r = (Number.isFinite(info.ra) && Number.isFinite(info.dec))
       ? { ra: info.ra, dec: info.dec }
       : (info.astropixelsReading || info.geoReading || info.helioReading
-         || info.vsop87Reading || info.ptolemyReading || null);
+         || info.ptolemyReading || null);
     const ra  = r ? fmtH(r.ra)  : '—';
     const dec = r ? fmtSignedDms(r.dec * 180 / Math.PI) : '—';
     const mag = (info.mag != null && Number.isFinite(info.mag))
@@ -521,3 +521,4 @@ export function buildTrackingInfoPopup(panelEl, model) {
   model.addEventListener('update', refresh);
   refresh();
 }
+                      

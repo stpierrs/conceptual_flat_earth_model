@@ -693,7 +693,6 @@ const FIELD_GROUPS = [
           { value: 'geocentric',   label: 'GeoC     (Earth-focus Kepler)' },
           { value: 'ptolemy',      label: 'Ptolemy  (deferent + epicycle)' },
           { value: 'astropixels',  label: 'DE405    (Espenak AstroPixels)' },
-          { value: 'vsop87',       label: 'VSOP87   (Bretagnon & Francou)' },
         ]},
         { key: 'ShowEphemerisReadings', label: 'Ephemeris comparison', bool: true },
         { key: 'StarApplyPrecession', label: 'Precession',  bool: true },
@@ -1653,7 +1652,6 @@ export function buildControlPanel(host, model, demos) {
     geocentric:   'GeoC',
     ptolemy:      'Ptolemy',
     astropixels:  'DE405',
-    vsop87:       'VSOP87',
   };
   const refreshInfoBar = () => {
     const s = model.state;
@@ -3111,8 +3109,7 @@ export function buildTrackerHud(trackerEl, model) {
   };
 
   // target id → { block, title, azel, helio, geo, ptolemy, astropixels,
-  // vsop87, foot } DOM nodes kept across refreshes. added Ptolemy,
-  // added AstroPixels/DE405, added VSOP87.
+  // foot } DOM nodes kept across refreshes.
   const blockCache = new Map();
 
   function makeBlock() {
@@ -3136,13 +3133,10 @@ export function buildTrackerHud(trackerEl, model) {
     const astropixels = document.createElement('div');
     astropixels.className = 'line source-line';
     block.appendChild(astropixels);
-    const vsop87 = document.createElement('div');
-    vsop87.className = 'line source-line';
-    block.appendChild(vsop87);
     const foot = document.createElement('div');
     foot.className = 'line tracker-foot';
     block.appendChild(foot);
-    return { block, title, azel, refr, geo, ptolemy, astropixels, vsop87, foot };
+    return { block, title, azel, refr, geo, ptolemy, astropixels, foot };
   }
 
   const refresh = () => {
@@ -3228,7 +3222,6 @@ export function buildTrackerHud(trackerEl, model) {
       rec.geo.hidden = !showReadings;
       rec.ptolemy.hidden = !showReadings;
       rec.astropixels.hidden = !showReadings;
-      rec.vsop87.hidden = !showReadings;
       if (showReadings) {
         // Each pipeline's RA / Dec is followed by its converted
         // az / el so the user can see how a different RA / Dec
@@ -3247,7 +3240,6 @@ export function buildTrackerHud(trackerEl, model) {
         rec.geo.textContent         = fmtRow('GeoC',   info.geoReading);
         rec.ptolemy.textContent     = fmtRow('Ptol',   info.ptolemyReading);
         rec.astropixels.textContent = fmtRow('DE405',  info.astropixelsReading);
-        rec.vsop87.textContent      = fmtRow('VSOP87', info.vsop87Reading);
       }
       const magTag = (info.mag != null) ? `   mag ${info.mag.toFixed(2)}` : '';
       rec.foot.textContent = `${stamp}${magTag}`;
@@ -3265,3 +3257,4 @@ export function buildTrackerHud(trackerEl, model) {
   model.addEventListener('update', refresh);
   refresh();
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                      

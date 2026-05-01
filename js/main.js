@@ -328,8 +328,8 @@ refreshI18nNodes();
 attachUrlState(model, demos);
 
 // Meeus-moon warning banner: Meeus Ch.47 moon is ~2.5° off DE405.
-// HelioC / GeoC use it directly; VSOP87 delegates its moon to Meeus.
-const MEEUS_BODY_SOURCES = new Set(['heliocentric', 'geocentric', 'vsop87']);
+// HelioC / GeoC use it directly.
+const MEEUS_BODY_SOURCES = new Set(['heliocentric', 'geocentric']);
 const meeusBannerEl = document.getElementById('meeus-warning');
 function syncMeeusBanner() {
   if (!meeusBannerEl) return;
@@ -373,3 +373,4 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+                                              

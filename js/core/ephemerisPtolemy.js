@@ -6,8 +6,8 @@
 //   • The Tracker tab's "Ephemeris comparison" toggle is on, so
 //     the side-by-side RA / Dec / Az / El rows have a "Ptol" column
 //     to populate.
-//   • The dispatcher fell back to it after DE405 → GeoC → VSOP87
-//     all declined the (body, date) request. Historical last
+//   • The dispatcher fell back to it after DE405 → GeoC both
+//     declined the (body, date) request. Historical last
 //     resort — the Almagest model is intentionally pre-Newtonian
 //     and lands ~5–10° off modern positions.
 // With comparison off and any earlier pipeline able to cover the
@@ -451,3 +451,4 @@ export const SUPPORTED_BODIES = new Set(['sun', 'moon', 'mercury', 'venus', 'mar
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
 export function coversDate(_date) { return true; }
 export const BUILTIN_CORRECTIONS = { precession: false, nutation: false, aberration: false, fk5: false };
+          
