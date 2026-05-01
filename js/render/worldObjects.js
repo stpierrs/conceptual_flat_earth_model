@@ -4949,140 +4949,211 @@ export class MtMeru {
 
 // Discworld cosmology: Great A'Tuin the star turtle swimming through
 // space, with four elephants (Berilia, Tubul, Great T'Phon, Jerakeen)
-// arranged in a cross on its back holding the FE disc aloft. Nod to
-// Terry Pratchett's *The Colour of Magic*. Materials are left without
-// clipping planes so the whole assembly renders below z = 0 (under
-// the disc) where the user can orbit around to see it.
+// standing on its shell with their backs touching the disc underside.
+//
+// Z layout (disc underside = 0, positive Z is up):
+//   Disc bottom      Z =  0.00
+//   Elephant backs   Z =  0.00  (support the disc from below)
+//   Elephant feet    Z = -0.30  (stand on shell top)
+//   Shell top        Z = -0.30
+//   Shell centre     Z = -0.60
+//   Flippers/body    Z ~ -0.65
+//
+// All MeshBasicMaterial -- renderer uses localClippingEnabled which
+// requires basic materials for sub-disc geometry.
 export class Discworld {
   constructor() {
     this.group = new THREE.Group();
     this.group.name = 'discworld';
 
-    const shellColor  = 0x3a6a3a;   // turtle shell — mottled green
-    const skinColor   = 0x5a8a55;   // softer body green
-    const elephantCol = 0x8c8c94;   // slate-grey elephants
-    const ivoryCol    = 0xeeeadf;   // tusks
+    const shellCol = 0x7a6828;  // warm golden-brown carapace
+    const scuteCol = 0x4a3a10;  // darker scute plates
+    const skinCol  = 0x5a4820;  // turtle skin / flippers
+    const eyeCol   = 0x0a0800;  // dark eyes
+    const elephCol = 0x8a8a8a;  // grey elephants
+    const ivoryCol = 0xf0ead0;  // ivory tusks
 
-    // --- A'Tuin the turtle ------------------------------------------
-    // Shell: squashed hemisphere sitting just under the disc.
-    const shellGeo = new THREE.SphereGeometry(0.7, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
-    shellGeo.scale(1, 1, 0.45);
-    shellGeo.translate(0, 0, -0.55);
-    const shellMat = new THREE.MeshBasicMaterial({ color: shellColor });
-    this.group.add(new THREE.Mesh(shellGeo, shellMat));
+    // Z constants
+    const EH  = 0.30;       // elephant height
+    const STZ = -EH;        // shell top Z        = -0.30
+    const SSX = 0.80;       // shell half-width X
+    const SSY = 1.00;       // shell half-length Y (sea turtles are longer than wide)
+    const SSZ = 0.30;       // shell dome half-height Z
+    const SCZ = STZ - SSZ;  // shell centre Z     = -0.60
 
-    // Belly: matching hemisphere flipped over, slightly smaller.
-    const bellyGeo = new THREE.SphereGeometry(0.65, 24, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-    bellyGeo.scale(1, 1, 0.35);
-    bellyGeo.translate(0, 0, -0.55);
-    this.group.add(new THREE.Mesh(bellyGeo, new THREE.MeshBasicMaterial({ color: skinColor })));
+    // Shell carapace (upper dome)
+    const shGeo = new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    shGeo.scale(SSX, SSY, SSZ);
+    shGeo.translate(0, 0, SCZ);
+    this.group.add(new THREE.Mesh(shGeo, new THREE.MeshBasicMaterial({ color: shellCol })));
 
-    // Four legs at the corners of the shell, splayed outward.
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      const legGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.45, 10);
-      legGeo.translate(0, -0.22, 0);
-      legGeo.rotateX(Math.PI / 2);
-      const leg = new THREE.Mesh(legGeo, new THREE.MeshBasicMaterial({ color: skinColor }));
-      leg.position.set(Math.cos(a) * 0.6, Math.sin(a) * 0.6, -0.55);
-      leg.rotation.z = a;
-      this.group.add(leg);
+    // Scute-plate overlays across the carapace
+    const scutes = [
+      [0, 0, 0.02], [0, 0.40, 0], [0, -0.38, 0],
+      [0.30, 0.22, -0.01], [-0.30, 0.22, -0.01],
+      [0.30, -0.20, -0.01], [-0.30, -0.20, -0.01],
+    ];
+    for (let si = 0; si < scutes.length; si++) {
+      const ox = scutes[si][0], oy = scutes[si][1], oz = scutes[si][2];
+      const sg = new THREE.SphereGeometry(1, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2);
+      sg.scale(0.16 * SSX, 0.15 * SSY, 0.10);
+      sg.translate(ox * SSX, oy * SSY, SCZ + SSZ * 0.88 + oz);
+      this.group.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: scuteCol })));
     }
 
-    // Turtle head + neck poking out the front.
-    const neckGeo = new THREE.CylinderGeometry(0.09, 0.12, 0.35, 12);
-    neckGeo.rotateX(Math.PI / 2);
-    const neck = new THREE.Mesh(neckGeo, new THREE.MeshBasicMaterial({ color: skinColor }));
-    neck.position.set(0.85, 0, -0.55);
-    neck.rotation.z = Math.PI / 2;
-    this.group.add(neck);
-    const headGeo = new THREE.SphereGeometry(0.13, 16, 12);
-    const head = new THREE.Mesh(headGeo, new THREE.MeshBasicMaterial({ color: skinColor }));
-    head.position.set(1.05, 0, -0.52);
-    this.group.add(head);
+    // Plastron (belly underside)
+    const blGeo = new THREE.SphereGeometry(1, 24, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+    blGeo.scale(SSX * 0.80, SSY * 0.76, SSZ * 0.60);
+    blGeo.translate(0, 0, SCZ);
+    this.group.add(new THREE.Mesh(blGeo, new THREE.MeshBasicMaterial({ color: skinCol })));
 
-    // Stubby tail.
-    const tailGeo = new THREE.ConeGeometry(0.06, 0.2, 8);
-    tailGeo.rotateZ(Math.PI / 2);
-    const tail = new THREE.Mesh(tailGeo, new THREE.MeshBasicMaterial({ color: skinColor }));
-    tail.position.set(-0.85, 0, -0.57);
-    tail.rotation.z = Math.PI;
-    this.group.add(tail);
+    // Front flippers (long, swept forward)
+    const flipSides = [-1, 1];
+    for (let fi = 0; fi < 2; fi++) {
+      const s = flipSides[fi];
+      const fg = new THREE.SphereGeometry(1, 14, 8);
+      fg.scale(0.55, 0.13, 0.06);
+      const fl = new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ color: skinCol }));
+      fl.position.set(s * (SSX + 0.26), SSY * 0.36, SCZ + 0.02);
+      fl.rotation.z = s * 0.20;
+      fl.rotation.y = s * -0.30;
+      this.group.add(fl);
+    }
 
-    // --- Four elephants in a cross on the turtle's back -------------
-    // Each elephant's head points outward (radial), so their butts
-    // meet at the disc centre — matches Pratchett's cross arrangement.
-    const buildElephant = () => {
-      const g = new THREE.Group();
-      const mat = new THREE.MeshBasicMaterial({ color: elephantCol });
+    // Rear flippers (smaller, angled back)
+    for (let fi = 0; fi < 2; fi++) {
+      const s = flipSides[fi];
+      const fg2 = new THREE.SphereGeometry(1, 12, 7);
+      fg2.scale(0.30, 0.10, 0.05);
+      const fl2 = new THREE.Mesh(fg2, new THREE.MeshBasicMaterial({ color: skinCol }));
+      fl2.position.set(s * (SSX + 0.12), -SSY * 0.56, SCZ - 0.06);
+      fl2.rotation.z = s * 0.16;
+      fl2.rotation.y = s * 0.26;
+      this.group.add(fl2);
+    }
+
+    // Neck
+    const nkGeo = new THREE.CylinderGeometry(0.09, 0.15, 0.40, 12);
+    const nkMesh = new THREE.Mesh(nkGeo, new THREE.MeshBasicMaterial({ color: skinCol }));
+    nkMesh.rotation.x = Math.PI / 2;
+    nkMesh.position.set(0, SSY + 0.12, SCZ + 0.04);
+    this.group.add(nkMesh);
+
+    // Head (slightly flattened sphere)
+    const hdGeo = new THREE.SphereGeometry(0.17, 18, 12);
+    hdGeo.scale(1.0, 1.10, 0.80);
+    const hdMesh = new THREE.Mesh(hdGeo, new THREE.MeshBasicMaterial({ color: skinCol }));
+    hdMesh.position.set(0, SSY + 0.38, SCZ + 0.07);
+    this.group.add(hdMesh);
+
+    // Eyes
+    for (let ei = 0; ei < 2; ei++) {
+      const s = flipSides[ei];
+      const eGeo = new THREE.SphereGeometry(0.034, 8, 6);
+      const eMesh = new THREE.Mesh(eGeo, new THREE.MeshBasicMaterial({ color: eyeCol }));
+      eMesh.position.set(s * 0.13, SSY + 0.41, SCZ + 0.12);
+      this.group.add(eMesh);
+    }
+
+    // Tail
+    const tlGeo = new THREE.ConeGeometry(0.065, 0.26, 8);
+    tlGeo.rotateX(-Math.PI / 2);
+    const tlMesh = new THREE.Mesh(tlGeo, new THREE.MeshBasicMaterial({ color: skinCol }));
+    tlMesh.position.set(0, -(SSY + 0.10), SCZ - 0.04);
+    this.group.add(tlMesh);
+
+    // Four elephants -- feet at Z=STZ, backs at Z=0, heads face radially out.
+    const LH  = EH * 0.54;  // leg height
+    const BZ  = LH + 0.11;  // body centre Z in elephant local space
+    const HDZ = LH + 0.09;  // head centre Z
+    const HDX = 0.22;       // head forward offset (radial outward = local +X)
+
+    const mkEleph = () => {
+      const eg = new THREE.Group();
+      const em = new THREE.MeshBasicMaterial({ color: elephCol });
+      const im = new THREE.MeshBasicMaterial({ color: ivoryCol });
+
       // Body
-      const bodyGeo = new THREE.SphereGeometry(0.16, 14, 10);
-      bodyGeo.scale(1.3, 0.9, 0.9);
-      const body = new THREE.Mesh(bodyGeo, mat);
-      body.position.z = 0.13;
-      g.add(body);
+      const bG = new THREE.SphereGeometry(1, 14, 10);
+      bG.scale(0.20, 0.13, 0.13);
+      const bM = new THREE.Mesh(bG, em);
+      bM.position.z = BZ;
+      eg.add(bM);
+
+      // Shoulder hump reaching toward disc
+      const hmG = new THREE.SphereGeometry(0.09, 10, 8);
+      hmG.scale(0.9, 0.9, 1.5);
+      const hmM = new THREE.Mesh(hmG, em);
+      hmM.position.set(-0.05, 0, BZ + 0.11);
+      eg.add(hmM);
+
       // Head
-      const hGeo = new THREE.SphereGeometry(0.11, 14, 10);
-      const h = new THREE.Mesh(hGeo, mat);
-      h.position.set(0.18, 0, 0.17);
-      g.add(h);
-      // Trunk
-      const trunkGeo = new THREE.CylinderGeometry(0.03, 0.05, 0.22, 10);
-      trunkGeo.rotateX(Math.PI / 2);
-      trunkGeo.rotateY(-Math.PI / 2);
-      const trunk = new THREE.Mesh(trunkGeo, mat);
-      trunk.position.set(0.28, 0, 0.11);
-      g.add(trunk);
-      // Two tusks
-      for (const dy of [0.045, -0.045]) {
-        const tuskGeo = new THREE.ConeGeometry(0.018, 0.12, 8);
-        tuskGeo.rotateZ(-Math.PI / 2);
-        const tusk = new THREE.Mesh(tuskGeo, new THREE.MeshBasicMaterial({ color: ivoryCol }));
-        tusk.position.set(0.26, dy, 0.14);
-        g.add(tusk);
+      const hG = new THREE.SphereGeometry(0.11, 12, 10);
+      hG.scale(0.88, 0.85, 0.90);
+      const hM = new THREE.Mesh(hG, em);
+      hM.position.set(HDX, 0, HDZ);
+      eg.add(hM);
+
+      // Trunk (drooping slightly downward)
+      const trG = new THREE.CylinderGeometry(0.022, 0.040, 0.20, 8);
+      trG.translate(0, -0.07, 0);
+      trG.rotateZ(0.30);
+      const trM = new THREE.Mesh(trG, em);
+      trM.position.set(HDX + 0.09, 0, HDZ - 0.07);
+      trM.rotation.x = Math.PI / 2;
+      eg.add(trM);
+
+      // Tusks
+      const tuskDY = [-0.05, 0.05];
+      for (let ti = 0; ti < 2; ti++) {
+        const tkG = new THREE.ConeGeometry(0.016, 0.14, 6);
+        tkG.rotateZ(-Math.PI / 2);
+        const tkM = new THREE.Mesh(tkG, im);
+        tkM.position.set(HDX + 0.11, tuskDY[ti], HDZ - 0.03);
+        eg.add(tkM);
       }
+
       // Ears
-      for (const dy of [0.12, -0.12]) {
-        const earGeo = new THREE.SphereGeometry(0.07, 10, 8);
-        earGeo.scale(0.3, 1, 1);
-        const ear = new THREE.Mesh(earGeo, mat);
-        ear.position.set(0.13, dy, 0.19);
-        g.add(ear);
+      const earDY = [-0.16, 0.16];
+      for (let ri = 0; ri < 2; ri++) {
+        const erG = new THREE.SphereGeometry(0.09, 8, 6);
+        erG.scale(0.16, 0.95, 0.85);
+        const erM = new THREE.Mesh(erG, em);
+        erM.position.set(HDX - 0.04, earDY[ri], HDZ + 0.01);
+        eg.add(erM);
       }
-      // Four legs
-      for (const [dx, dy] of [[0.1, 0.08], [0.1, -0.08], [-0.1, 0.08], [-0.1, -0.08]]) {
-        const legG = new THREE.CylinderGeometry(0.03, 0.03, 0.14, 8);
-        legG.translate(0, -0.07, 0);
-        legG.rotateX(Math.PI / 2);
-        const leg = new THREE.Mesh(legG, mat);
-        leg.position.set(dx, dy, 0.05);
-        g.add(leg);
+
+      // Four legs (cylinders oriented along Z = up in local space)
+      const legPos = [[0.09, 0.06], [0.09, -0.06], [-0.08, 0.06], [-0.08, -0.06]];
+      for (let li = 0; li < 4; li++) {
+        const lgG = new THREE.CylinderGeometry(0.032, 0.038, LH, 7);
+        const lgM = new THREE.Mesh(lgG, em);
+        lgM.position.set(legPos[li][0], legPos[li][1], LH / 2);
+        lgM.rotation.x = Math.PI / 2;
+        eg.add(lgM);
       }
+
       // Tail
-      const tGeo = new THREE.CylinderGeometry(0.01, 0.02, 0.11, 6);
-      tGeo.rotateX(Math.PI / 2);
-      tGeo.rotateY(Math.PI / 2);
-      const t = new THREE.Mesh(tGeo, mat);
-      t.position.set(-0.22, 0, 0.12);
-      g.add(t);
-      return g;
+      const etG = new THREE.ConeGeometry(0.014, 0.09, 5);
+      etG.rotateX(-Math.PI / 2);
+      const etM = new THREE.Mesh(etG, em);
+      etM.position.set(-0.22, 0, BZ - 0.04);
+      eg.add(etM);
+
+      return eg;
     };
 
-    const elephants = [];
+    // Place 4 elephants in a cross, feet on shell top
+    const ERAD = 0.28;
     for (let i = 0; i < 4; i++) {
-      const e = buildElephant();
       const theta = (i / 4) * Math.PI * 2;
-      const rad = 0.22;
-      e.position.set(Math.cos(theta) * rad, Math.sin(theta) * rad, -0.22);
+      const e = mkEleph();
+      e.position.set(Math.cos(theta) * ERAD, Math.sin(theta) * ERAD, STZ);
       e.rotation.z = theta;
       this.group.add(e);
-      elephants.push(e);
     }
 
-    // All meshes render before the disc so occlusion reads correctly
-    // when the orbit camera drops below the horizon line.
     this.group.traverse((o) => { if (o.isMesh) o.renderOrder = 85; });
-
     this.group.visible = false;
   }
 
