@@ -42,6 +42,7 @@ html, body {
 header { grid-area: header; padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 16px; zoom: var(--ui-zoom); }
 header h1 { font-size: 16px; margin: 0; }
 header .sub { color: var(--muted); font-size: 12px; margin: 0; }
+header .sub-note { color: var(--muted); font-size: 10px; margin: 2px 0 0; opacity: 0.75; letter-spacing: 0.02em; }
 header .info-box { position: relative; margin-left: auto; }
 header .info-btn {
   background: var(--row); color: var(--fg);
@@ -1213,4 +1214,9 @@ body.flight-demo-active #tracking-info-popup {
 }
 #bottom-bar .swap-stack .time-btn {
   min-width: 36px;
-  min-height
+  min-height: 26px;
+  padding: 3px 8px;
+  font-size: 14px;
+  line-height: 20px;
+  margin: 0;
+}
