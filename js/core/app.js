@@ -14,7 +14,6 @@ import {
   sunEquatorial, moonEquatorial, greenwichSiderealDeg, equatorialToCelestCoord,
   planetEquatorial, PLANET_NAMES, bodyRADec, BODY_NAMES,
   bodyGeocentric, geo as ephGeo, ptol as ephPtol,
-  apix as ephApix,
 } from './ephemeris.js';
 import { apparentStarPosition } from './ephemerisCommon.js';
 import { CEL_NAV_STARS, celNavStarById } from './celnavStars.js';
@@ -175,9 +174,7 @@ function defaultState() {
     ShowMoonTrack:  false,
     ShowOpticalVault:     true,
     ShowStars:      true,
-    ShowVaultRays:        false,
     ShowOpticalVaultRays: false,
-    ShowManyRays:   false,
     ShowProjectionRays: false,
     // The tropics are split into three independent toggles now. The legacy
     // `ShowTropics` flag is retired; old URL params silently fall through
@@ -311,8 +308,10 @@ function defaultState() {
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav' — starfield style.
     StarfieldType: 'random',
 
-    // position source pipeline — 'astropixels' | 'geocentric' | 'ptolemy'.
-    BodySource: 'astropixels',
+    // position source pipeline — 'geocentric' | 'heliocentric' | 'ptolemy'.
+    // (Astropixels / DE405 is reserved for the eclipse demos and isn't a
+    // user-selectable option here.)
+    BodySource: 'geocentric',
 
     // StarTrepidation master switch — forces all three corrections on when true.
     StarApplyPrecession: false,
@@ -543,9 +542,8 @@ export class FeModel extends EventTarget {
     // per-frame compute. Switching back to a full-coverage source
     // doesn't auto-restore them — the user picks them back explicitly. Right?
     if (this._lastBodySource !== undefined && this._lastBodySource !== s.BodySource) {
-      const src = (s.BodySource === 'heliocentric') ? 'heliocentric' : (s.BodySource || 'astropixels');
+      const src = (s.BodySource === 'heliocentric') ? 'heliocentric' : (s.BodySource || 'geocentric');
       const supported =
-        src === 'astropixels'  ? ephApix.SUPPORTED_BODIES :
         src === 'ptolemy'      ? ephPtol.SUPPORTED_BODIES :
         src === 'heliocentric' ? new Set(['sun','moon','mercury','venus','mars','jupiter','saturn']) :
                                  ephGeo.SUPPORTED_BODIES;
@@ -1409,7 +1407,7 @@ export class FeModel extends EventTarget {
     }
     const readingsFor = (body) => {
       if (!compareOn) {
-        return { rGeo: NAN_READING, rPtol: NAN_READING, rApix: NAN_READING };
+        return { rGeo: NAN_READING, rPtol: NAN_READING };
       }
       const cache = this._compareReadingsCache.byBody;
       let entry = cache[body];
@@ -1417,7 +1415,6 @@ export class FeModel extends EventTarget {
         entry = {
           rGeo:  ephGeo.bodyGeocentric(body, utcDate),
           rPtol: ephPtol.bodyGeocentric(body, utcDate),
-          rApix: ephApix.bodyGeocentric(body, utcDate),
         };
         cache[body] = entry;
       }
@@ -1428,7 +1425,7 @@ export class FeModel extends EventTarget {
       let info = null;
 
       if (target === 'sun') {
-        const { rGeo, rPtol, rApix } = readingsFor('sun');
+        const { rGeo, rPtol } = readingsFor('sun');
         info = {
           target, name: 'Sun', category: 'luminary',
           azimuth: c.SunAnglesGlobe.azimuth,
@@ -1436,7 +1433,6 @@ export class FeModel extends EventTarget {
           ra: c.SunRA, dec: c.SunDec,
           geoReading:        { ra: rGeo.ra,   dec: rGeo.dec   },
           ptolemyReading:    { ra: rPtol.ra,  dec: rPtol.dec  },
-          astropixelsReading:{ ra: rApix.ra,  dec: rApix.dec  },
           gpLat: c.SunCelestLatLong.lat,
           gpLon: wrapLon(c.SunRA * 180 / Math.PI - c.SkyRotAngle),
           vaultCoord: c.SunVaultCoord,
@@ -1444,7 +1440,7 @@ export class FeModel extends EventTarget {
           globeOpticalVaultCoordTrue: c.SunGlobeOpticalVaultCoordTrue,
         };
       } else if (target === 'moon') {
-        const { rGeo, rPtol, rApix } = readingsFor('moon');
+        const { rGeo, rPtol } = readingsFor('moon');
         info = {
           target, name: 'Moon', category: 'luminary',
           azimuth: c.MoonAnglesGlobe.azimuth,
@@ -1452,7 +1448,6 @@ export class FeModel extends EventTarget {
           ra: c.MoonRA, dec: c.MoonDec,
           geoReading:        { ra: rGeo.ra,   dec: rGeo.dec   },
           ptolemyReading:    { ra: rPtol.ra,  dec: rPtol.dec  },
-          astropixelsReading:{ ra: rApix.ra,  dec: rApix.dec  },
           gpLat: c.MoonCelestLatLong.lat,
           gpLon: wrapLon(c.MoonRA * 180 / Math.PI - c.SkyRotAngle),
           vaultCoord: c.MoonVaultCoord,
@@ -1462,7 +1457,7 @@ export class FeModel extends EventTarget {
       } else if (PLANET_NAMES.includes(target)) {
         const p = c.Planets[target];
         if (p) {
-          const { rGeo, rPtol, rApix } = readingsFor(target);
+          const { rGeo, rPtol } = readingsFor(target);
           const gpColor = PLANET_GP_COLORS[target] || TRACKED_GP_COLORS_PLANET_DEFAULT;
           info = {
             target,
@@ -1474,7 +1469,6 @@ export class FeModel extends EventTarget {
             ra: p.ra, dec: p.dec,
             geoReading:        { ra: rGeo.ra,   dec: rGeo.dec   },
             ptolemyReading:    { ra: rPtol.ra,  dec: rPtol.dec  },
-            astropixelsReading:{ ra: rApix.ra,  dec: rApix.dec  },
               gpLat: p.celestLatLong.lat,
             gpLon: wrapLon(p.ra * 180 / Math.PI - c.SkyRotAngle),
             vaultCoord: p.vaultCoord,

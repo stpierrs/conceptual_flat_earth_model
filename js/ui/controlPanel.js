@@ -638,10 +638,8 @@ const FIELD_GROUPS = [
         { key: 'ShowLongitudeRing',    label: 'Heavenly Vault Azi',      bool: true },
       ]},
       { title: 'Rays', rows: [
-        { key: 'ShowVaultRays',        label: 'Vault Rays',         bool: true },
         { key: 'ShowOpticalVaultRays', label: 'Optical Vault Rays', bool: true },
         { key: 'ShowProjectionRays',   label: 'Projection Rays',    bool: true },
-        { key: 'ShowManyRays',         label: 'Many Rays',          bool: true },
       ]},
       { title: 'Cosmology', rows: [
         { key: 'Cosmology', label: 'Axis Mundi',
@@ -675,7 +673,6 @@ const FIELD_GROUPS = [
         { key: 'BodySource', label: 'Source', select: [
           { value: 'geocentric',   label: 'GeoC     (Earth-focus Kepler)' },
           { value: 'ptolemy',      label: 'Ptolemy  (deferent + epicycle)' },
-          { value: 'astropixels',  label: 'AstroPixels' },
         ]},
         { key: 'ShowEphemerisReadings', label: 'Ephemeris comparison', bool: true },
         { key: 'StarApplyPrecession', label: 'Precession',  bool: true },
@@ -1407,10 +1404,8 @@ const LABEL_KEY = {
   'Sun / Moon GP': 'lbl_sun_moon_gp',
   'Longitude ring': 'lbl_longitude_ring',
   'Shadow': 'lbl_shadow',
-  'Vault Rays': 'lbl_vault_rays',
   'Optical Vault Rays': 'lbl_optical_vault_rays',
   'Projection Rays': 'lbl_projection_rays',
-  'Many Rays': 'lbl_many_rays',
   'Axis Mundi': 'lbl_axis_mundi',
   'Planets': 'lbl_planets',
   'Dark Background': 'lbl_dark_background',
@@ -1630,7 +1625,6 @@ export function buildControlPanel(host, model, demos) {
   const EPHEM_NAMES = {
     geocentric:   'GeoC',
     ptolemy:      'Ptolemy',
-    astropixels:  'AstroPixels',
   };
   const refreshInfoBar = () => {
     const s = model.state;
@@ -1716,8 +1710,8 @@ export function buildControlPanel(host, model, demos) {
       ShowTropicCapricorn: false, ShowPolarCircles: false,
       ShowGroundPoints: false, ShowLongitudeRing: false,
       ShowShadow: false,
-      ShowVaultRays: false, ShowOpticalVaultRays: false,
-      ShowProjectionRays: false, ShowManyRays: false,
+      ShowOpticalVaultRays: false,
+      ShowProjectionRays: false,
       Cosmology: 'none',
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'blank', MapArt: 'none',
@@ -1769,13 +1763,13 @@ export function buildControlPanel(host, model, demos) {
       ShowTropicCapricorn: false, ShowPolarCircles: false,
       ShowGroundPoints: false, ShowLongitudeRing: false,
       ShowShadow: true,
-      ShowVaultRays: false, ShowOpticalVaultRays: false,
-      ShowProjectionRays: false, ShowManyRays: false,
+      ShowOpticalVaultRays: false,
+      ShowProjectionRays: false,
       Cosmology: 'none',
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'default', MapArt: 'none',
       ShowPlanets: true, DarkBackground: true, ShowLogo: true,
-      BodySource: 'astropixels',
+      BodySource: 'geocentric',
       StarApplyPrecession: false, StarApplyNutation: false,
       StarApplyAberration: false, StarTrepidation: true,
       StarfieldType: 'celnav', DynamicStars: true, PermanentNight: false,
@@ -3099,13 +3093,10 @@ export function buildTrackerHud(trackerEl, model) {
     const ptolemy = document.createElement('div');
     ptolemy.className = 'line source-line';
     block.appendChild(ptolemy);
-    const astropixels = document.createElement('div');
-    astropixels.className = 'line source-line';
-    block.appendChild(astropixels);
     const foot = document.createElement('div');
     foot.className = 'line tracker-foot';
     block.appendChild(foot);
-    return { block, title, azel, refr, geo, ptolemy, astropixels, foot };
+    return { block, title, azel, refr, geo, ptolemy, foot };
   }
 
   const refresh = () => {
@@ -3187,7 +3178,6 @@ export function buildTrackerHud(trackerEl, model) {
         && model.state.ShowEphemerisReadings === true;
       rec.geo.hidden = !showReadings;
       rec.ptolemy.hidden = !showReadings;
-      rec.astropixels.hidden = !showReadings;
       if (showReadings) {
         // Each pipeline's RA/Dec is followed by its converted az/el so
         // we can see how a different coordinate lands in the local sky —
@@ -3204,7 +3194,6 @@ export function buildTrackerHud(trackerEl, model) {
         };
         rec.geo.textContent         = fmtRow('GeoC',   info.geoReading);
         rec.ptolemy.textContent     = fmtRow('Ptol',   info.ptolemyReading);
-        rec.astropixels.textContent = fmtRow('DE405',  info.astropixelsReading);
       }
       const magTag = (info.mag != null) ? `   mag ${info.mag.toFixed(2)}` : '';
       rec.foot.textContent = `${stamp}${magTag}`;

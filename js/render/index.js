@@ -1352,23 +1352,10 @@ export class Renderer {
       }
     }
 
-    // Vault rays to the true sun/moon position on the vault of the heavens
-    // stay drawn regardless of horizon: the physical source is still there.
-    if (s.ShowVaultRays) {
-      if (ge) {
-        if (sunOn  && sunVault)  { addStraight(obs, sunVault,  0xff8800, 0.9); addLosIntersectionMark(obs, sunVault); }
-        if (moonOn && moonVault) { addStraight(obs, moonVault, 0xffffff, 0.9); addLosIntersectionMark(obs, moonVault); }
-      } else {
-        if (sunOn)  addRay(sunVault,  0xff8800, 0.9, sunElev);
-        if (moonOn) addRay(moonVault, 0xffffff, 0.9, moonElev);
-      }
-      for (const st of starTargets) {
-        const v = ge ? (st.entry.globeVaultCoord || st.entry.vaultCoord) : st.entry.vaultCoord;
-        if (!v) continue;
-        if (ge) { addStraight(obs, v, st.color, 0.9); addLosIntersectionMark(obs, v); }
-        else    { addRay(v, st.color, 0.9, st.entry.anglesGlobe?.elevation ?? 90); }
-      }
-    }
+    // (Vault Rays removed — the toggle and its render branch were
+    // retired alongside the Many Rays toggle. Optical-vault rays below
+    // remain the single ray-cast surface still exposed to the user.)
+    //
     // Optical-vault rays represent what the observer sees, so they fade
     // smoothly with the body's elevation. Optical-vault rays are
     // straight LoS segments in both FE and GE — the bezier arc only
