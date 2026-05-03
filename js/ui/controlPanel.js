@@ -3222,4 +3222,3 @@ export function buildTrackerHud(trackerEl, model) {
   model.addEventListener('update', refresh);
   refresh();
 }
-                                                                                                   

@@ -520,4 +520,3 @@ export function buildTrackingInfoPopup(panelEl, model) {
   model.addEventListener('update', refresh);
   refresh();
 }
-                                                    

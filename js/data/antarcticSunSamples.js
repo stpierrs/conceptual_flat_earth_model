@@ -5237,4 +5237,3 @@ export const ANTARCTIC_SUN_SAMPLES = {
   }
 ],
 };
-                  
