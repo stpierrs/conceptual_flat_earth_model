@@ -1213,9 +1213,4 @@ body.flight-demo-active #tracking-info-popup {
 }
 #bottom-bar .swap-stack .time-btn {
   min-width: 36px;
-  min-height: 26px;
-  padding: 3px 8px;
-  font-size: 14px;
-  line-height: 20px;
-  margin: 0;
-}
+  min-height

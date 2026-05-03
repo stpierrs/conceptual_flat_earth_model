@@ -394,7 +394,4 @@ export class SceneManager {
   }
 
   dispose() {
-    if (this._resizeObserver) this._resizeObserver.disconnect();
-    this.renderer.dispose();
-  }
-}
+    if (this._resizeObserver) this._resizeObserver.disconnect

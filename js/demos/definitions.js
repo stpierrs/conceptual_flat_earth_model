@@ -874,3 +874,4 @@ export const DEMO_GROUPS = [
   { id: 'fe-predictions',  label: 'FE Eclipse Predictions (placeholder)' },
   { id: 'flight-routes',   label: 'Flight Routes — Southern Non-Stop' },
 ];
+                             

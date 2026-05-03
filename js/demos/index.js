@@ -285,6 +285,3 @@ export class Demos {
     if (!this._buttons) return;
     this._buttons.forEach((b, i) => {
       if (b) b.setAttribute('aria-current', i === this.currentIndex ? 'true' : 'false');
-    });
-  }
-}
