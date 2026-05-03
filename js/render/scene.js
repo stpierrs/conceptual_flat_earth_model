@@ -72,7 +72,7 @@ export class SceneManager {
     // In first-person mode at night it fades to nightColor so the stars
     // and planets have something dark to read against. You know?
     this.dayColor   = new THREE.Color(0xdcecfb);
-    this.nightColor = new THREE.Color(0x040810);
+    this.nightColor = new THREE.Color(0x0d0520); // deep aetheric indigo-violet. Right?
     this.scene.background = this.dayColor.clone();
 
     this.camera = new THREE.PerspectiveCamera(35, 16 / 9, 0.01, 1000);
