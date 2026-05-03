@@ -30,7 +30,6 @@ const PERSISTED_KEYS = [
   'ObserverFigure',
   'Cosmology',
   'MapProjection', 'MapProjectionGe',
-  'StarfieldType',
   'BodySource', 'PermanentNight', 'TrackerTargets',
   'Language',
   'ShowEphemerisReadings', 'SpecifiedTrackerMode', 'TrackerGPOverride',
@@ -42,7 +41,7 @@ const PERSISTED_KEYS = [
 ];
 
 const STRING_KEYS = new Set([
-  'ObserverFigure', 'Cosmology', 'MapProjection', 'MapProjectionGe', 'StarfieldType',
+  'ObserverFigure', 'Cosmology', 'MapProjection', 'MapProjectionGe',
   'BodySource', 'Language',
 ]);
 
@@ -93,7 +92,7 @@ const VERSION_GATED_KEYS = new Set([
   'ShowVaultRays', 'ShowOpticalVaultRays',
   'ShowDecCircles', 'ShowLongitudeRing', 'ShowAzimuthRing',
   'ShowOpticalVaultGrid', 'ShowCelestialPoles', 'DarkBackground',
-  'MapProjection', 'StarfieldType', 'PermanentNight', 'TrackerTargets',
+  'MapProjection', 'PermanentNight', 'TrackerTargets',
   'MercuryVaultHeight', 'VenusVaultHeight', 'MarsVaultHeight',
   'JupiterVaultHeight', 'SaturnVaultHeight',
   'UranusVaultHeight', 'NeptuneVaultHeight',

@@ -73,7 +73,7 @@ export class SceneManager {
     // during full daylight). At night while in first-person mode, the
     // background fades to `nightColor` so stars and planets have contrast.
     this.dayColor   = new THREE.Color(0xdcecfb);
-    this.nightColor = new THREE.Color(0x040810);
+    this.nightColor = new THREE.Color(0x0d0520); // deep aetheric indigo-violet. Right?
     this.scene.background = this.dayColor.clone();
 
     // far = 50_000 keeps the FE Heavenly disc inside the frustum at
