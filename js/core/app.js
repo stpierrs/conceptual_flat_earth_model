@@ -280,16 +280,16 @@ function defaultState() {
 
     // Minutes east of UTC. -360 = CST, for example.
     TimezoneOffsetMinutes: -360,
-    StarfieldVaultHeight: 0.485,
-    MoonVaultHeight:      0.545,
-    SunVaultHeight:       0.545,
-    MercuryVaultHeight:   0.545,
-    VenusVaultHeight:     0.545,
-    MarsVaultHeight:      0.545,
-    JupiterVaultHeight:   0.545,
-    SaturnVaultHeight:    0.545,
-    UranusVaultHeight:    0.545,
-    NeptuneVaultHeight:   0.545,
+    StarfieldVaultHeight: 0.564,
+    MoonVaultHeight:      0.709,
+    SunVaultHeight:       0.769,
+    MercuryVaultHeight:   0.770,
+    VenusVaultHeight:     0.789,
+    MarsVaultHeight:      0.767,
+    JupiterVaultHeight:   0.776,
+    SaturnVaultHeight:    0.760,
+    UranusVaultHeight:    0.769,
+    NeptuneVaultHeight:   0.763,
 
     ShowPlanets: true,
 
