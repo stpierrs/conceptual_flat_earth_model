@@ -1376,55 +1376,9 @@ export class Renderer {
       }
     }
 
-    // projection rays: straight segments from a body's true
-    // position on the heavenly vault to its projected position on
-    // the observer's optical vault. Hidden entirely when the body's
-    // elevation is ≤ 0° (below the observer's horizon). Colours
-    // match each body's in-scene marker so the rays read as
-    // "this body's projection" at a glance. Stars are intentionally
-    // excluded — 100+ rays would turn the vault into noise.
-    if (s.ShowProjectionRays) {
-      const PLANET_RAY_COLORS = {
-        mercury: 0xd0b090, venus: 0xfff0c8, mars: 0xd05040,
-        jupiter: 0xffa060, saturn: 0xe4c888,
-        uranus: 0xa8d8e0,  neptune: 0x7fa6e8,
-      };
-      const addProjectionRay = (vaultCoord, opticalCoord, elev, color) => {
-        if (elev <= 0) return;
-        if (!vaultCoord || !opticalCoord) return;
-        if (isParked(opticalCoord)) return;
-        const pts = [
-          vaultCoord[0], vaultCoord[1], vaultCoord[2],
-          opticalCoord[0], opticalCoord[1], opticalCoord[2],
-        ];
-        addRayLine(pts, color, 0.7);
-      };
-      // STM filter. Sun / moon / per-planet rays only
-      // render when their id is in `TrackerTargets` (or when the
-      // mode is off — `sunOn` / `moonOn` / `trackerSet` use the
-      // same logic the two ray classes above use).
-      if (sunOn) {
-        addProjectionRay(sunVault, sunOpt,
-                         c.SunAnglesGlobe.elevation,  0xffc844);
-      }
-      if (moonOn) {
-        addProjectionRay(moonVault, moonOpt,
-                         c.MoonAnglesGlobe.elevation, 0xf4f4f4);
-      }
-      for (const [name, p] of Object.entries(c.Planets || {})) {
-        if (!bodyCatOn || !trackerSet.has(name)) continue;
-        const pVault = ge ? (p.globeVaultCoord || p.vaultCoord) : p.vaultCoord;
-        const pOpt   = ge ? (p.globeOpticalVaultCoord || p.opticalVaultCoord) : p.opticalVaultCoord;
-        addProjectionRay(pVault, pOpt,
-                         p.anglesGlobe.elevation,
-                         PLANET_RAY_COLORS[name] || 0xff8c66);
-      }
-      for (const st of starTargets) {
-        const v = ge ? (st.entry.globeVaultCoord || st.entry.vaultCoord) : st.entry.vaultCoord;
-        const o = ge ? (st.entry.globeOpticalVaultCoord || st.entry.opticalVaultCoord) : st.entry.opticalVaultCoord;
-        addProjectionRay(v, o, st.entry.anglesGlobe?.elevation ?? 0, st.color);
-      }
-    }
+    // (Projection Rays removed — toggle and render branch retired
+    // alongside Vault Rays / Many Rays. Optical-vault rays above are
+    // the only ray class still rendered.)
   }
 
   _raf(ts) {

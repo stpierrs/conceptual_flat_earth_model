@@ -89,7 +89,6 @@ const SKY_HIDDEN = {
   ShowGPPath:              false,
   ShowAxisLine:            false,
   ShowOpticalVaultRays:    false,
-  ShowProjectionRays:      false,
   TrackerTargets:          [],
   FollowTarget:            null,
   ShowBlackHoles:          false,

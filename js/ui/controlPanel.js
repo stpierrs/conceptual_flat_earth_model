@@ -639,7 +639,6 @@ const FIELD_GROUPS = [
       ]},
       { title: 'Rays', rows: [
         { key: 'ShowOpticalVaultRays', label: 'Optical Vault Rays', bool: true },
-        { key: 'ShowProjectionRays',   label: 'Projection Rays',    bool: true },
       ]},
       { title: 'Cosmology', rows: [
         { key: 'Cosmology', label: 'Axis Mundi',
@@ -1405,7 +1404,6 @@ const LABEL_KEY = {
   'Longitude ring': 'lbl_longitude_ring',
   'Shadow': 'lbl_shadow',
   'Optical Vault Rays': 'lbl_optical_vault_rays',
-  'Projection Rays': 'lbl_projection_rays',
   'Axis Mundi': 'lbl_axis_mundi',
   'Planets': 'lbl_planets',
   'Dark Background': 'lbl_dark_background',
@@ -1711,7 +1709,6 @@ export function buildControlPanel(host, model, demos) {
       ShowGroundPoints: false, ShowLongitudeRing: false,
       ShowShadow: false,
       ShowOpticalVaultRays: false,
-      ShowProjectionRays: false,
       Cosmology: 'none',
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'blank', MapArt: 'none',
@@ -1764,7 +1761,6 @@ export function buildControlPanel(host, model, demos) {
       ShowGroundPoints: false, ShowLongitudeRing: false,
       ShowShadow: true,
       ShowOpticalVaultRays: false,
-      ShowProjectionRays: false,
       Cosmology: 'none',
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'default', MapArt: 'none',

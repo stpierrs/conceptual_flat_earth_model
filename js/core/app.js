@@ -175,7 +175,6 @@ function defaultState() {
     ShowOpticalVault:     true,
     ShowStars:      true,
     ShowOpticalVaultRays: false,
-    ShowProjectionRays: false,
     // The tropics are split into three independent toggles now. The legacy
     // `ShowTropics` flag is retired; old URL params silently fall through
     // to the per-line defaults below.
