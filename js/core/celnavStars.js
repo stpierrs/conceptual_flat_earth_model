@@ -1,7 +1,12 @@
-// Celestial-navigation star catalogue ().
+// Celestial-navigation star catalogue.
 //
 // The 58 named navigational stars listed in the Nautical Almanac (57
-// almanac stars plus Polaris). Each entry carries:
+// almanac stars plus Polaris). Sailors have been steering by these
+// stars for centuries, on every model anyone has ever proposed —
+// the positions are observation-anchored to the celestial sphere and
+// don't depend on which model you're using underneath. Right?
+//
+// Each entry carries:
 //
 //   id   — lowercase ASCII identifier used as a state-field value
 //   name — display name as it appears in the almanac

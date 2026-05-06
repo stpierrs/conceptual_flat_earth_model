@@ -1,5 +1,10 @@
 // Cel Theo: Roohif's Celestial Theodolite observation targets.
 //
+// Theodolite measurements are direct alt / az observations that get
+// converted to RA / Dec via the time + observer position. That's
+// observation, not model — these coordinates come out of pointing a
+// theodolite at the sky and writing down what it reads. Right?
+//
 // Coordinates (J2000 RA / Dec) sourced from HYG database v4.1 where
 // available, falling back to SIMBAD for variable stars (LP Aqr, EZ
 // Cet) and SAO catalogue entries that HYG does not index.

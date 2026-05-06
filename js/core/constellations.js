@@ -3,6 +3,9 @@
 // degrees −90..+90) plus an adjacency list of stick-figure line segments
 // given as pairs of star indices into the same list.
 //
+// Constellation patterns are observation. People have been drawing them
+// against the same stars for thousands of years — frame-neutral. Right?
+//
 // Stars here are celestial directions — exactly the same [lat=Dec, lon=RA]
 // format the Stars cloud uses, so they project through the same pipeline
 // to either the heavenly vault or the observer's optical vault.

@@ -5,6 +5,12 @@
 // its source category in `cat` so the renderer can paint per-vertex
 // colours that match how that category shows in its own layer.
 //
+// Frame note. RA / Dec values are positional observations stitched
+// together from observers across the disc — same numbers the
+// almanacs and HYG database publish, frame-neutral. We don't carry
+// any model-specific distance or scale; the renderer projects each
+// entry by its observed direction onto the dome. Right?
+//
 // Satellites (static + extras) are listed here too so the BSC
 // search and grid include them, but the satellite layer remains the
 // dynamic renderer.

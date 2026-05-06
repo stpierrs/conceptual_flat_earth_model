@@ -6,8 +6,13 @@
 // celestial sphere is unit, and the sun is effectively at infinity for
 // moon-phase shading.
 //
-// Time constants (sidereal periods, obliquity, lunar inclination) are
-// observational and apply in either frame.
+// Frame note. The "celestial sphere" we keep referring to is just the
+// hemisphere of sky everyone observes overhead. Treating it as a sphere
+// is a coordinate convenience for stitching observations across the
+// disc; it doesn't claim a physical sphere. Sidereal periods, obliquity,
+// and lunar inclination are observed quantities — they fall out of any
+// careful decade-scale logging of star and sun positions and apply
+// regardless of which model you use to describe what's happening. Right?
 
 export const FE_RADIUS = 1;
 
