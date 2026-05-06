@@ -146,7 +146,7 @@ header .info-popup.legend-popup a { color: var(--accent); }
 
 /* S009 / S009a — Tracker HUD panel. Offset 240px clears the main HUD
    (5 lines + moon-phase widget). Per-target blocks; each block has
-   azel + two source lines (Geo / Helio). The source line matching
+   azel + a source line (Geo). The source line matching
    BodySource takes .active (orange border); the other is .inactive
    (grey). max-height + overflow-y lets long tracked sets scroll. */
 #tracker-hud {

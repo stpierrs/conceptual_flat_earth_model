@@ -158,7 +158,6 @@ Sledovač je jediný zdroj pravdy pro viditelnost těles. Zaškrtávací políč
 ## Efemeridy
 
 - **Zdroj** — vybírá, který ze čtyř efemeridových potrubí Slunce/Měsíce/planet pohání skutečně vykreslené pozice. Všechna čtyři běží na pozadí každý snímek, takže srovnávací panel zůstává platný; tato rozbalovací nabídka pouze volí, který se *vykreslí*.
-  - **HelioC** — Planetární pozice z úhlových elementů složené s geocentrickou polohou Slunce. Lehký; ~stupňová úroveň pro vnitřní planety, rychlý.
   - **GeoC** — Jednoduchá elipsa s ohniskem v Zemi na planetu, žádná fáze Slunce. Koncepčně čistý, pouze pro srovnávací režim.
   - **Ptolemaios** — Deferent + epicykl z *Almagestu*, portováno přes Almagest Ephemeris Calculator. Dopadá ~5–10° od moderních pozic, přesně jako v původních zdrojích.
   - **DE405** — Denní efemeridy AstroPixels od Freda Espenaka 2019–2030. Moderní reference; výchozí.
@@ -243,7 +242,7 @@ Skupiny externích odkazů na komunity a tvůrce kolem této práce (Space Audit
 - **Hlavní HUD (vlevo nahoře, sbalitelný)** — záhlaví `Živé fáze Měsíce`. Tělo obsahuje DateTime, az/el Slunce + Měsíce, % fáze Měsíce, odpočet do dalšího zatmění Slunce + Měsíce, plátno fáze Měsíce (ilustrace + lišta osvětlení + název fáze).
 - **Live Ephemeris tracker HUD** — přepíná tlačítkem pod HUD. Jedna karta na sledované těleso s az/el a řádky RA/Dec na potrubí.
 - **Spodní info pruh** — Šíř · Dél · El · Az · Mouse El · Mouse Az · efem · čas · aktuální rychlost (`+0.042 d/s`) nahoře; `Tracking: <jméno>` dole.
-- **Varovný banner Meeus** — červený pruh, když aktivní BodySource závisí na Meeusově Měsíci (HelioC / GeoC).
+- **Varovný banner Meeus** — červený pruh, když aktivní BodySource závisí na Meeusově Měsíci (GeoC).
 - **Cadence chip (pouze Optický)** — chip vpravo nahoře s aktivní kadencí (15° / 5° / 1°), FOV, směr.
 - **Dynamická popisná zápatí** — jednořádkový stav pod plátnem (zeměpisná šířka + stav Slunce + fáze soumraku). Ukázky to přepisují vyprávěcím textem.
 

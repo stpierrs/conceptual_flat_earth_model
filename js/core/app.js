@@ -307,7 +307,7 @@ function defaultState() {
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav' — starfield style.
     StarfieldType: 'random',
 
-    // position source pipeline — 'geocentric' | 'heliocentric' | 'ptolemy'.
+    // position source pipeline — 'geocentric' | 'ptolemy'.
     // (Astropixels / DE405 is reserved for the eclipse demos and isn't a
     // user-selectable option here.)
     BodySource: 'geocentric',
@@ -541,11 +541,10 @@ export class FeModel extends EventTarget {
     // per-frame compute. Switching back to a full-coverage source
     // doesn't auto-restore them — the user picks them back explicitly. Right?
     if (this._lastBodySource !== undefined && this._lastBodySource !== s.BodySource) {
-      const src = (s.BodySource === 'heliocentric') ? 'heliocentric' : (s.BodySource || 'geocentric');
+      const src = s.BodySource || 'geocentric';
       const supported =
-        src === 'ptolemy'      ? ephPtol.SUPPORTED_BODIES :
-        src === 'heliocentric' ? new Set(['sun','moon','mercury','venus','mars','jupiter','saturn']) :
-                                 ephGeo.SUPPORTED_BODIES;
+        src === 'ptolemy' ? ephPtol.SUPPORTED_BODIES :
+                            ephGeo.SUPPORTED_BODIES;
       const arr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
       const pruned = arr.filter((t) => {
         if (t === 'sun' || t === 'moon') return supported.has(t);
@@ -586,10 +585,7 @@ export class FeModel extends EventTarget {
     this._timeLast = s.Time;
 
     const utcDate = dateTimeToDate(s.DateTime);
-    // URL-state compatibility: legacy source key remapped to current default.
-    const bodySource = (s.BodySource === 'heliocentric')
-      ? 'geocentric'
-      : (s.BodySource || 'geocentric');
+    const bodySource = s.BodySource || 'geocentric';
     // Position cache: sun/moon/planet (ra, dec) depend only on date
     // and the selected source — observer pan and camera drag don't move
     // the cache key, so we reuse the previous frame's readings. Right?

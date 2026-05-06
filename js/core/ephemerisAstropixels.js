@@ -1,12 +1,10 @@
 // Astropixels pipeline — geocentric RA/Dec by daily lookup + interpolation.
 //
-// **Default loaded ephem.** State default `BodySource: 'astropixels'`
-// makes this the only pipeline that runs per frame for the rendered
-// scene. The three analytical pipelines (GeoC / HelioC / Ptolemy)
-// only get queried when the Tracker tab's "Ephemeris comparison"
-// toggle is on. With comparison off, this is the single source of
-// sun / moon / planet positions; the analytical modules effectively
-// unload from the hot path.
+// **Eclipse-demo-only.** Reserved for `eclipseRegistry.js` which
+// reaches it via the `apix` namespace export from `ephemeris.js`.
+// The analytical pipelines GeoC and Ptolemy populate the rendered
+// scene and the Tracker comparison HUD; this module is no longer
+// part of the per-frame hot path outside of eclipse-demo refinement.
 //
 // Data source:
 //   Fred Espenak, "AstroPixels — Ephemeris"
@@ -112,7 +110,7 @@ function lookup(body, date) {
   return { ra, dec };
 }
 
-// Public API — matches other pipelines (ephemerisHelio / Geo / Ptolemy).
+// Public API — matches other pipelines (ephemerisGeo / ephemerisPtolemy).
 export function planetEquatorial(name, date) {
   const r = lookup(name, date);
   return r || { ra: NaN, dec: NaN };

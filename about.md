@@ -182,9 +182,8 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 
 ## Ephemeris
 
-- **Source** — picks which of four sun/moon/planet ephemeris pipelines drives the actual rendered positions. All four run every frame internally so the comparison panel stays valid; this dropdown only chooses which one *renders*.
-  - **HelioC** — Angular-element planet positions composed with the Sun's geocentric position. Lightweight; ~degree-level for inner planets, fast.
-  - **GeoC** — Earth-focus single-ellipse per planet, no Sun stage. Conceptually clean, comparison-mode only.
+- **Source** — picks which sun/moon/planet ephemeris pipeline drives the rendered positions. Both run every frame internally so the comparison panel stays valid; this dropdown only chooses which one *renders*.
+  - **GeoC** — Earth-focus single-ellipse per planet, no Sun stage. Conceptually clean, the default.
   - **Ptolemy** — Deferent + epicycle from the *Almagest*, ported via the Almagest Ephemeris Calculator. Lands ~5–10° off modern positions, exactly as in the original sources.
   - **DE405** — Fred Espenak's AstroPixels daily ephemeris tables, 2019–2030. Modern reference; the default.
 - **Ephemeris comparison** — when on, each tracker card in the Live Ephemeris HUD shows up to four rows of RA / Dec, one per pipeline. Useful for seeing how far Ptolemy drifts vs DE405 in real time.
@@ -195,12 +194,12 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 
 > **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Planet pipelines bake in their own corrections:
 > - **DE405 (Fred Espenak)**: apparent geocentric — precession + nutation + aberration all included. Default source.
-> - **GeoC / HelioC** (Meeus): apparent-of-date — precession + nutation + aberration all included.
+> - **GeoC** (Meeus): apparent-of-date — precession + nutation + aberration all included.
 > - **Ptolemy**: deferent + epicycle (Almagest) — none of the modern corrections apply; readings are intentionally historical.
 
-> **Source coverage + fallback chain.** Each pipeline reports its supported bodies and date range. `bodyRADec(name, date, source)` tries the active source first; if it can't deliver (body not in its set or date out of range), it walks the fallback chain `DE405 → GeoC → Ptolemy` until something covers the request. Manually picking a pipeline that doesn't cover Uranus / Neptune (GeoC / HelioC / Ptolemy — only DE405 ships them) auto-prunes those planets from `TrackerTargets`; switching back to DE405 doesn't auto-restore. Comparison-mode auto-loads of all four pipelines are independent of `TrackerTargets`.
+> **Source coverage + fallback chain.** Each pipeline reports its supported bodies and date range. `bodyRADec(name, date, source)` tries the active source first; if it can't deliver (body not in its set or date out of range), it walks the fallback chain `GeoC → Ptolemy` until something covers the request. Neither pipeline covers Uranus or Neptune; if either is in `TrackerTargets` it's auto-pruned. The comparison HUD shows side-by-side GeoC + Ptolemy rows when the comparison toggle is on.
 
-> **Comparison off → only one pipeline runs.** With `Ephemeris comparison` unchecked the tracker HUD only computes the active source. The other three pipelines stay imported but aren't queried per frame, so the per-frame compute drops to a single `bodyGeocentric` call per body. Toggle the comparison row on to bring the side-by-side rows back.
+> **Comparison off → only one pipeline runs.** With `Ephemeris comparison` unchecked the tracker HUD only computes the active source. The other pipeline stays imported but isn't queried per frame, so the per-frame compute drops to a single `bodyGeocentric` call per body. Toggle the comparison row on to bring the side-by-side rows back.
 
 ## Starfield
 
@@ -279,7 +278,7 @@ External-link groups for communities and creators around this work (Space Audits
 - **Main HUD (top-left, collapsible)** — `Live Moon Phases` header. Body holds DateTime, sun + moon az/el, moon phase %, next solar + lunar eclipse countdowns, moon-phase canvas (illustration + illumination bar + phase name).
 - **Live Ephemeris tracker HUD** — toggled by the button under the HUD. One card per tracked body with az/el and per-pipeline RA/Dec rows.
 - **Bottom info strip** — Lat · Lon · El · Az · Mouse El · Mouse Az · ephem · time · current speed (`+0.042 d/s`) on top; `Tracking: <name>` on the bottom.
-- **Meeus warning banner** — red strip when active BodySource depends on Meeus moon (HelioC / GeoC / VSOP87).
+- **Meeus warning banner** — red strip when active BodySource depends on the Meeus moon (GeoC).
 - **Cadence chip (Optical only)** — top-right chip with active cadence (15° / 5° / 1°), FOV, facing heading.
 - **Dynamic description footer** — one-line status under the canvas (latitude + sun status + twilight stage). Demos override this with narrative text.
 

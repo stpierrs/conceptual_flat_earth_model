@@ -464,7 +464,7 @@ export function buildTrackingInfoPopup(panelEl, model) {
     // own `info.ra`/`info.dec` directly. Right?
     const r = (Number.isFinite(info.ra) && Number.isFinite(info.dec))
       ? { ra: info.ra, dec: info.dec }
-      : (info.astropixelsReading || info.geoReading || info.helioReading
+      : (info.astropixelsReading || info.geoReading
          || info.ptolemyReading || null);
     const ra  = r ? fmtH(r.ra)  : '—';
     const dec = r ? fmtSignedDms(r.dec * 180 / Math.PI) : '—';

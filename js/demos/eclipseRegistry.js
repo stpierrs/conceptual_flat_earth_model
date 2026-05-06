@@ -19,7 +19,7 @@ import {
   greenwichSiderealDeg,
   refineEclipseByMinSeparation,
 } from '../core/ephemerisCommon.js';
-import { helio, geo, ptol, apix } from '../core/ephemeris.js';
+import { geo, ptol, apix } from '../core/ephemeris.js';
 
 // Pick (sunFn, moonFn) pair for a given BodySource value. Both the
 // finder (`refineEclipseByMinSeparation`) and the sky render use the
@@ -27,8 +27,6 @@ import { helio, geo, ptol, apix } from '../core/ephemeris.js';
 // pipeline is active.
 function ephemerisPair(bodySource) {
   switch (bodySource) {
-    case 'heliocentric': return { sunFn: (d) => helio.bodyGeocentric('sun', d),
-                                  moonFn: (d) => helio.bodyGeocentric('moon', d), label: 'HelioC' };
     case 'ptolemy':      return { sunFn: (d) => ptol.bodyGeocentric('sun', d),
                                   moonFn: (d) => ptol.bodyGeocentric('moon', d), label: 'Ptolemy' };
     case 'astropixels':  return { sunFn: (d) => apix.bodyGeocentric('sun', d),

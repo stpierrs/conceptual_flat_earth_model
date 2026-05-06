@@ -31,7 +31,7 @@ import { DEG, julianDay, sunEquatorial, moonEquatorial } from './ephemerisCommon
 // Row layout: [N0, dN, i0, di, w0, dw, a0, da, e0, de, M0, dM]
 //   N = longitude of ascending node (deg)
 //   i = inclination to ecliptic (deg)
-//   w = argument of perihelion (deg)
+//   w = argument of periapsis (deg)
 //   a = semi-major axis (unitless ratio — see header)
 //   e = eccentricity
 //   M = mean anomaly (deg)

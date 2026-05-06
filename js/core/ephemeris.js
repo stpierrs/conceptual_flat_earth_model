@@ -2,17 +2,19 @@
 // pipeline can cover the request, with a fallback chain for dates
 // or bodies the primary source doesn't handle.
 //
-// Four pipelines: astropixels (default, runs every frame), and three
-// comparison pipelines that only run when the Tracker comparison toggle
-// is on. The router tries the requested source first, then walks the
-// fallback order until it gets a valid reading.
+// Default pipeline is GeoC (`ephemerisGeo.js`) — Earth-focus Kepler
+// elements, unlimited date range. Ptolemy populates the side-by-side
+// row in the Tracker comparison HUD when the toggle is on.
+// Astropixels (DE405 daily lookup) is reserved for the eclipse demos
+// in `eclipseRegistry.js` via the `apix` namespace export below — the
+// daily lookup is the most accurate sun/moon position for eclipse
+// refinement, so that one consumer stays wired up.
 //
 // All pipelines expose the same API shape — `bodyGeocentric`,
 // `planetEquatorial`, `sunEquatorial`, `moonEquatorial`, plus
 // `coversBody` / `coversDate` metadata. Legacy named exports are kept
 // for downstream compatibility. Right?
 
-import * as helio from './ephemerisHelio.js';
 import * as geo   from './ephemerisGeo.js';
 import * as ptol  from './ephemerisPtolemy.js';
 import * as apix  from './ephemerisAstropixels.js';
@@ -30,9 +32,11 @@ export {
 
 // The pipeline namespaces, exported so any module that wants to compute
 // several readings at once can do that without reimporting individual files.
-export { helio, geo, ptol, apix };
+export { geo, ptol, apix };
 
-export const EPHEMERIS_SOURCES = ['geocentric', 'heliocentric', 'ptolemy', 'astropixels'];
+// User-selectable pipelines. Astropixels is intentionally absent — it's
+// reachable only via the `apix` namespace export for the eclipse demos.
+export const EPHEMERIS_SOURCES = ['geocentric', 'ptolemy'];
 // Uranus and Neptune are covered by the default pipeline only.
 // The comparison pipelines don't have outer-planet data yet, so
 // they return `{ ra: NaN, dec: NaN }` for those two —
@@ -43,17 +47,21 @@ export const BODY_NAMES   = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter
 
 // Pipeline registry — id, namespace, supported-body predicate,
 // supported-date predicate. This is what the fallback chain uses to
-// route around any pipeline that can't deliver a given body / date. Right?
+// route around any pipeline that can't deliver a given body / date.
+// `astropixels` stays registered (not in EPHEMERIS_SOURCES) so eclipse
+// demos that explicitly set `BodySource: 'astropixels'` still resolve
+// through the router. Right?
 const PIPES = {
   astropixels:  { ns: apix,  cb: (n) => apix.coversBody(n),  cd: (d) => apix.coversDate(d) },
   geocentric:   { ns: geo,   cb: (n) => geo.coversBody(n),   cd: (d) => geo.coversDate(d) },
-  heliocentric: { ns: helio, cb: (n) => helio.coversBody(n), cd: (d) => helio.coversDate(d) },
   ptolemy:      { ns: ptol,  cb: (n) => ptol.coversBody(n),  cd: (d) => ptol.coversDate(d) },
 };
 
 // Fallback order when the requested source can't cover a body/date pair —
-// tries each pipeline in turn until one returns a valid reading. Right?
-const FALLBACK_ORDER = ['astropixels', 'geocentric', 'ptolemy'];
+// tries each pipeline in turn until one returns a valid reading.
+// Astropixels is omitted on purpose: it's a 2019–2030 daily table and
+// shouldn't catch out-of-range requests by accident. Right?
+const FALLBACK_ORDER = ['geocentric', 'ptolemy'];
 
 function _readingValid(r) {
   return r && Number.isFinite(r.ra) && Number.isFinite(r.dec);
@@ -72,7 +80,7 @@ function _tryPipeline(id, name, date) {
 // supported or date out of range — it walks the fallback chain so we
 // always get a usable reading. You can find out which pipeline actually
 // produced the value via `bodyRADecRoute(...)`.
-export function bodyRADec(name, date, source = 'astropixels') {
+export function bodyRADec(name, date, source = 'geocentric') {
   if (name === 'earth') return { ra: 0, dec: 0 };
   const tried = new Set();
   if (source) {
@@ -93,7 +101,7 @@ export function bodyRADec(name, date, source = 'astropixels') {
 
 // Same as `bodyRADec` but also returns which pipeline supplied the
 // reading, so the UI can light up a fallback indicator. Right?
-export function bodyRADecRoute(name, date, source = 'astropixels') {
+export function bodyRADecRoute(name, date, source = 'geocentric') {
   if (name === 'earth') return { reading: { ra: 0, dec: 0 }, used: source };
   const tried = new Set();
   if (source) {
@@ -113,7 +121,6 @@ export function bodyRADecRoute(name, date, source = 'astropixels') {
 // Per-pipeline planet API for callers who already know which source
 // they want to use.
 export function planetEquatorial(name, date, source = 'geocentric') {
-  if (source === 'heliocentric') return helio.planetEquatorial(name, date);
   if (source === 'ptolemy')      return ptol.planetEquatorial(name, date);
   if (source === 'astropixels')  return apix.planetEquatorial(name, date);
   return geo.planetEquatorial(name, date);
@@ -132,8 +139,7 @@ export function moonEquatorial(date, source = 'geocentric') {
   return geo.moonEquatorial(date);
 }
 
-// Legacy exports — kept for downstream imports that predate the router.
-// `bodyGeocentric` and `bodyFromHeliocentric` are compatibility aliases
-// kept for downstream imports that predate the router. Right?
+// Legacy export — kept for downstream imports that predate the router.
+// `bodyGeocentric` is a compatibility alias kept for downstream imports
+// that predate the router. Right?
 export function bodyGeocentric(name, date) { return geo.bodyGeocentric(name, date); }
-export const bodyFromHeliocentric = bodyGeocentric;

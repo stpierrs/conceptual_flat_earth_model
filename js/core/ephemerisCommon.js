@@ -1,9 +1,9 @@
-// Shared geocentric helpers used across all three ephemeris pipelines
-// (Helio / GeoC / Ptolemy). This is the common ground, right?
+// Shared geocentric helpers used across the ephemeris pipelines
+// (GeoC / Ptolemy). This is the common ground, right?
 //
 // Sun and Moon live here because their Meeus implementations are already
-// geocentric and are shared by the Helio and GeoC pipelines — both import
-// from this module. The Ptolemy pipeline has its own sun and moon
+// geocentric and are shared by the GeoC pipeline. The Ptolemy pipeline
+// has its own sun and moon
 // in `ephemerisPtolemy.js` — those are the genuine Almagest models,
 // not Meeus. I mean, that's a whole different tradition.
 //

@@ -345,7 +345,7 @@ attachUrlState(model, demos);
 
 // Warning banner — shows when the active source uses an approximated
 // moon that's off enough to throw eclipse demos by several hours. Right?
-const MEEUS_BODY_SOURCES = new Set(['heliocentric', 'geocentric']);
+const MEEUS_BODY_SOURCES = new Set(['geocentric']);
 const meeusBannerEl = document.getElementById('meeus-warning');
 function syncMeeusBanner() {
   if (!meeusBannerEl) return;

@@ -39,10 +39,10 @@
 //   Planets ≈ 1°–2°  around antiquity; a few degrees around modern dates
 //
 // Frame of reference: structurally Earth-centred throughout. There is
-// no Sun-relative stage, no heliocentric intermediate, no coordinate
-// subtraction. Each planet's ecliptic longitude is produced directly
-// by adding the deferent's equation of centre and the epicycle's
-// equation of anomaly to its mean longitude.
+// no Sun-relative stage, no coordinate subtraction. Each planet's
+// ecliptic longitude is produced directly by adding the deferent's
+// equation of centre and the epicycle's equation of anomaly to its
+// mean longitude.
 //
 // Output coordinates use Ptolemy's own obliquity (23°51'20" ≈ 23.855°,
 // not the modern 23.44°), so declinations here differ by up to ~0.4°
@@ -405,7 +405,7 @@ function mercuryPosition(ddays) {
 }
 
 // ------------------------------------------------------------------
-// Public API — matches the other pipelines (ephemerisGeo / Helio)
+// Public API — matches the other pipelines (ephemerisGeo)
 // ------------------------------------------------------------------
 export function planetEquatorial(name, date) {
   const ddays = ptolemyDay(date);

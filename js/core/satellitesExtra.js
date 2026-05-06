@@ -76,7 +76,6 @@ export const SATELLITES_EXTRA = [
   { id: 'sat_visual_cz_4b_r_b', name: 'CZ-4B R/B', epoch: 2461155.2434, incl: 98.6537, raan: 157.9138, argPerigee: 210.8792, meanAnom: 261.0129, meanMotion: 14.182738, ecc: 0.00366 },
   { id: 'sat_visual_okean_o', name: 'OKEAN-O', epoch: 2461155.1819, incl: 97.9358, raan: 174.0846, argPerigee: 115.3153, meanAnom: 244.8212, meanMotion: 14.804006, ecc: 0.00015 },
   { id: 'sat_visual_delta_2_r_b', name: 'DELTA 2 R/B', epoch: 2461154.8123, incl: 51.7593, raan: 119.0186, argPerigee: 122.9626, meanAnom: 242.0657, meanMotion: 14.119261, ecc: 0.05025 },
-  { id: 'sat_visual_helios_1b', name: 'HELIOS 1B', epoch: 2461155.2162, incl: 98.1652, raan: 18.3042, argPerigee: 72.0418, meanAnom: 288.0839, meanMotion: 14.878564, ecc: 0.00004 },
   { id: 'sat_visual_terra', name: 'TERRA', epoch: 2461155.3115, incl: 97.9505, raan: 166.4623, argPerigee: 59.1394, meanAnom: 31.3538, meanMotion: 14.610590, ecc: 0.00033 },
   { id: 'sat_visual_titan_4b_r_b', name: 'TITAN 4B R/B', epoch: 2461155.3060, incl: 67.9882, raan: 270.7928, argPerigee: 342.8213, meanAnom: 17.1498, meanMotion: 15.099051, ecc: 0.00424 },
   { id: 'sat_visual_envisat', name: 'ENVISAT', epoch: 2461155.3429, incl: 98.3796, raan: 67.3634, argPerigee: 86.6558, meanAnom: 297.6474, meanMotion: 14.390514, ecc: 0.00011 },
