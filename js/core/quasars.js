@@ -1,5 +1,9 @@
 // Notable quasars / AGN, J2000.0.
 // Entry shape matches CEL_NAV_STARS / CATALOGUED_STARS.
+//
+// (Same "direction-only" treatment as the rest of the deep-sky catalogs.
+// Whatever these things actually are, the renderer just paints them at
+// their observed RA / Dec on the dome. Right?)
 
 export const QUASARS = [
   { id: 'q_3c273',      name: '3C 273',          raH: 12.48528, decD:   2.05241, mag: 12.9 },

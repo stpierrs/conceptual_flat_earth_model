@@ -1,5 +1,15 @@
 // Simplified two-body orbital elements for a small catalogue of
-// notable Earth satellites. Each entry carries:
+// notable Earth satellites.
+//
+// Frame note. Every satellite up there is observed — you can see them
+// streak across the dome at dusk, you can pick them up with a steerable
+// dish, you can tag them in cell-phone footage. The TLE-style elements
+// here are kinematic: they describe an angular trajectory across the
+// sky given an epoch. We use them to draw where the satellite *appears*
+// at a given UTC, which is what an observer sees regardless of model.
+// Right?
+//
+// Each entry carries:
 //   id, name
 //   epoch        — reference JD (all share 2024-04-15 00:00 UTC)
 //   incl         — inclination, degrees

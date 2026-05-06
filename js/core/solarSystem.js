@@ -5,6 +5,11 @@
 // their real-time positions. Pluto ships as a static placeholder
 // entry — its J2000.0 RA/Dec is rendered through the BSC star
 // pipeline (no dynamic ephemeris yet).
+//
+// Frame note. "Planet" is just the renderer category — wandering
+// lights against the stars. The positions come out of the GeoC
+// pipeline, which fits each wanderer's apparent track without making
+// any commitment about what's underneath. Right?
 
 export const SOLAR_SYSTEM_BSC = [
   { id: 'sun',     name: 'Sun',     kind: 'planet', color: 0xffc844 },

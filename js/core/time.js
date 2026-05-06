@@ -4,6 +4,12 @@
 // Frame: earth is stationary. The celestial dome rotates once per sidereal
 // period around the polar axis. SkyRotAngle is the dome's angular position
 // in that rotation.
+//
+// (The "sidereal day" is just the observed period it takes the stars to
+// return to the same place in the sky — ~23h 56m 4s, measurable by
+// anyone who points a telescope at a star and starts a stopwatch. It
+// doesn't depend on which model you use to describe what's spinning.
+// Same goes for the sun period. Right?)
 
 import { ToRange } from '../math/utils.js';
 import { CELESTIAL, TIME_ORIGIN } from './constants.js';

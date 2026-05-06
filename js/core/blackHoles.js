@@ -4,6 +4,10 @@
 //   mag   — apparent visual magnitude of host/vicinity (nullable)
 // Entry shape matches CEL_NAV_STARS / CATALOGUED_STARS so they flow
 // through the same projectStar() helper in app.update().
+//
+// (RA / Dec for these compact objects are positional observations —
+// however far away these things actually are, what we render is just
+// a direction on the dome. Frame-neutral.)
 
 export const BLACK_HOLES = [
   { id: 'bh_sgra',      name: 'Sgr A*',       raH: 17.76224, decD: -29.00781, mag: null },

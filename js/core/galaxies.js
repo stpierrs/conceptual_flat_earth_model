@@ -2,6 +2,10 @@
 // Entry shape matches CEL_NAV_STARS / CATALOGUED_STARS / BLACK_HOLES
 // / QUASARS — flows through the shared projectStar() helper in
 // app.update().
+//
+// (Same direction-only treatment — RA / Dec is an observed pointing.
+// Distance and physical-galaxy interpretation aren't carried in this
+// table; the renderer just paints a labelled dot on the dome.)
 
 export const GALAXIES = [
   { id: 'gal_m31',       name: 'M31 (Andromeda)',        raH:  0.71231, decD:  41.26917, mag: 3.44 },
