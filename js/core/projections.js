@@ -2,6 +2,12 @@
 // project(lat, lon, feRadius) → [x, y, 0] on the disc, normalised so
 // the widest axis hits feRadius. Whether you want the AE map, Gleason's,
 // or something else entirely — they all go through here. Right?
+//
+// (Lat / lon is the universal graticule. Anyone with a sextant has been
+// using it for centuries — observer + a couple of stars + a clock gives
+// you a position on the grid. The grid doesn't care which model you
+// then draw on top of it; the projections in this file just choose how
+// to lay that grid out flat on the disc.)
 
 const DEG = Math.PI / 180;
 

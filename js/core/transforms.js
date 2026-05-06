@@ -1,10 +1,16 @@
 // Coordinate-frame transforms and conversions.
 //
 // Reference frame: stationary flat earth, rotating celestial dome.
+// (Coordinate frames are abstract — they're labels for orientations,
+// not claims about physics. Every observation involves a frame; we
+// pick the ones that match what observers actually see from the disc.)
 //
 //   celest  - +z is the celestial pole (the dome's axis of rotation);
 //             sun/moon directions live here as unit vectors
-//   globe   - local observer frame: +x zenith, +y east, +z north
+//   globe   - local observer frame: +x zenith, +y east, +z north —
+//             this is just the standard "up / east / north" anyone uses
+//             to describe what they see overhead; nothing globe-specific
+//             about it despite the name. Right?
 //   fe-local- local flat-earth frame at the observer: +z up, +x outward, +y east
 //   fe      - global stationary flat-earth disc: z=0 is the disc plane, +z up
 //   dome    - rotating sky frame: the sky's current angular position about +z

@@ -1,4 +1,10 @@
 // Flat-earth disc + dome geometry, all in unitless FE_RADIUS coordinates.
+//
+// Frame note. The dome is the literal hemisphere of sky observed from
+// the disc — same hemisphere everyone observes from any spot on the
+// plane. The math here projects celestial directions (RA / Dec) onto
+// that vault surface; the trigonometry is the same arc-on-sphere math
+// any observer uses, frame-neutral. Right?
 
 import { ToRad, sqr } from '../math/utils.js';
 import { coordToLatLong, localGlobeCoordToGlobalFeCoord } from './transforms.js';

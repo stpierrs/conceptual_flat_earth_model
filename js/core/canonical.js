@@ -2,6 +2,11 @@
 // north-pole azimuthal-equidistant; the FE grid, observer placement,
 // and every above-disc anchor share this single coordinate framework.
 //
+// Lat / lon is just an observation label — same coordinates pilots and
+// sailors put into their GPS and their charts. We translate to disc xy
+// here and use it everywhere the dome anchors, sun GP, eclipse path,
+// etc. need a position. Right?
+//
 // Projections that opt into `useProjectionGrid` (currently only `dp`,
 // the dual-pole AE world model) can override the framework via
 // `setActiveProjection(id)`. While such an override is active, every

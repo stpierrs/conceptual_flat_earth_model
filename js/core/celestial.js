@@ -1,5 +1,14 @@
 // Celestial direction vectors (unit sphere — no absolute distances).
 //
+// Frame note. Everyone observes a hemisphere of sky; the whole celestial
+// sphere is just both hemispheres of those observations stitched together
+// and given coordinate labels. RA / Dec / ecliptic / celestial pole are
+// abstract coordinate axes anchored to the same observed motion of the
+// stars regardless of which world model you draw underneath. The "earth
+// equator plane" we mention below is the plane perpendicular to the
+// celestial pole — the plane the equatorial stars trace out — not a
+// statement about physics. Right?
+//
 // All three functions return unit vectors in the "celestial" frame, where
 // +z is the celestial pole (perpendicular to the earth equator plane) and
 // the sun's position at spring equinox is on the +x axis.
@@ -8,7 +17,10 @@ import { ToRad } from '../math/utils.js';
 import { M } from '../math/mat3.js';
 
 // Ecliptic-to-celestial transform: rotate the ecliptic plane up by the
-// obliquity of the ecliptic.
+// obliquity of the ecliptic. ("Ecliptic" is just the band the sun stays
+// inside as it moves through the year; "obliquity" is the angle between
+// that band and the celestial equator. Both are observed quantities,
+// labeled with words older than either model.)
 export function compTransMatSunToCelest(obliquityDeg) {
   return M.RotatingX(ToRad(obliquityDeg));
 }
