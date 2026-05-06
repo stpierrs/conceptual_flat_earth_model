@@ -1,5 +1,11 @@
 // Textured starfield: two copies of a polar star-chart texture.
 //
+// (A star chart is just an observed photograph of the dome flattened
+// to a disc — anyone with a long-exposure camera and an equatorial
+// mount can produce one. We render two copies: one on the heavenly
+// vault overhead, one on the observer's local optical hemisphere,
+// rotated by sidereal time. Same observation, two viewing modes.)
+//
 // 1. Heavenly-vault disc: flat circle at the FE disc centre, radius
 //    FE_RADIUS, lifted to the starfield altitude. Rotates with sidereal
 //    time. Visible from orbital and first-person views alike.

@@ -1,5 +1,9 @@
 // Map renderer. We have two entry points here, right?
 //
+// (All maps are projections of observation. Continents and coastlines
+// are surveyed shapes; we lay them out flat per the active projection.
+// Frame-neutral: same Natural Earth GeoJSON anyone uses.)
+//
 //   buildGeoJsonLand(geoJson, projection, feRadius)
 //     Walks Natural Earth GeoJSON polygons and projects each vertex
 //     through projection.project() to build a filled land mesh plus

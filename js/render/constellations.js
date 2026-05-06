@@ -4,6 +4,10 @@
 // on the heavenly vault (AE-projected at the starfield altitude) and once
 // on the observer's optical vault hemisphere, with horizon culling so
 // below-horizon pieces don't leak across.
+//
+// (Constellations are observed line patterns — same drawings every
+// civilization independently agreed on, rendered onto the dome by
+// their RA / Dec. Frame-neutral.)
 
 import * as THREE from 'three';
 import { M } from '../math/mat3.js';

@@ -1,6 +1,10 @@
 // three.js scene, camera, and renderer setup for the flat earth model.
 // World coords map straight to the FE frame — z-up, x forward, y east.
 // Camera `up` is +z so all the math stays in FE coords. Right?
+//
+// (three.js doesn't care about world models; it draws triangles and
+// lines wherever you tell it. We pin the renderer's coordinate frame
+// to the FE disc so the math in every other file stays clean.)
 
 import * as THREE from 'three';
 import { ToRad } from '../math/utils.js';
