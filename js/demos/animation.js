@@ -1,6 +1,9 @@
 // Tiny tween engine for animated demos. Lives outside the render loop — the
 // engine calls model.setState() at rAF frequency and the renderer reacts via
 // its own 'update' listener.
+//
+// (Pure animation utility — no ephemeris, no coordinates, just easing
+// functions and a queue. Frame-neutral by construction.)
 
 const EASING = {
   linear: (t) => t,

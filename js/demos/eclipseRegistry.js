@@ -6,6 +6,13 @@
 // selected — so the same eclipse plays out differently across sources,
 // which is the whole point of the comparison. Right?
 //
+// Frame note. Every entry in the eclipse table is an observed
+// alignment — astronomers logged the date, type, magnitude, Saros
+// number, and central duration on the day. The model just plays back
+// the moment and lets the chosen pipeline say where the sun and moon
+// were at that UTC. Different pipelines, different predictions, same
+// observation.
+//
 // Exports two arrays (solar + lunar) of demo objects matching the shape
 // `js/demos/index.js` expects. `definitions.js` concatenates them
 // alongside the non-eclipse demos and an FE-prediction placeholder track.

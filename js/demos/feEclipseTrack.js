@@ -6,6 +6,12 @@
 //   pack; Fred-style Saros/Metonic/synodic-anomalistic-nodal harmonics;
 //   Dimbleby's historical eclipse catalogue as validation).
 //
+// Frame note. Eclipse prediction has been done with cycle harmonics
+// (Saros / Metonic) for thousands of years — long before any
+// world model claimed credit. The cycles are observed periods between
+// repeated alignments; you can derive them by logging eclipses in a
+// notebook for a few centuries. They're frame-neutral. Right?
+//
 // Status at :
 //   **PLACEHOLDER** — not yet implemented. The asked
 //   not to fake this with the astropixels table. This file provides the
