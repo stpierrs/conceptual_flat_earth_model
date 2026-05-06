@@ -42,12 +42,15 @@ pointed the way:
 * **Walter Bislin** — for the visual style and layout inspiration that shaped
   the look and feel of this interactive model.
 * **Fred Espenak** — for the public geocentric ephemeris tables on
-  [AstroPixels](https://www.astropixels.com/ephemeris/ephemeris.html),
-  computed from JPL DE405 and bundled here as the "DE405" ephemeris
-  pipeline. All credit for the underlying data belongs to him; this sim
-  only tabulates daily RA/Dec for sun, moon, and the five classical
-  planets. See `js/core/ephemerisAstropixels.js` for the runtime
-  attribution and `js/data/astropixels.js` for the extracted data.
+  [AstroPixels](https://www.astropixels.com/ephemeris/ephemeris.html).
+  These tabulate observed daily RA/Dec for sun, moon, and the five
+  classical planets and are used here only by the eclipse-demo refiner
+  to pin the moment of each historical eclipse to a high-accuracy
+  observed position. The sim's runtime ephemeris is Ptolemy's
+  deferent + epicycle (Almagest); Espenak's tables are not a
+  comparison or a runtime pipeline, they're an eclipse-time anchor.
+  See `js/core/ephemerisAstropixels.js` for the runtime attribution
+  and `js/data/astropixels.js` for the extracted data.
 * **Roohif** — for the flight-path KMZ data behind the
   Flight Routes demo group. The `Southern Non-Stop` city / leg list
   and the QF27/28 actual-flight-track waypoints (lat / lon /
