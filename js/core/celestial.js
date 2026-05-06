@@ -9,6 +9,15 @@
 // celestial pole — the plane the equatorial stars trace out — not a
 // statement about physics. Right?
 //
+// This is the celestial half of Ptolemy's two-sphere conceptual model
+// (the terrestrial half — lat / lon graticule — lives in
+// `canonical.js` / `projections.js`). The *Almagest* preface lays out
+// the pairing: every point on the celestial sphere uniquely
+// corresponds to a point on the terrestrial sphere at a given UTC.
+// That correspondence is what makes RA ↔ longitude and Dec ↔
+// latitude work the same way regardless of which world model is
+// drawn underneath. Two spheres, same observation indexed two ways.
+//
 // All three functions return unit vectors in the "celestial" frame, where
 // +z is the celestial pole (perpendicular to the earth equator plane) and
 // the sun's position at spring equinox is on the +x axis.

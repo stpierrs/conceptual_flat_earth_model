@@ -9,9 +9,7 @@
 // same alt/az → RA/Dec abstract spherical coordinates anchored to
 // the stars. The sun's altitude and azimuth from any observer is a
 // direct measurement (sextant + clock + compass) — that's what's
-// recorded here. The fact that the sun stays above the horizon at
-// the south-polar stations through austral summer is the kind of
-// observation that anchors any model. Right?
+// recorded here. Right?
 
 export const ANTARCTIC_SUN_SAMPLES = {
   meta: {

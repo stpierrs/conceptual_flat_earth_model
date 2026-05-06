@@ -3,11 +3,21 @@
 // the widest axis hits feRadius. Whether you want the AE map, Gleason's,
 // or something else entirely — they all go through here. Right?
 //
-// (Lat / lon is the universal graticule. Anyone with a sextant has been
+// Lat / lon is the universal graticule. Anyone with a sextant has been
 // using it for centuries — observer + a couple of stars + a clock gives
 // you a position on the grid. The grid doesn't care which model you
 // then draw on top of it; the projections in this file just choose how
-// to lay that grid out flat on the disc.)
+// to lay that grid out flat on the disc.
+//
+// The graticule itself is the terrestrial half of Ptolemy's
+// two-sphere conceptual model from the *Almagest* preface — a
+// terrestrial sphere of lat / lon paired with a celestial sphere of
+// RA / Dec, where each point on the dome corresponds to a point on
+// the earth at a given UTC. We use it everywhere a body's ground
+// point lands on the disc. Two conceptual spheres, same observation
+// indexed two ways; the projections below just flatten the
+// terrestrial half into disc xy. Frame-neutral by construction.
+// Right?
 
 const DEG = Math.PI / 180;
 

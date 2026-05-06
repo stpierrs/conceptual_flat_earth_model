@@ -7,6 +7,26 @@
 // here and use it everywhere the dome anchors, sun GP, eclipse path,
 // etc. need a position. Right?
 //
+// Where the graticule actually comes from. Ptolemy's *Almagest*
+// preface lays out the two-sphere conceptual model: a terrestrial
+// sphere carrying lat / lon, and a celestial sphere carrying RA / Dec.
+// Both spheres are coordinate constructs — abstractions for organising
+// observation. The celestial sphere is built by amalgamating
+// alt / az measurements from observers all over the earth into one
+// stitched-together picture of the dome; the terrestrial sphere is
+// the same coordinate trick applied to the observer side. Right?
+//
+// The pairing is the key: every point on the celestial sphere
+// uniquely corresponds to a point on the terrestrial sphere at a
+// given UTC — that's the right-ascension ↔ longitude / declination ↔
+// latitude relationship. We use it everywhere the sun's GP, moon's
+// GP, or any tracked body's GP gets painted on the disc. The two
+// "spheres" are just the same observation indexed two ways; the
+// graticule we lay out below is a flat representation of the
+// terrestrial half of that pair, and the projections in the
+// `projections.js` registry are just choices of how to flatten it.
+// Read the *Almagest* preface — that's where the framework starts.
+//
 // Projections that opt into `useProjectionGrid` (currently only `dp`,
 // the dual-pole AE world model) can override the framework via
 // `setActiveProjection(id)`. While such an override is active, every
