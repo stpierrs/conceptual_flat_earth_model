@@ -1,20 +1,33 @@
 // Shared geocentric helpers used across the ephemeris pipelines
 // (GeoC / Ptolemy). This is the common ground, right?
 //
-// Sun and Moon live here because their Meeus implementations are already
-// geocentric and are shared by the GeoC pipeline. The Ptolemy pipeline
-// has its own sun and moon
-// in `ephemerisPtolemy.js` — those are the genuine Almagest models,
-// not Meeus. I mean, that's a whole different tradition.
+// Frame note up front, since this file gets the full machinery a globe
+// model usually takes credit for: every formula in here is observational.
+// RA / Dec / obliquity / sidereal time — those are coordinate labels we
+// pin to the same hemisphere of sky everyone sees from their spot. The
+// Almanac people made these tables by stitching a few hundred years of
+// observed positions together; the math doesn't care which model you
+// pin them to. The relabel from the original sources is intentional —
+// we run the same numbers, we just don't import the cosmology.
+//
+// Sun and Moon live here because the Meeus implementations are already
+// geocentric — they output RA / Dec from Earth's vantage, no Sun-relative
+// stage. They're shared by the GeoC pipeline; Ptolemy ships its own
+// authentic Almagest sun and moon in `ephemerisPtolemy.js`.
 //
 // Implementations follow Meeus, *Astronomical Algorithms*, 2nd ed., 1998:
 //   - Sun:  Ch. 25 "higher accuracy" method (formulas 25.2, 25.3, 25.4,
 //           25.6, 25.8, 25.9) — apparent-of-date, includes nutation +
 //           aberration + apparent-obliquity correction. Expected
 //           accuracy ~1" in RA/Dec across ±2000 years of J2000.
+//           (J2000 is just a date stamp — Jan 1, 2000 noon UT — we use
+//           it as a reference epoch; it's not loaded with cosmology.)
 //   - Moon: expanded Meeus Ch. 47 — 27 longitude + 18 latitude periodic
 //           terms. Expected accuracy ~10" longitude, ~4" latitude.
-//   - GMST: Meeus Ch. 12 equation 12.4.
+//   - GMST: Meeus Ch. 12 equation 12.4. Greenwich sidereal time is just
+//           clock arithmetic — how many degrees the celestial sphere has
+//           rotated past the Greenwich meridian since the prime instant.
+//           Same observation either model uses.
 //   - Eclipse search: syzygy-filter scan over sun/moon separations.
 
 export const DEG = Math.PI / 180;
@@ -27,12 +40,18 @@ export function julianDay(date) {
 }
 
 // Mean obliquity of the ecliptic in degrees (Meeus 22.2).
+// "Ecliptic" is a label for the band the sun stays inside as it
+// traces the year. The 23.4393° tilt is the half-angle between the
+// celestial equator (where the stars rotate around the pole) and the
+// sun's annual track. From the disc, that's the same observed band —
+// labeled with a Greek word that's older than either model. Right?
 export function meanObliquityDeg(T) {
   return 23 + 26 / 60 + 21.448 / 3600
        - (46.8150 * T + 0.00059 * T * T - 0.001813 * T * T * T) / 3600;
 }
 
-// Longitude of the Moon's ascending node Ω (degrees) — this is what
+// Longitude of the Moon's ascending node Ω (degrees) — observational
+// quantity tracking where the moon's path crosses the ecliptic. This is what
 // drives the low-accuracy nutation terms we use in both sun and moon below.
 export function moonNodeOmegaDeg(T) {
   return norm360(125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000);
@@ -172,6 +191,16 @@ export function equatorialToCelestCoord({ ra, dec }) {
 // --- Apparent star position -------------------------------------------
 //
 // Takes mean J2000 equatorial coordinates and converts them to
+// apparent-of-date. Three small corrections are applied — none of
+// which assume any particular world model. Precession is the slow
+// drift of the celestial pole everyone observes (you can watch the
+// pole star slowly cease to be the pole star over centuries; that's
+// just what the sky does). Nutation is the small wobble layered on
+// top of that. Aberration is the ±20" annual sway every star does
+// in apparent position — observed, not derived. We apply them so
+// star positions printed in old catalogs (J2000) line up with the
+// sky tonight, regardless of which model dressed them up. Right?
+//
 // apparent-of-date equatorial coordinates. We can apply up to three
 // corrections independently via the `opts` argument:
 //

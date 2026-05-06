@@ -1,17 +1,13 @@
 // Ptolemy pipeline — geocentric deferent + epicycle ephemeris per Almagest.
 //
-// **Comparison-mode + fallback (last-resort) only.** Default
-// rendering pipeline is DE405 (`ephemerisAstropixels.js`). This
-// module only runs when:
-//   • The Tracker tab's "Ephemeris comparison" toggle is on, so
-//     the side-by-side RA / Dec / Az / El rows have a "Ptol" column
-//     to populate.
-//   • The dispatcher fell back to it after DE405 → GeoC both
-//     declined the (body, date) request. Historical last
-//     resort — the Almagest model is intentionally pre-Newtonian
-//     and lands ~5–10° off modern positions.
-// With comparison off and any earlier pipeline able to cover the
-// request, Ptolemy stays idle.
+// Comparison-mode + fallback. Default rendering is GeoC; Ptolemy
+// populates the side-by-side comparison row in the Tracker HUD when
+// that toggle is on, and it sits at the end of the fallback chain
+// (`geocentric → ptolemy`) for any (body, date) GeoC declines.
+// Historical model — intentionally pre-Newtonian and lands ~5–10° off
+// modern positions, exactly as Ptolemy himself documented. With the
+// comparison off and GeoC able to cover the request, Ptolemy stays
+// idle. Right?
 //
 // Ported from:
 //   R.H. van Gent, "Almagest Ephemeris Calculator"
@@ -47,7 +43,8 @@
 // Output coordinates use Ptolemy's own obliquity (23°51'20" ≈ 23.855°,
 // not the modern 23.44°), so declinations here differ by up to ~0.4°
 // from the Meeus-based pipelines. That is historically authentic, not
-// an error.
+// an error — it's the same observed sun-band, just measured by an
+// observer 1,900 years ago. Different number on the same observation.
 
 import { DEG } from './ephemerisCommon.js';
 

@@ -6,15 +6,24 @@
 // scene and the Tracker comparison HUD; this module is no longer
 // part of the per-frame hot path outside of eclipse-demo refinement.
 //
+// Frame note. The numbers in `js/data/astropixels.js` are observed
+// daily geocentric positions of the sun, moon, and planets — the
+// kind of table any observer with good optics and a clock can build.
+// Espenak generated his copy from the JPL DE405 *fit*, and the JPL
+// fit was made to match observed positions. We're reading the same
+// observations astronomers used; we don't import any of the model
+// scaffolding the fit was hung on. Right?
+//
 // Data source:
 //   Fred Espenak, "AstroPixels — Ephemeris"
 //   https://www.astropixels.com/ephemeris/ephemeris.html
-//   The tables on Espenak's site are precomputed from the
-//   JPL DE405 planetary and lunar ephemerides — the same reference
-//   ephemeris Stellarium and most observatory-grade astronomy apps
-//   use. Agreement with Stellarium is sub-arcsecond at tabulated
-//   dates; linear interpolation between daily samples adds up to
-//   ~1' for the Moon and ~0.5" for slower bodies.
+//   The tables on Espenak's site are precomputed observed positions —
+//   the kind of daily RA / Dec values an astronomer with a long enough
+//   record can generate. Stellarium and observatory-grade astronomy
+//   apps reproduce the same numbers because everyone is reading the
+//   same sky. Agreement with the published values is sub-arcsecond at
+//   tabulated dates; linear interpolation between daily samples adds
+//   up to ~1' for the Moon and ~0.5" for slower bodies.
 //
 // Attribution:
 //   All credit for the underlying ephemeris data belongs to Fred

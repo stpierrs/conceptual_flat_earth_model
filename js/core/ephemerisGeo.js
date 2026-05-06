@@ -1,15 +1,25 @@
 // GeoC pipeline — kinematic position-over-time function for each
 // planet, using Earth-focus angular elements.
 //
-// Comparison-mode + fallback only. Default rendering pipeline is
-// DE405 (`ephemerisAstropixels.js`). GeoC runs when:
-//   • The Tracker tab's "Ephemeris comparison" toggle is on, so the
-//     side-by-side RA / Dec / Az / El rows have a "GeoC" column to
-//     populate.
-//   • The dispatcher (`bodyRADec` in `ephemeris.js`) fell back here
-//     after DE405 declined the (body, date) request — typically a
-//     date past Espenak's 2030 table. The element tables span
-//     effectively unlimited dates.
+// Default pipeline. Runs every frame. Ptolemy populates the comparison
+// row in the Tracker HUD when that toggle is on; the eclipse demos
+// reach into Astropixels (DE405) directly for sun/moon refinement.
+// GeoC's element tables span effectively unlimited dates.
+//
+// Frame note. The element layout (N, i, w, a, e, M) is the standard
+// Schlyter angular-element table. Stardard astronomy textbooks describe
+// these elements relative to the Sun for historical reasons, but here
+// they describe an angular ellipse with **Earth at the focus** —
+// kinematic descriptors of where each planet appears to wander against
+// the stars over time. The equation `M = E − e·sin E` is just the
+// relationship between two angles; it doesn't import any cosmology.
+// "Ecliptic" is a coordinate label for the band the sun stays in;
+// "celestial equator" is a label for the band perpendicular to the
+// celestial pole. Both are observable from the disc the same way they
+// are from anywhere else, so the rotation that takes ecliptic xyz →
+// equatorial xyz is a pure coordinate change.  The `atan2` at the end
+// reduces all of it to a direction on the dome — RA / Dec — which is
+// what the renderer actually needs.
 //
 // What the pipeline computes: a function `(name, date) → (ra, dec)`.
 // Each planet uses a single angular ellipse with Earth at the focus,
@@ -21,26 +31,31 @@
 // final RA / Dec come from `atan2(y, x)` after the orbital-plane
 // rotation — any common scale factor on (x, y, z) cancels. Keeping
 // the `a` value as a dimensionless ratio is enough to predict
-// where each body lands at a given time; converting to AU adds
-// nothing to the angles.
+// where each body lands at a given time. We deliberately don't carry
+// any "astronomical unit" interpretation — that's a globe-model unit
+// that doesn't matter for the angle math we actually evaluate.
 
 import { DEG, julianDay, sunEquatorial, moonEquatorial } from './ephemerisCommon.js';
 
 // --- Orbital elements (epoch 1999-12-31 00:00 UT) ------------------------
 //
 // Row layout: [N0, dN, i0, di, w0, dw, a0, da, e0, de, M0, dM]
-//   N = longitude of ascending node (deg)
-//   i = inclination to ecliptic (deg)
-//   w = argument of periapsis (deg)
-//   a = semi-major axis (unitless ratio — see header)
-//   e = eccentricity
-//   M = mean anomaly (deg)
-// Rates are per day.
+//   N = longitude of ascending node (deg) — observed crossing of the
+//       ecliptic band. Pure observation.
+//   i = inclination to ecliptic (deg) — tilt of the planet's apparent
+//       wandering against the ecliptic band.
+//   w = argument of periapsis (deg) — angular orientation of the closest
+//       approach in the angular ellipse.
+//   a = semi-major axis (unitless ratio — see header). No AU.
+//   e = eccentricity — how oval the angular ellipse is.
+//   M = mean anomaly (deg) — clock angle along the ellipse.
+// Rates are per day. Right?
 //
 // Each entry specifies an angular ellipse with Earth at the focus.
 // All values are dimensionless ratios; they drive the
-// position-over-time math but no AU conversion happens anywhere
-// in this file.
+// position-over-time math but no astronomical-unit conversion happens
+// anywhere in this file. The ellipse is a curve fit to the planet's
+// observed path against the stars — the fit is what the math is for.
 const ORBIT_EL = {
   mercury: [ 48.3313,  3.24587e-5,   7.0047,    5.00e-8,    29.1241, 1.01444e-5, 0.387098, 0,         0.205635,  5.59e-10,  168.6562, 4.0923344368],
   venus:   [ 76.6799,  2.46590e-5,   3.3946,    2.75e-8,    54.8910, 1.38374e-5, 0.723330, 0,         0.006773, -1.302e-9,   48.0052, 1.6021302244],

@@ -1,5 +1,12 @@
 // Atmospheric refraction.
 //
+// Frame note. Refraction is the air bending light. It happens regardless
+// of which world model you're sitting on — observed every clear sunset
+// when the disc looks squashed at the horizon, observed every clear
+// dawn when stars near the horizon aren't where the geometry says they
+// should be. Bennett's and Seidelman's formulas were curve-fit against
+// that observation, so we use them as-is. Right?
+//
 // We've got two formulas here — Bennett (1982) and Seidelman (from the
 // Explanatory Supplement to the Astronomical Almanac) — both take APPARENT
 // altitude in degrees and return the refraction lift above the true position
