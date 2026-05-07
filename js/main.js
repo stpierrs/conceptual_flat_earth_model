@@ -43,13 +43,31 @@ if (!_hashHasLang) {
   }
 }
 
-// Tells canonical.js which projection is active for the AE map.
-// Only the dual-pole (`dp`) world model overrides the default north-pole
-// AE framework — FE and GE stay on the standard AE. I mean, that's the
-// whole map layout. We register this before the Renderer so it runs first
-// and rebuilds DiscGrid and LatitudeLines for the new projection. Right?
+// Tells canonical.js which projection is active for the FE grid.
+//
+// Two ways the active projection can override the default north-pole
+// AE framework:
+//
+//   1. The dual-pole (`dp`) world model — always uses the `dp`
+//      projection's grid, ignores `MapProjection`.
+//   2. Otherwise, if the user-selected `MapProjection` (FE) has
+//      `useProjectionGrid: true` on its registry entry (e.g. the
+//      Hellerick boreal triaxial entry that backs 'Proportional AE
+//      Map'), the grid follows that projection. Observer placement,
+//      sun / moon GPs, eclipse paths and the FE lat/lon graticule all
+//      stay internally consistent with the active layout. Right?
+//
+// We register this before the Renderer so it runs first and rebuilds
+// DiscGrid / LatitudeLines for the new projection.
+import { getProjection } from './core/projections.js';
 const refreshActiveProjection = () => {
-  setActiveProjection(model.state.WorldModel === 'dp' ? 'dp' : null);
+  if (model.state.WorldModel === 'dp') {
+    setActiveProjection('dp');
+    return;
+  }
+  const id = model.state.MapProjection;
+  const proj = id ? getProjection(id) : null;
+  setActiveProjection((proj && proj.useProjectionGrid) ? id : null);
 };
 model.addEventListener('update', refreshActiveProjection);
 refreshActiveProjection();

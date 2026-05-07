@@ -37,6 +37,82 @@ const RADIAL_PROPORTIONAL = (lat) => Math.pow((90 - lat) / 180, 0.75);
 
 // --- Forward functions for world-map projections --------------------
 
+// Hellerick Boreal Triaxial Projection.
+// Three "main" meridians at -70° / +20° / +110° anchor the projection;
+// three bisector "mid" meridians at -25° / +65° / -160° split the gaps.
+// As you move away from the north pole (R = π/2 − φ grows), longitudes
+// get pulled toward the nearest main meridian by a power-law warp,
+// (1 - sh)^(1 - R/π). At the north pole (R=0) the warp is identity;
+// at the south pole (R=π) the whole hemisphere collapses onto the
+// three main meridians. Output is normalised so the south pole sits
+// on the rim at r = feRadius.
+//
+// Algorithm ported from Hellerick's Python (Pastebin C4dnd6Kc):
+//   https://pastebin.com/C4dnd6Kc
+// Reference image:
+//   https://commons.wikimedia.org/wiki/File:Hellerick_triaxial_boreal_projection.svg
+const HELLERICK_MAIN = [-70 * DEG, +20 * DEG, +110 * DEG];
+const HELLERICK_MID  = [-25 * DEG, +65 * DEG, -160 * DEG];
+
+function _hellerickAngDist(a, b) {
+  let d = a - b;
+  if (d >  Math.PI) d -= 2 * Math.PI;
+  if (d < -Math.PI) d += 2 * Math.PI;
+  return d;
+}
+
+function projectHellerickBoreal(lat, lon, r = 1) {
+  const x_i = lon * DEG;            // input longitude (radians)
+  const y_i = lat * DEG;            // input latitude (radians)
+  const R   = Math.PI / 2 - y_i;    // polar distance from north pole
+
+  // Find the nearest "main" meridian.
+  let s0 = 0;
+  for (let i = 0; i < 3; i++) {
+    if (Math.abs(_hellerickAngDist(x_i, HELLERICK_MAIN[i])) <
+        Math.abs(_hellerickAngDist(x_i, HELLERICK_MAIN[s0]))) {
+      s0 = i;
+    }
+  }
+  const xims0 = _hellerickAngDist(x_i, HELLERICK_MAIN[s0]);
+
+  // Find the bisector "mid" meridian on the same side of mainlon[s0]
+  // as x_i (i.e. ximi1 has the same sign as xims0 — the Pastebin uses
+  // the <= 0 product trick to mean "between x_i and main[s0]").
+  let s1 = 0;
+  for (let i = 0; i < 3; i++) {
+    const ximi1 = _hellerickAngDist(x_i, HELLERICK_MID[i]);
+    const xims1 = _hellerickAngDist(x_i, HELLERICK_MID[s1]);
+    if ((ximi1 * xims0 <= 0) && (Math.abs(ximi1) <= Math.abs(xims1))) {
+      s1 = i;
+    }
+  }
+
+  // Fractional position from main toward mid (signed).
+  let sh = _hellerickAngDist(x_i, HELLERICK_MAIN[s0])
+         / _hellerickAngDist(HELLERICK_MID[s1], HELLERICK_MAIN[s0]);
+  let sign = 1;
+  if (sh < 0) { sign = -1; sh = -sh; }
+  if (sh > 1) sh = 1;
+
+  // Power-law warp — the heart of the projection. Identity at R=0
+  // (north pole); collapses to 0 at R=π (south pole).
+  sh = 1 - Math.pow(1 - sh, 1 - R / Math.PI);
+
+  // Output angle. mainlon[1] = +20° is subtracted so that meridian
+  // points "up" (alpha = 0 → output along -y) in the projection's
+  // native frame. Downstream rendering rotates the disc as needed.
+  const alpha = sign * sh
+              * _hellerickAngDist(HELLERICK_MID[s1], HELLERICK_MAIN[s0])
+              + HELLERICK_MAIN[s0] - HELLERICK_MAIN[1];
+
+  // Polar → Cartesian. Normalise by π so the south pole (R=π) lands
+  // on the rim at r = feRadius.
+  const k = r / Math.PI;
+  return [k * R * Math.sin(alpha), -k * R * Math.cos(alpha), 0];
+}
+
+
 // Azimuthal Equidistant centred at (0°, 0°), edge angle = π.
 // You know, same AE math but anchored equatorially instead of at the pole.
 function projectAEDual(lat, lon, r = 1) {
@@ -244,8 +320,9 @@ export const PROJECTIONS = {
     id: 'hellerick', name: 'Hellerick boreal',
     category: 'generated',
     imageAsset: null, imageInscribedRadius: 0.5,
-    notes: 'Lambert azimuthal equal-area, polar aspect.',
-    project(lat, lon, r = 1) { return polarFromRadial(lat, lon, r, RADIAL_LAEA); },
+    useProjectionGrid: true,
+    notes: 'Hellerick boreal triaxial — three main meridians (-70/+20/+110°), bisectors at -25/+65/-160°, power-law warp pulling other meridians toward the mains as R grows.',
+    project: projectHellerickBoreal,
   },
 
   proportional: {
@@ -254,8 +331,9 @@ export const PROJECTIONS = {
     imageAsset: 'assets/map_proportional.png',
     imageNativeWidth: 1920, imageNativeHeight: 1080,
     imageInscribedRadius: 0.5,
-    notes: 'Artwork-driven AE power-law tweak (exponent 0.75).',
-    project(lat, lon, r = 1) { return polarFromRadial(lat, lon, r, RADIAL_PROPORTIONAL); },
+    useProjectionGrid: true,
+    notes: 'Hellerick boreal triaxial graticule under the Proportional AE artwork. Three main meridians at -70/+20/+110° anchor the disc; meridians warp toward them as R grows. Observer / GP / FE grid all route through this projection when active.',
+    project: projectHellerickBoreal,
   },
 
   ae_dual: {

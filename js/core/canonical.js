@@ -27,13 +27,15 @@
 // `projections.js` registry are just choices of how to flatten it.
 // Read the *Almagest* preface — that's where the framework starts.
 //
-// Projections that opt into `useProjectionGrid` (currently only `dp`,
-// the dual-pole AE world model) can override the framework via
-// `setActiveProjection(id)`. While such an override is active, every
-// caller that goes through `canonicalLatLongToDisc` lands on the
-// override projection's disc — observer, sun / moon GPs, optical-vault
-// rays, eclipse paths, etc. — so the visualisation stays internally
-// consistent end-to-end.
+// Projections that opt into `useProjectionGrid` can override the
+// framework via `setActiveProjection(id)`. Currently:
+//   • `dp` — dual-pole AE world model (forced when WorldModel = 'dp')
+//   • `proportional` (= 'Proportional AE Map') and `hellerick` —
+//     both back onto the Hellerick boreal triaxial graticule
+// While such an override is active, every caller that goes through
+// `canonicalLatLongToDisc` lands on the override projection's disc —
+// observer, sun / moon GPs, optical-vault rays, eclipse paths, etc. —
+// so the visualisation stays internally consistent end-to-end.
 //
 // Projections without `useProjectionGrid` (mercator / equirect / etc.)
 // are treated as decorative art only and don't override the framework.
