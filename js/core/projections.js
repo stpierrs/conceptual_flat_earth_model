@@ -333,9 +333,8 @@ export const PROJECTIONS = {
     imageAsset: 'assets/map_proportional.png',
     imageNativeWidth: 1920, imageNativeHeight: 1080,
     imageInscribedRadius: 0.5,
-    useProjectionGrid: true,
-    notes: 'Hellerick boreal triaxial graticule under the Proportional AE artwork. Three main meridians at -70/+20/+110° anchor the disc; meridians warp toward them as R grows. Observer / GP / FE grid all route through this projection when active.',
-    project: projectHellerickBoreal,
+    notes: 'Artwork-driven AE power-law tweak (exponent 0.75). Uses the standard AE graticule — the Hellerick triaxial entry is the only projection-grid override that lat/lon/observer placement routes through (DP world model handles its own override).',
+    project(lat, lon, r = 1) { return polarFromRadial(lat, lon, r, RADIAL_PROPORTIONAL); },
   },
 
   ae_dual: {
