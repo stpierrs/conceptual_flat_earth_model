@@ -331,7 +331,7 @@ The sim ships a PWA `manifest.webmanifest`, `theme-color`, and the `mobile-web-a
 
 # Credits
 
-- **Fred Espenak** (NASA GSFC retired, AstroPixels) — DE405 daily ephemeris, eclipse catalogues.
+- **Fred Espenak** (NASA GSFC retired, AstroPixels) — eclipse catalogues used by the eclipse-demo refiner.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, source for the Ptolemy port.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — conceptual framing and the push to actually build a working interactive demonstration.
