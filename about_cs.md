@@ -157,14 +157,13 @@ Sledovač je jediný zdroj pravdy pro viditelnost těles. Zaškrtávací políč
 
 ## Efemeridy
 
-- **Zdroj** — vybírá, který ze čtyř efemeridových potrubí Slunce/Měsíce/planet pohání skutečně vykreslené pozice. Všechna čtyři běží na pozadí každý snímek, takže srovnávací panel zůstává platný; tato rozbalovací nabídka pouze volí, který se *vykreslí*.
-  - **GeoC** — Jednoduchá elipsa s ohniskem v Zemi na planetu, žádná fáze Slunce. Koncepčně čistý, pouze pro srovnávací režim.
-  - **Ptolemaios** — Deferent + epicykl z *Almagestu*, portováno přes Almagest Ephemeris Calculator. Dopadá ~5–10° od moderních pozic, přesně jako v původních zdrojích.
-  - **DE405** — Denní efemeridy AstroPixels od Freda Espenaka 2019–2030. Moderní reference; výchozí.
-- **Srovnání efemerid** — když je zapnuto, každá karta sledovače v Live Ephemeris HUD zobrazuje až čtyři řádky RA / Dec, jeden na potrubí. Užitečné pro pozorování, jak daleko Ptolemaios driftuje vs DE405 v reálném čase.
+- **Zdroj** — vybírá, která efemerida Slunce/Měsíce/planet pohání vykreslené pozice. Dvě možnosti:
+  - **Ptolemaios** — Deferent + epicykl z *Almagestu*, portováno přes Almagest Ephemeris Calculator. Koncepční motor pro tento model.
+  - **GeoC** — Jednoduchá elipsa s ohniskem v Zemi na planetu, kinematický křivkový fit pozorovaných drah. Lehká srovnávací alternativa.
+- **Srovnání efemerid** — když je zapnuto, každá karta sledovače v Live Ephemeris HUD zobrazuje řádky GeoC + Ptolemaios RA / Dec vedle sebe.
 - **Precese** — klasická precese J2000-do-data aplikovaná na fixní RA / Dec hvězd. Vypnuto = hvězdy zůstávají na hodnotách katalogu J2000; Zapnuto = posouvají se vpřed k zobrazenému datu.
 - **Nutace** — krátkoperiodické kolísání nebeského pólu (~18,6 r). Malé (~10″), ale viditelné na přesných čteních sledovače.
-- **Aberace** — roční aberace: hvězdy zdánlivě posunuté až ~20″ ve směru pohybu Země během roku. Vypnuto = katalogové průměrné pozice.
+- **Aberace** — roční aberace: hvězdy zdánlivě posunuté až ~20″ podél roční elipsy, pozorováno jako roční zdánlivý kyv. Vypnuto = katalogové průměrné pozice.
 - **Trepidace** — historický pre-newtonovský model oscilující obliquity. Poskytováno vedle precese, aby uživatelé mohli porovnat, jak tento starší rámec předpovídal stejný jev. Výchozí vypnuto.
 
 ## Hvězdné pole
@@ -283,7 +282,7 @@ Každé pole stavu žije v hash URL, takže nastavení sim může být sdíleno 
 
 # Poděkování
 
-- **Fred Espenak** (NASA GSFC v důchodu, AstroPixels) — denní efemeridy DE405, katalogy zatmění.
+- **Fred Espenak** (NASA GSFC v důchodu, AstroPixels) — katalogy zatmění používané refinerem demo zatmění.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, zdroj pro Ptolemaiovský port.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — koncepční rámcování a podnět skutečně vybudovat funkční interaktivní demonstraci.

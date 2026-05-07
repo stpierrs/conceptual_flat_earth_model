@@ -157,14 +157,13 @@ El Rastreador es la única fuente de verdad para la visibilidad de los cuerpos. 
 
 ## Efemérides
 
-- **Fuente** — elige cuál de los cuatro pipelines de efemérides Sol/Luna/planeta dirige las posiciones realmente renderizadas. Los cuatro se ejecutan internamente cada cuadro para que el panel de comparación siga válido; este desplegable solo elige cuál se *renderiza*.
-  - **GeoC** — Elipse única con foco en la Tierra por planeta, sin etapa de Sol. Conceptualmente limpio, solo para modo comparación.
-  - **Ptolomeo** — Deferente + epiciclo del *Almagesto*, portado vía Almagest Ephemeris Calculator. Cae ~5–10° de las posiciones modernas, exactamente como en las fuentes originales.
-  - **DE405** — Tablas de efemérides diarias AstroPixels de Fred Espenak, 2019–2030. Referencia moderna; el predeterminado.
-- **Comparación de efemérides** — cuando está activado, cada tarjeta del rastreador en el HUD Live Ephemeris muestra hasta cuatro filas de RA / Dec, una por pipeline. Útil para ver cuánto deriva Ptolomeo vs DE405 en tiempo real.
+- **Fuente** — elige qué efemérides de Sol/Luna/planeta dirigen las posiciones renderizadas. Dos opciones:
+  - **Ptolomeo** — Deferente + epiciclo del *Almagesto*, portado vía Almagest Ephemeris Calculator. El motor conceptual para este modelo.
+  - **GeoC** — Elipse única con foco en la Tierra por planeta, ajuste cinemático de curvas a trayectorias observadas. Alternativa de comparación ligera.
+- **Comparación de efemérides** — cuando está activado, cada tarjeta del rastreador en el HUD Live Ephemeris muestra filas de GeoC + Ptolomeo RA / Dec lado a lado.
 - **Precesión** — precesión clásica J2000-a-fecha aplicada a RA / Dec de estrellas fijas. Apagado = las estrellas permanecen en valores del catálogo J2000; Activado = avanzan a la fecha mostrada.
 - **Nutación** — oscilación de período corto del polo celeste (~18,6 años). Pequeña (~10″) pero visible en lecturas precisas del rastreador.
-- **Aberración** — aberración anual: las estrellas aparentemente se desplazan hasta ~20″ en la dirección del movimiento de la Tierra durante el año. Apagado = posiciones medias del catálogo.
+- **Aberración** — aberración anual: las estrellas aparentemente se desplazan hasta ~20″ a lo largo de una elipse anual, observado como un balanceo aparente anual. Apagado = posiciones medias del catálogo.
 - **Trepidación** — modelo histórico pre-newtoniano de oblicuidad oscilante. Proporcionado junto a la precesión para que los usuarios puedan comparar cómo ese marco más antiguo predijo el mismo fenómeno. Apagado por defecto.
 
 ## Campo de estrellas
@@ -283,7 +282,7 @@ Cada campo de estado vive en el hash de la URL para que un setup del sim se pued
 
 # Créditos
 
-- **Fred Espenak** (NASA GSFC retirado, AstroPixels) — efemérides diarias DE405, catálogos de eclipses.
+- **Fred Espenak** (NASA GSFC retirado, AstroPixels) — catálogos de eclipses utilizados por el refinador de demos de eclipses.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, fuente para el port de Ptolomeo.
 - **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — encuadre conceptual y el empuje para realmente construir una demostración interactiva funcional.
