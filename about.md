@@ -182,20 +182,18 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 
 ## Ephemeris
 
-- **Source** — picks which sun/moon/planet ephemeris pipeline drives the rendered positions. Both run every frame internally so the comparison panel stays valid; this dropdown only chooses which one *renders*.
-  - **GeoC** — Earth-focus single-ellipse per planet, no Sun stage. Conceptually clean, the default.
-  - **Ptolemy** — Deferent + epicycle from the *Almagest*, ported via the Almagest Ephemeris Calculator. Lands ~5–10° off modern positions, exactly as in the original sources.
-  - **DE405** — Fred Espenak's AstroPixels daily ephemeris tables, 2019–2030. Modern reference; the default.
-- **Ephemeris comparison** — when on, each tracker card in the Live Ephemeris HUD shows up to four rows of RA / Dec, one per pipeline. Useful for seeing how far Ptolemy drifts vs DE405 in real time.
+- **Source** — picks which sun/moon/planet ephemeris drives the rendered positions. Two choices:
+  - **Ptolemy** — Deferent + epicycle from the *Almagest*, ported via the Almagest Ephemeris Calculator. The conceptual engine for this model.
+  - **GeoC** — Earth-focus single-ellipse per planet, kinematic curve fit to observed paths. Lightweight comparison alternative.
+- **Ephemeris comparison** — when on, each tracker card in the Live Ephemeris HUD shows side-by-side GeoC + Ptolemy RA / Dec rows so you can watch how the two trace the same observed sky.
 - **Precession** — classical J2000-to-date precession applied to fixed-star RA / Dec. Off = stars stay at J2000 catalog values; On = they walk forward to the displayed date.
 - **Nutation** — short-period wobble of the celestial pole (~18.6 yr term). Small (~10″) but visible on tight tracker readouts.
-- **Aberration** — annual aberration: stars apparently shift up to ~20″ in the direction of Earth's motion through the year. Off = catalog-mean positions.
+- **Aberration** — annual aberration: stars apparently shift up to ~20″ along an annual ellipse, observed as a yearly stellar parallax-like sway. Off = catalog-mean positions.
 - **Trepidation** — historical pre-Newtonian model of an oscillating obliquity. Provided alongside precession so users can compare how that older framework predicted the same phenomenon. Off by default.
 
-> **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Planet pipelines bake in their own corrections:
-> - **DE405 (Fred Espenak)**: apparent geocentric — precession + nutation + aberration all included. Default source.
-> - **GeoC** (Meeus): apparent-of-date — precession + nutation + aberration all included.
+> **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Planet sources bake in their own corrections:
 > - **Ptolemy**: deferent + epicycle (Almagest) — none of the modern corrections apply; readings are intentionally historical.
+> - **GeoC** (Meeus): apparent-of-date — precession + nutation + aberration all included.
 
 > **Source coverage + fallback chain.** Each pipeline reports its supported bodies and date range. `bodyRADec(name, date, source)` tries the active source first; if it can't deliver (body not in its set or date out of range), it walks the fallback chain `GeoC → Ptolemy` until something covers the request. Neither pipeline covers Uranus or Neptune; if either is in `TrackerTargets` it's auto-pruned. The comparison HUD shows side-by-side GeoC + Ptolemy rows when the comparison toggle is on.
 
