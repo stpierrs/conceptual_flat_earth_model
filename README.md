@@ -60,13 +60,14 @@ pointed the way:
   archive. The Equal Arc demos and the QF27/28 actual-flight
   playbacks lean entirely on that dataset.
 
-Additional credits baked into the ephemeris pipelines:
+Additional credits baked into the ephemeris machinery:
 
-* **R.H. van Gent** (Utrecht University) — Almagest Ephemeris Calculator,
-  the source of the Ptolemaic deferent+epicycle pipeline.
-* **Jean Meeus**, *Astronomical Algorithms* (2nd ed., 1998) — the
-  backbone for the Sun, Moon, GMST, precession, nutation, and
-  aberration routines used across all pipelines.
+* **R.H. van Gent** (Utrecht University) — Almagest Ephemeris
+  Calculator, the source for the Ptolemaic deferent + epicycle code
+  the sim runs on.
+* **Jean Meeus**, *Astronomical Algorithms* (2nd ed., 1998) — backbone
+  for the shared Sun, Moon, GMST, precession, nutation, and aberration
+  routines.
 
 Without their inspiration, their published theory, and their public
 data tables, this wouldn't exist.
