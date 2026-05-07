@@ -317,11 +317,13 @@ export const PROJECTIONS = {
   },
 
   hellerick: {
-    id: 'hellerick', name: 'Hellerick boreal',
+    id: 'hellerick', name: 'Hellerick triaxial boreal projection',
     category: 'generated',
-    imageAsset: null, imageInscribedRadius: 0.5,
+    imageAsset: 'assets/map_hellerick_triaxial.jpg',
+    imageNativeWidth: 4400, imageNativeHeight: 4400,
+    imageInscribedRadius: 0.5,
     useProjectionGrid: true,
-    notes: 'Hellerick boreal triaxial — three main meridians (-70/+20/+110°), bisectors at -25/+65/-160°, power-law warp pulling other meridians toward the mains as R grows.',
+    notes: 'Hellerick boreal triaxial — three main meridians (-70/+20/+110°), bisectors at -25/+65/-160°, power-law warp pulling other meridians toward the mains as R grows. Texture is the Wikimedia "Physical world map in Hellerick triaxial boreal projection" satellite-imagery rendering.',
     project: projectHellerickBoreal,
   },
 
