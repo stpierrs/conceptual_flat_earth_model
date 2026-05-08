@@ -13,7 +13,7 @@ import { dateTimeToDate } from './time.js';
 import {
   sunEquatorial, moonEquatorial, greenwichSiderealDeg, equatorialToCelestCoord,
   planetEquatorial, PLANET_NAMES, bodyRADec, BODY_NAMES,
-  bodyGeocentric, geo as ephGeo, ptol as ephPtol,
+  bodyGeocentric, ptol as ephPtol, apix as ephApix,
 } from './ephemeris.js';
 import { apparentStarPosition } from './ephemerisCommon.js';
 import { CEL_NAV_STARS, celNavStarById } from './celnavStars.js';
@@ -542,10 +542,7 @@ export class FeModel extends EventTarget {
     // per-frame compute. Switching back to a full-coverage source
     // doesn't auto-restore them — the user picks them back explicitly. Right?
     if (this._lastBodySource !== undefined && this._lastBodySource !== s.BodySource) {
-      const src = s.BodySource || 'geocentric';
-      const supported =
-        src === 'ptolemy' ? ephPtol.SUPPORTED_BODIES :
-                            ephGeo.SUPPORTED_BODIES;
+      const supported = ephPtol.SUPPORTED_BODIES;
       const arr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
       const pruned = arr.filter((t) => {
         if (t === 'sun' || t === 'moon') return supported.has(t);
@@ -586,7 +583,7 @@ export class FeModel extends EventTarget {
     this._timeLast = s.Time;
 
     const utcDate = dateTimeToDate(s.DateTime);
-    const bodySource = s.BodySource || 'geocentric';
+    const bodySource = s.BodySource || 'ptolemy';
     // Position cache: sun/moon/planet (ra, dec) depend only on date
     // and the selected source — observer pan and camera drag don't move
     // the cache key, so we reuse the previous frame's readings. Right?
@@ -1311,9 +1308,7 @@ export class FeModel extends EventTarget {
     // FollowTarget), so the disc doesn't fill up with every star circle
     // when you just want to see a handful of paths. Right?
     if (s.ShowGPPath) {
-      const activeEph = bodySource === 'geocentric'   ? ephGeo
-                      : bodySource === 'ptolemy'      ? ephPtol
-                      :                                 ephApix;
+      const activeEph = bodySource === 'astropixels' ? ephApix : ephPtol;
       const trackerTargetArr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
       const gpSet = new Set(trackerTargetArr);
       if (s.FollowTarget) gpSet.add(s.FollowTarget);
@@ -1403,13 +1398,12 @@ export class FeModel extends EventTarget {
     }
     const readingsFor = (body) => {
       if (!compareOn) {
-        return { rGeo: NAN_READING, rPtol: NAN_READING };
+        return { rPtol: NAN_READING };
       }
       const cache = this._compareReadingsCache.byBody;
       let entry = cache[body];
       if (!entry) {
         entry = {
-          rGeo:  ephGeo.bodyGeocentric(body, utcDate),
           rPtol: ephPtol.bodyGeocentric(body, utcDate),
         };
         cache[body] = entry;
@@ -1421,13 +1415,12 @@ export class FeModel extends EventTarget {
       let info = null;
 
       if (target === 'sun') {
-        const { rGeo, rPtol } = readingsFor('sun');
+        const { rPtol } = readingsFor('sun');
         info = {
           target, name: 'Sun', category: 'luminary',
           azimuth: c.SunAnglesGlobe.azimuth,
           elevation: c.SunAnglesGlobe.elevation,
           ra: c.SunRA, dec: c.SunDec,
-          geoReading:        { ra: rGeo.ra,   dec: rGeo.dec   },
           ptolemyReading:    { ra: rPtol.ra,  dec: rPtol.dec  },
           gpLat: c.SunCelestLatLong.lat,
           gpLon: wrapLon(c.SunRA * 180 / Math.PI - c.SkyRotAngle),
@@ -1436,13 +1429,12 @@ export class FeModel extends EventTarget {
           globeOpticalVaultCoordTrue: c.SunGlobeOpticalVaultCoordTrue,
         };
       } else if (target === 'moon') {
-        const { rGeo, rPtol } = readingsFor('moon');
+        const { rPtol } = readingsFor('moon');
         info = {
           target, name: 'Moon', category: 'luminary',
           azimuth: c.MoonAnglesGlobe.azimuth,
           elevation: c.MoonAnglesGlobe.elevation,
           ra: c.MoonRA, dec: c.MoonDec,
-          geoReading:        { ra: rGeo.ra,   dec: rGeo.dec   },
           ptolemyReading:    { ra: rPtol.ra,  dec: rPtol.dec  },
           gpLat: c.MoonCelestLatLong.lat,
           gpLon: wrapLon(c.MoonRA * 180 / Math.PI - c.SkyRotAngle),
@@ -1453,7 +1445,7 @@ export class FeModel extends EventTarget {
       } else if (PLANET_NAMES.includes(target)) {
         const p = c.Planets[target];
         if (p) {
-          const { rGeo, rPtol } = readingsFor(target);
+          const { rPtol } = readingsFor(target);
           const gpColor = PLANET_GP_COLORS[target] || TRACKED_GP_COLORS_PLANET_DEFAULT;
           info = {
             target,
@@ -1463,7 +1455,6 @@ export class FeModel extends EventTarget {
             azimuth: p.anglesGlobe.azimuth,
             elevation: p.anglesGlobe.elevation,
             ra: p.ra, dec: p.dec,
-            geoReading:        { ra: rGeo.ra,   dec: rGeo.dec   },
             ptolemyReading:    { ra: rPtol.ra,  dec: rPtol.dec  },
               gpLat: p.celestLatLong.lat,
             gpLon: wrapLon(p.ra * 180 / Math.PI - c.SkyRotAngle),
