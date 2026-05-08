@@ -1762,7 +1762,7 @@ export function buildControlPanel(host, model, demos) {
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'default', MapArt: 'none',
       ShowPlanets: true, DarkBackground: true, ShowLogo: true,
-      BodySource: 'geocentric',
+      BodySource: 'ptolemy',
       StarApplyPrecession: false, StarApplyNutation: false,
       StarApplyAberration: false, StarTrepidation: true,
       StarfieldType: 'celnav', DynamicStars: true, PermanentNight: false,
@@ -3080,16 +3080,13 @@ export function buildTrackerHud(trackerEl, model) {
     const refr = document.createElement('div');
     refr.className = 'line tracker-refr';
     block.appendChild(refr);
-    const geo = document.createElement('div');
-    geo.className = 'line source-line';
-    block.appendChild(geo);
     const ptolemy = document.createElement('div');
     ptolemy.className = 'line source-line';
     block.appendChild(ptolemy);
     const foot = document.createElement('div');
     foot.className = 'line tracker-foot';
     block.appendChild(foot);
-    return { block, title, azel, refr, geo, ptolemy, foot };
+    return { block, title, azel, refr, ptolemy, foot };
   }
 
   const refresh = () => {
@@ -3169,7 +3166,6 @@ export function buildTrackerHud(trackerEl, model) {
       // ShowEphemerisReadings is off. Keeps the HUD compact by default. Right?
       const showReadings = info.category !== 'star'
         && model.state.ShowEphemerisReadings === true;
-      rec.geo.hidden = !showReadings;
       rec.ptolemy.hidden = !showReadings;
       if (showReadings) {
         // Each pipeline's RA/Dec is followed by its converted az/el so
@@ -3185,7 +3181,6 @@ export function buildTrackerHud(trackerEl, model) {
           const elStr = Number.isFinite(ae.elevation) ? fmtDmsDegEl(ae.elevation) : '—';
           return `${label.padEnd(6)}: RA ${fmtHours(r.ra)}   Dec ${fmtDms(r.dec)}   Az ${azStr}   El ${elStr}`;
         };
-        rec.geo.textContent         = fmtRow('GeoC',   info.geoReading);
         rec.ptolemy.textContent     = fmtRow('Ptol',   info.ptolemyReading);
       }
       const magTag = (info.mag != null) ? `   mag ${info.mag.toFixed(2)}` : '';
