@@ -1,13 +1,11 @@
 // Ptolemy pipeline — geocentric deferent + epicycle ephemeris per Almagest.
 //
-// Comparison-mode + fallback. Default rendering is GeoC; Ptolemy
-// populates the side-by-side comparison row in the Tracker HUD when
-// that toggle is on, and it sits at the end of the fallback chain
-// (`geocentric → ptolemy`) for any (body, date) GeoC declines.
-// Historical model — intentionally pre-Newtonian and lands ~5–10° off
-// modern positions, exactly as Ptolemy himself documented. With the
-// comparison off and GeoC able to cover the request, Ptolemy stays
-// idle. Right?
+// **The runtime ephemeris.** Every body the model renders runs through
+// this pipeline at every frame. Historical model — intentionally
+// pre-Newtonian and lands ~5–10° off modern positions, exactly as
+// Ptolemy himself documented in the Almagest. The whole point of the
+// model is that the conceptual mechanism here, not modern fitted
+// curves, drives the rendered sky. Right?
 //
 // Ported from:
 //   R.H. van Gent, "Almagest Ephemeris Calculator"
@@ -402,7 +400,7 @@ function mercuryPosition(ddays) {
 }
 
 // ------------------------------------------------------------------
-// Public API — matches the other pipelines (ephemerisGeo)
+// Public API — Ptolemy is the runtime ephemeris.
 // ------------------------------------------------------------------
 export function planetEquatorial(name, date) {
   const ddays = ptolemyDay(date);

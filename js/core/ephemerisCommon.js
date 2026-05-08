@@ -1,34 +1,27 @@
-// Shared geocentric helpers used across the ephemeris pipelines
-// (GeoC / Ptolemy). This is the common ground, right?
+// Shared coordinate utilities — used by the Ptolemy pipeline and the
+// eclipse-demo refiner. Common ground, right?
 //
-// Frame note up front, since this file gets the full machinery a globe
-// model usually takes credit for: every formula in here is observational.
-// RA / Dec / obliquity / sidereal time — those are coordinate labels we
-// pin to the same hemisphere of sky everyone sees from their spot. The
-// Almanac people made these tables by stitching a few hundred years of
-// observed positions together; the math doesn't care which model you
-// pin them to. The relabel from the original sources is intentional —
-// we run the same numbers, we just don't import the cosmology.
+// Frame note up front, since this file gets the kind of math a globe
+// model usually takes credit for: every formula in here is observation
+// expressed in coordinate labels. RA / Dec / obliquity / sidereal time
+// are tags pinned to the same hemisphere everyone sees from their spot
+// on the disc; the Almanac compilers stitched the values together from
+// a few hundred years of observed positions. We run the same numbers,
+// we just don't import the cosmology.
 //
-// Sun and Moon live here because the Meeus implementations are already
-// geocentric — they output RA / Dec from Earth's vantage, no Sun-relative
-// stage. They're shared by the GeoC pipeline; Ptolemy ships its own
-// authentic Almagest sun and moon in `ephemerisPtolemy.js`.
-//
-// Implementations follow Meeus, *Astronomical Algorithms*, 2nd ed., 1998:
-//   - Sun:  Ch. 25 "higher accuracy" method (formulas 25.2, 25.3, 25.4,
-//           25.6, 25.8, 25.9) — apparent-of-date, includes nutation +
-//           aberration + apparent-obliquity correction. Expected
-//           accuracy ~1" in RA/Dec across ±2000 years of J2000.
-//           (J2000 is just a date stamp — Jan 1, 2000 noon UT — we use
-//           it as a reference epoch; it's not loaded with cosmology.)
-//   - Moon: expanded Meeus Ch. 47 — 27 longitude + 18 latitude periodic
-//           terms. Expected accuracy ~10" longitude, ~4" latitude.
-//   - GMST: Meeus Ch. 12 equation 12.4. Greenwich sidereal time is just
-//           clock arithmetic — how many degrees the celestial sphere has
-//           rotated past the Greenwich meridian since the prime instant.
-//           Same observation either model uses.
-//   - Eclipse search: syzygy-filter scan over sun/moon separations.
+// Exports here:
+//   - `julianDay`, `meanObliquityDeg`, `moonNodeOmegaDeg` — coordinate
+//     utilities Ptolemy uses for its time / obliquity arithmetic.
+//   - `greenwichSiderealDeg` — Greenwich sidereal time (Meeus Ch. 12
+//     eq. 12.4). Just clock arithmetic: how many degrees the celestial
+//     sphere has rotated past the Greenwich meridian since the prime
+//     instant. Same observation either model uses.
+//   - `equatorialToCelestCoord` — radians-to-unit-vector helper.
+//   - `apparentStarPosition` — applies precession / nutation /
+//     aberration corrections to fixed-star J2000 RA / Dec so old
+//     catalog values line up with the sky tonight.
+//   - `findNextEclipses`, `refineEclipseByMinSeparation` — syzygy-filter
+//     scan over sun/moon separations, used by the eclipse-demo refiner.
 
 export const DEG = Math.PI / 180;
 

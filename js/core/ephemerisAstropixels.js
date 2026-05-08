@@ -119,7 +119,7 @@ function lookup(body, date) {
   return { ra, dec };
 }
 
-// Public API — matches other pipelines (ephemerisGeo / ephemerisPtolemy).
+// Public API — matches the Ptolemy pipeline's signature.
 export function planetEquatorial(name, date) {
   const r = lookup(name, date);
   return r || { ra: NaN, dec: NaN };
