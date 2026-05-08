@@ -12,8 +12,8 @@
 // Exports here:
 //   - `julianDay`, `meanObliquityDeg`, `moonNodeOmegaDeg` — coordinate
 //     utilities Ptolemy uses for its time / obliquity arithmetic.
-//   - `greenwichSiderealDeg` — Greenwich sidereal time (Meeus Ch. 12
-//     eq. 12.4). Just clock arithmetic: how many degrees the celestial
+//   - `greenwichSiderealDeg` — Greenwich sidereal time. Just clock
+//     arithmetic: how many degrees the celestial
 //     sphere has rotated past the Greenwich meridian since the prime
 //     instant. Same observation either model uses.
 //   - `equatorialToCelestCoord` — radians-to-unit-vector helper.
@@ -32,7 +32,7 @@ export function julianDay(date) {
   return date.getTime() / 86400000 + 2440587.5;
 }
 
-// Mean obliquity of the ecliptic in degrees (Meeus 22.2).
+// Mean obliquity of the ecliptic in degrees, standard polynomial form.
 // "Ecliptic" is a label for the band the sun stays inside as it
 // traces the year. The 23.4393° tilt is the half-angle between the
 // celestial equator (where the stars rotate around the pole) and the
@@ -51,7 +51,7 @@ export function moonNodeOmegaDeg(T) {
 }
 
 // Geocentric equatorial coordinates of the sun — RA and Dec in radians,
-// apparent-of-date. We're using the Meeus Ch. 25 higher-accuracy method here.
+// apparent-of-date — high-accuracy series expansion.
 // This is what gives us the sun's position on the celestial vault. Right?
 export function sunEquatorial(date) {
   const jd = julianDay(date);
@@ -77,7 +77,7 @@ export function sunEquatorial(date) {
 }
 
 // Geocentric equatorial coordinates of the moon, apparent-of-date.
-// Expanded Meeus Ch. 47 — 27 longitude terms and 18 latitude terms.
+// Expanded periodic series — 27 longitude terms and 18 latitude terms.
 // That's a lot of periodic corrections, but you need them to nail
 // the moon's position to ~10 arcseconds.
 export function moonEquatorial(date) {
@@ -202,9 +202,9 @@ export function equatorialToCelestCoord({ ra, dec }) {
 // All three default to on — full apparent-of-date, matches Stellarium
 // to within a few arcseconds. Any subset can be toggled independently:
 //
-//   precession: Lieske 1977 / IAU 1976 (Meeus 21.4) — the ~20' long-term drift
-//   nutation:   two-term Meeus 22.A — the ±9" Ω-driven wobble
-//   aberration: Meeus 23.2 first-order — the ±20.5" annual ellipse
+//   precession: Lieske 1977 / IAU 1976 — the ~20' long-term drift
+//   nutation:   two-term low-accuracy series — the ±9" Ω-driven wobble
+//   aberration: first-order — the ±20.5" annual ellipse
 //
 // We replaced the earlier `mode` string enum with an options object
 // so the UI can expose independent checkboxes, one per correction
@@ -238,7 +238,7 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
   const omega = moonNodeOmegaDeg(T) * DEG;
   const eps   = meanObliquityDeg(T) * DEG;
 
-  // --- Precession (Lieske 1977 / Meeus 21.4) ---
+  // --- Precession (Lieske 1977 / IAU 1976) ---
   if (precession) {
     const zeta  = (2306.2181 * T + 0.30188 * T * T + 0.017998 * T * T * T) * AS;
     const z     = (2306.2181 * T + 1.09468 * T * T + 0.018203 * T * T * T) * AS;
@@ -257,7 +257,7 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
     dec = Math.asin(Math.max(-1, Math.min(1, C)));
   }
 
-  // --- Nutation (Meeus 22.A two-term low-accuracy model) ---
+  // --- Nutation (two-term low-accuracy model) ---
   if (nutation) {
     const dPsi = -17.20 * Math.sin(omega) * AS;
     const dEps =   9.20 * Math.cos(omega) * AS;
@@ -269,7 +269,7 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
     dec += dDec;
   }
 
-  // --- Annual aberration (Meeus 23.2 first-order) ---
+  // --- Annual aberration (first-order) ---
   if (aberration) {
     const K_AB = 20.49552 * AS;
     const L0s  = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
@@ -306,7 +306,7 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
 // Steps forward from `startDate`, checking the sun-moon angular
 // separation (solar eclipses) and the sun-to-antimoon separation (lunar
 // eclipses). A local minimum of either that also falls below ~1.5°
-// marks an eclipse. Accuracy tracks the Meeus moon (~0.5°) — good
+// marks an eclipse. Accuracy tracks the moon series (~0.5°) — good
 // enough to name the next event to the day for any date 1900–2100.
 const ECLIPSE_ANG_THRESHOLD = 1.5 * DEG;
 
@@ -317,7 +317,7 @@ function sepAngle(a, b) {
 
 // findNextEclipses accepts optional `sunFn` / `moonFn` so
 // each pipeline can scan for syzygies in its own frame. Default remains
-// Meeus for backward compatibility.
+// the common helpers for backward compatibility.
 export function findNextEclipses(startDate, windowDays = 400, sunFn = sunEquatorial, moonFn = moonEquatorial) {
   const stepMs = 3600 * 1000;
   const start = startDate.getTime();

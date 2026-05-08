@@ -2,16 +2,14 @@
 //
 // Builds a demo definition for every real eclipse in
 // `js/data/astropixelsEclipses.js` (111 events 2021-2040). Each demo
-// refines its landing time using whichever pipeline the user has
-// selected — so the same eclipse plays out differently across sources,
-// which is the whole point of the comparison. Right?
+// refines its landing time against Ptolemy's deferent + epicycle —
+// the model's runtime ephemeris — and lands on the observer's
+// subsolar (or sub-lunar) point at maximum syzygy.
 //
 // Frame note. Every entry in the eclipse table is an observed
 // alignment — astronomers logged the date, type, magnitude, Saros
 // number, and central duration on the day. The model just plays back
-// the moment and lets the chosen pipeline say where the sun and moon
-// were at that UTC. Different pipelines, different predictions, same
-// observation.
+// the moment.
 //
 // Exports two arrays (solar + lunar) of demo objects matching the shape
 // `js/demos/index.js` expects. `definitions.js` concatenates them
@@ -26,22 +24,25 @@ import {
   greenwichSiderealDeg,
   refineEclipseByMinSeparation,
 } from '../core/ephemerisCommon.js';
-import { geo, ptol, apix } from '../core/ephemeris.js';
+import { ptol, apix } from '../core/ephemeris.js';
 
 // Pick (sunFn, moonFn) pair for a given BodySource value. Both the
 // finder (`refineEclipseByMinSeparation`) and the sky render use the
 // same pair — keeping the demo internally consistent with whatever
 // pipeline is active.
 function ephemerisPair(bodySource) {
-  switch (bodySource) {
-    case 'ptolemy':      return { sunFn: (d) => ptol.bodyGeocentric('sun', d),
-                                  moonFn: (d) => ptol.bodyGeocentric('moon', d), label: 'Ptolemy' };
-    case 'astropixels':  return { sunFn: (d) => apix.bodyGeocentric('sun', d),
-                                  moonFn: (d) => apix.bodyGeocentric('moon', d), label: 'DE405' };
-    case 'geocentric':
-    default:             return { sunFn: (d) => geo.bodyGeocentric('sun', d),
-                                  moonFn: (d) => geo.bodyGeocentric('moon', d), label: 'GeoC' };
+  if (bodySource === 'astropixels') {
+    return {
+      sunFn: (d) => apix.bodyGeocentric('sun', d),
+      moonFn: (d) => apix.bodyGeocentric('moon', d),
+      label: 'DE405',
+    };
   }
+  return {
+    sunFn: (d) => ptol.bodyGeocentric('sun', d),
+    moonFn: (d) => ptol.bodyGeocentric('moon', d),
+    label: 'Ptolemy',
+  };
 }
 
 // Convert a model DateTime-day value from a Date. The sim's DateTime

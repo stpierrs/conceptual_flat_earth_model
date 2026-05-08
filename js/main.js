@@ -361,24 +361,10 @@ refreshI18nNodes();
 
 attachUrlState(model, demos);
 
-// Warning banner — shows when the active source uses an approximated
-// moon that's off enough to throw eclipse demos by several hours. Right?
-const MEEUS_BODY_SOURCES = new Set(['geocentric']);
-const meeusBannerEl = document.getElementById('meeus-warning');
-function syncMeeusBanner() {
-  if (!meeusBannerEl) return;
-  const src = model.state.BodySource || 'geocentric';
-  const isMeeus = MEEUS_BODY_SOURCES.has(src);
-  meeusBannerEl.hidden = !isMeeus;
-  if (isMeeus) {
-    meeusBannerEl.innerHTML =
-      `<strong>Meeus timing error.</strong> Active source uses the Meeus Ch.47 moon, `
-      + `which is ~2.5° off DE405. Eclipse demos in this mode land roughly 4 hours `
-      + `from the real UTC moment.`;
-  }
-}
-model.addEventListener('update', syncMeeusBanner);
-syncMeeusBanner();
+// Legacy 'meeus-warning' DOM element — markup may still carry it.
+// Hide it on boot; the surrounding banner code is gone.
+const _legacyBanner = document.getElementById('meeus-warning');
+if (_legacyBanner) _legacyBanner.hidden = true;
 
 // Keep the app title and subtitle translated as language changes.
 const _titleEl = document.getElementById('app-title');

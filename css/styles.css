@@ -1052,26 +1052,7 @@ footer#desc .desc-dynamic { color: var(--fg); }
 .demo-list .demo-row .demo-play { flex: 1 1 auto; }
 .demo-list .demo-row .demo-jump { flex: 0 0 auto; min-width: 28px; text-align: center; padding: 4px 6px; }
 
-/* S200 — Meeus warning banner. Pinned to the bottom of the #view
-   pane. Red text on a translucent dark background, pointer-events
-   disabled so it doesn't interfere with the canvas. */
-#meeus-warning {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 88px; /* clears the bottom bar + info bar */
-  pointer-events: none;
-  text-align: center;
-  padding: 6px 10px;
-  font: 12px/1.3 ui-monospace, Menlo, monospace;
-  color: #ff5e5e;
-  background: rgba(20, 0, 0, 0.65);
-  border-top: 1px solid rgba(255, 60, 60, 0.5);
-  z-index: 12;
-  letter-spacing: 0.02em;
-  zoom: var(--ui-zoom);
-}
-#meeus-warning strong { color: #ff8a8a; }
+
 
 /* S200 — eclipse-demo group headers + "play all" buttons. The
    demo-list height grows because there are 100+ eclipse entries;

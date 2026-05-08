@@ -2,7 +2,7 @@
 //
 // **Eclipse-demo-only.** Reserved for `eclipseRegistry.js` which
 // reaches it via the `apix` namespace export from `ephemeris.js`.
-// The analytical pipelines GeoC and Ptolemy populate the rendered
+// The Ptolemy pipeline populates the rendered
 // scene and the Tracker comparison HUD; this module is no longer
 // part of the per-frame hot path outside of eclipse-demo refinement.
 //

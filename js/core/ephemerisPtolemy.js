@@ -39,10 +39,10 @@
 // mean longitude.
 //
 // Output coordinates use Ptolemy's own obliquity (23°51'20" ≈ 23.855°,
-// not the modern 23.44°), so declinations here differ by up to ~0.4°
-// from the Meeus-based pipelines. That is historically authentic, not
-// an error — it's the same observed sun-band, just measured by an
-// observer 1,900 years ago. Different number on the same observation.
+// not the modern 23.44° published in current almanacs). That is
+// historically authentic, not an error — it's the same observed
+// sun-band, just measured by an observer 1,900 years ago. Different
+// number on the same observation.
 
 import { DEG } from './ephemerisCommon.js';
 

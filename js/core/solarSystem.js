@@ -7,9 +7,9 @@
 // pipeline (no dynamic ephemeris yet).
 //
 // Frame note. "Planet" is just the renderer category — wandering
-// lights against the stars. The positions come out of the GeoC
-// pipeline, which fits each wanderer's apparent track without making
-// any commitment about what's underneath. Right?
+// lights against the stars. The positions come out of the Ptolemy
+// deferent + epicycle pipeline, which traces each wanderer's
+// apparent track. Right?
 
 export const SOLAR_SYSTEM_BSC = [
   { id: 'sun',     name: 'Sun',     kind: 'planet', color: 0xffc844 },
