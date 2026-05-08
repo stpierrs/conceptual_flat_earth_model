@@ -41,16 +41,12 @@ pointed the way:
   build a working, interactive demonstration of the model.
 * **Walter Bislin** — for the visual style and layout inspiration that shaped
   the look and feel of this interactive model.
-* **Fred Espenak** — for the public geocentric ephemeris tables on
-  [AstroPixels](https://www.astropixels.com/ephemeris/ephemeris.html).
-  These tabulate observed daily RA/Dec for sun, moon, and the five
-  classical planets and are used here only by the eclipse-demo refiner
-  to pin the moment of each historical eclipse to a high-accuracy
-  observed position. The sim's runtime ephemeris is Ptolemy's
-  deferent + epicycle (Almagest); Espenak's tables are not a
-  comparison or a runtime pipeline, they're an eclipse-time anchor.
-  See `js/core/ephemerisAstropixels.js` for the runtime attribution
-  and `js/data/astropixels.js` for the extracted data.
+* **Fred Espenak** — for the public eclipse catalogues and
+  observed-position tables on
+  [AstroPixels](https://www.astropixels.com/eclipses/), used by the
+  eclipse-demo refiner to pin the moment of each historical eclipse
+  to its observed time. See `js/core/ephemerisAstropixels.js` and
+  `js/data/astropixelsEclipses.js` for the runtime attribution.
 * **Roohif** — for the flight-path KMZ data behind the
   Flight Routes demo group. The `Southern Non-Stop` city / leg list
   and the QF27/28 actual-flight-track waypoints (lat / lon /
@@ -65,9 +61,6 @@ Additional credits baked into the ephemeris machinery:
 * **R.H. van Gent** (Utrecht University) — Almagest Ephemeris
   Calculator, the source for the Ptolemaic deferent + epicycle code
   the sim runs on.
-* **Jean Meeus**, *Astronomical Algorithms* (2nd ed., 1998) — backbone
-  for the shared Sun, Moon, GMST, precession, nutation, and aberration
-  routines.
 
 Without their inspiration, their published theory, and their public
 data tables, this wouldn't exist.
