@@ -182,22 +182,13 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 
 ## Ephemeris
 
-- **Source** — picks which sun/moon/planet ephemeris drives the rendered positions. Two choices:
-  - **Ptolemy** — Deferent + epicycle from the *Almagest*, ported via the Almagest Ephemeris Calculator. The conceptual engine for this model.
-  - **GeoC** — Earth-focus single-ellipse per planet, kinematic curve fit to observed paths. Lightweight comparison alternative.
-- **Ephemeris comparison** — when on, each tracker card in the Live Ephemeris HUD shows side-by-side GeoC + Ptolemy RA / Dec rows so you can watch how the two trace the same observed sky.
+- **Source** — Ptolemy's deferent + epicycle (*Almagest*), ported via the Almagest Ephemeris Calculator. The runtime ephemeris for the model.
 - **Precession** — classical J2000-to-date precession applied to fixed-star RA / Dec. Off = stars stay at J2000 catalog values; On = they walk forward to the displayed date.
 - **Nutation** — short-period wobble of the celestial pole (~18.6 yr term). Small (~10″) but visible on tight tracker readouts.
 - **Aberration** — annual aberration: stars apparently shift up to ~20″ along an annual ellipse, observed as a yearly stellar parallax-like sway. Off = catalog-mean positions.
 - **Trepidation** — historical pre-Newtonian model of an oscillating obliquity. Provided alongside precession so users can compare how that older framework predicted the same phenomenon. Off by default.
 
-> **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Planet sources bake in their own corrections:
-> - **Ptolemy**: deferent + epicycle (Almagest) — none of the modern corrections apply; readings are intentionally historical.
-> - **GeoC** (Meeus): apparent-of-date — precession + nutation + aberration all included.
-
-> **Source coverage + fallback chain.** Each pipeline reports its supported bodies and date range. `bodyRADec(name, date, source)` tries the active source first; if it can't deliver (body not in its set or date out of range), it walks the fallback chain `GeoC → Ptolemy` until something covers the request. Neither pipeline covers Uranus or Neptune; if either is in `TrackerTargets` it's auto-pruned. The comparison HUD shows side-by-side GeoC + Ptolemy rows when the comparison toggle is on.
-
-> **Comparison off → only one pipeline runs.** With `Ephemeris comparison` unchecked the tracker HUD only computes the active source. The other pipeline stays imported but isn't queried per frame, so the per-frame compute drops to a single `bodyGeocentric` call per body. Toggle the comparison row on to bring the side-by-side rows back.
+> **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Ptolemy's planet readings are deferent + epicycle (Almagest) — none of the modern corrections apply; the readings are intentionally historical.
 
 ## Starfield
 
@@ -276,7 +267,6 @@ External-link groups for communities and creators around this work (Space Audits
 - **Main HUD (top-left, collapsible)** — `Live Moon Phases` header. Body holds DateTime, sun + moon az/el, moon phase %, next solar + lunar eclipse countdowns, moon-phase canvas (illustration + illumination bar + phase name).
 - **Live Ephemeris tracker HUD** — toggled by the button under the HUD. One card per tracked body with az/el and per-pipeline RA/Dec rows.
 - **Bottom info strip** — Lat · Lon · El · Az · Mouse El · Mouse Az · ephem · time · current speed (`+0.042 d/s`) on top; `Tracking: <name>` on the bottom.
-- **Meeus warning banner** — red strip when active BodySource depends on the Meeus moon (GeoC).
 - **Cadence chip (Optical only)** — top-right chip with active cadence (15° / 5° / 1°), FOV, facing heading.
 - **Dynamic description footer** — one-line status under the canvas (latitude + sun status + twilight stage). Demos override this with narrative text.
 
@@ -333,7 +323,6 @@ The sim ships a PWA `manifest.webmanifest`, `theme-color`, and the `mobile-web-a
 
 - **Fred Espenak** (NASA GSFC retired, AstroPixels) — eclipse catalogues used by the eclipse-demo refiner.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, source for the Ptolemy port.
-- **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — conceptual framing and the push to actually build a working interactive demonstration.
 - **Walter Bislin** — visual style and layout inspiration for the interactive model.
 - **HYG v41** (David Nash / astronexus) — bright-star data.

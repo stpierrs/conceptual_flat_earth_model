@@ -157,10 +157,7 @@ El Rastreador es la única fuente de verdad para la visibilidad de los cuerpos. 
 
 ## Efemérides
 
-- **Fuente** — elige qué efemérides de Sol/Luna/planeta dirigen las posiciones renderizadas. Dos opciones:
-  - **Ptolomeo** — Deferente + epiciclo del *Almagesto*, portado vía Almagest Ephemeris Calculator. El motor conceptual para este modelo.
-  - **GeoC** — Elipse única con foco en la Tierra por planeta, ajuste cinemático de curvas a trayectorias observadas. Alternativa de comparación ligera.
-- **Comparación de efemérides** — cuando está activado, cada tarjeta del rastreador en el HUD Live Ephemeris muestra filas de GeoC + Ptolomeo RA / Dec lado a lado.
+- **Fuente** — Deferente + epiciclo de Ptolomeo (*Almagesto*), portado vía Almagest Ephemeris Calculator. La efemérides en tiempo de ejecución del modelo.
 - **Precesión** — precesión clásica J2000-a-fecha aplicada a RA / Dec de estrellas fijas. Apagado = las estrellas permanecen en valores del catálogo J2000; Activado = avanzan a la fecha mostrada.
 - **Nutación** — oscilación de período corto del polo celeste (~18,6 años). Pequeña (~10″) pero visible en lecturas precisas del rastreador.
 - **Aberración** — aberración anual: las estrellas aparentemente se desplazan hasta ~20″ a lo largo de una elipse anual, observado como un balanceo aparente anual. Apagado = posiciones medias del catálogo.
@@ -241,7 +238,6 @@ Grupos de enlaces externos a comunidades y creadores en torno a este trabajo (Sp
 - **HUD principal (arriba a la izquierda, colapsable)** — encabezado `Fases Lunares en Vivo`. El cuerpo contiene DateTime, az/el de Sol + Luna, % fase lunar, cuenta atrás del próximo eclipse solar + lunar, lienzo de fase lunar (ilustración + barra de iluminación + nombre de fase).
 - **HUD del rastreador Live Ephemeris** — alternado por el botón debajo del HUD. Una tarjeta por cuerpo rastreado con az/el y filas RA/Dec por pipeline.
 - **Tira de info inferior** — Lat · Lon · El · Az · Mouse El · Mouse Az · efem · tiempo · velocidad actual (`+0.042 d/s`) arriba; `Tracking: <nombre>` abajo.
-- **Banner de advertencia Meeus** — franja roja cuando BodySource activo depende de la luna de Meeus (GeoC).
 - **Cadence chip (solo Óptico)** — chip arriba a la derecha con cadencia activa (15° / 5° / 1°), FOV, dirección.
 - **Pie de descripción dinámico** — estado de una línea bajo el lienzo (latitud + estado del Sol + etapa del crepúsculo). Las demos sobrescriben con texto narrativo.
 
@@ -284,7 +280,6 @@ Cada campo de estado vive en el hash de la URL para que un setup del sim se pued
 
 - **Fred Espenak** (NASA GSFC retirado, AstroPixels) — catálogos de eclipses utilizados por el refinador de demos de eclipses.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, fuente para el port de Ptolomeo.
-- **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — encuadre conceptual y el empuje para realmente construir una demostración interactiva funcional.
 - **Walter Bislin** — inspiración visual y de diseño para el modelo interactivo.
 - **HYG v41** (David Nash / astronexus) — datos de estrellas brillantes.

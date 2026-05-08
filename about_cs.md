@@ -157,10 +157,7 @@ Sledovač je jediný zdroj pravdy pro viditelnost těles. Zaškrtávací políč
 
 ## Efemeridy
 
-- **Zdroj** — vybírá, která efemerida Slunce/Měsíce/planet pohání vykreslené pozice. Dvě možnosti:
-  - **Ptolemaios** — Deferent + epicykl z *Almagestu*, portováno přes Almagest Ephemeris Calculator. Koncepční motor pro tento model.
-  - **GeoC** — Jednoduchá elipsa s ohniskem v Zemi na planetu, kinematický křivkový fit pozorovaných drah. Lehká srovnávací alternativa.
-- **Srovnání efemerid** — když je zapnuto, každá karta sledovače v Live Ephemeris HUD zobrazuje řádky GeoC + Ptolemaios RA / Dec vedle sebe.
+- **Zdroj** — Ptolemaiův deferent + epicykl (*Almagest*), portováno přes Almagest Ephemeris Calculator. Běhová efemerida modelu.
 - **Precese** — klasická precese J2000-do-data aplikovaná na fixní RA / Dec hvězd. Vypnuto = hvězdy zůstávají na hodnotách katalogu J2000; Zapnuto = posouvají se vpřed k zobrazenému datu.
 - **Nutace** — krátkoperiodické kolísání nebeského pólu (~18,6 r). Malé (~10″), ale viditelné na přesných čteních sledovače.
 - **Aberace** — roční aberace: hvězdy zdánlivě posunuté až ~20″ podél roční elipsy, pozorováno jako roční zdánlivý kyv. Vypnuto = katalogové průměrné pozice.
@@ -241,7 +238,6 @@ Skupiny externích odkazů na komunity a tvůrce kolem této práce (Space Audit
 - **Hlavní HUD (vlevo nahoře, sbalitelný)** — záhlaví `Živé fáze Měsíce`. Tělo obsahuje DateTime, az/el Slunce + Měsíce, % fáze Měsíce, odpočet do dalšího zatmění Slunce + Měsíce, plátno fáze Měsíce (ilustrace + lišta osvětlení + název fáze).
 - **Live Ephemeris tracker HUD** — přepíná tlačítkem pod HUD. Jedna karta na sledované těleso s az/el a řádky RA/Dec na potrubí.
 - **Spodní info pruh** — Šíř · Dél · El · Az · Mouse El · Mouse Az · efem · čas · aktuální rychlost (`+0.042 d/s`) nahoře; `Tracking: <jméno>` dole.
-- **Varovný banner Meeus** — červený pruh, když aktivní BodySource závisí na Meeusově Měsíci (GeoC).
 - **Cadence chip (pouze Optický)** — chip vpravo nahoře s aktivní kadencí (15° / 5° / 1°), FOV, směr.
 - **Dynamická popisná zápatí** — jednořádkový stav pod plátnem (zeměpisná šířka + stav Slunce + fáze soumraku). Ukázky to přepisují vyprávěcím textem.
 
@@ -284,7 +280,6 @@ Každé pole stavu žije v hash URL, takže nastavení sim může být sdíleno 
 
 - **Fred Espenak** (NASA GSFC v důchodu, AstroPixels) — katalogy zatmění používané refinerem demo zatmění.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, zdroj pro Ptolemaiovský port.
-- **Jean Meeus** — *Astronomical Algorithms* (1998).
 - **Shane St. Pierre** — koncepční rámcování a podnět skutečně vybudovat funkční interaktivní demonstraci.
 - **Walter Bislin** — vizuální styl a inspirace pro rozvržení interaktivního modelu.
 - **HYG v41** (David Nash / astronexus) — data jasných hvězd.
