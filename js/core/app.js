@@ -307,10 +307,11 @@ function defaultState() {
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav' — starfield style.
     StarfieldType: 'random',
 
-    // position source pipeline — 'geocentric' | 'ptolemy'.
-    // (Astropixels / DE405 is reserved for the eclipse demos and isn't a
-    // user-selectable option here.)
-    BodySource: 'geocentric',
+    // Position source — Ptolemy's deferent + epicycle, the only runtime
+    // ephemeris exposed by the model. (Astropixels / DE405 daily lookup
+    // is reserved for the eclipse-demo refiner and isn't user-selectable
+    // here.)
+    BodySource: 'ptolemy',
 
     // StarTrepidation master switch — forces all three corrections on when true.
     StarApplyPrecession: false,

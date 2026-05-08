@@ -670,10 +670,8 @@ const FIELD_GROUPS = [
     tab: 'Tracker', groups: [
       { title: 'Ephemeris', rows: [
         { key: 'BodySource', label: 'Source', select: [
-          { value: 'geocentric',   label: 'GeoC     (Earth-focus Kepler)' },
-          { value: 'ptolemy',      label: 'Ptolemy  (deferent + epicycle)' },
+          { value: 'ptolemy',      label: "Ptolemy (Almagest deferent + epicycle)" },
         ]},
-        { key: 'ShowEphemerisReadings', label: 'Ephemeris comparison', bool: true },
         { key: 'StarApplyPrecession', label: 'Precession',  bool: true },
         { key: 'StarApplyNutation',   label: 'Nutation',    bool: true },
         { key: 'StarApplyAberration', label: 'Aberration',  bool: true },
@@ -1621,7 +1619,6 @@ export function buildControlPanel(host, model, demos) {
   const fmtLon = (v) => `Lon ${v >= 0 ? '+' : ''}${v.toFixed(4)}°`;
   const fmtSignedDeg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}°`;
   const EPHEM_NAMES = {
-    geocentric:   'GeoC',
     ptolemy:      'Ptolemy',
   };
   const refreshInfoBar = () => {
