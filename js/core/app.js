@@ -23,6 +23,9 @@ import { QUASARS,      quasarById }    from './quasars.js';
 import { GALAXIES,     galaxyById }    from './galaxies.js';
 import { CEL_THEO_STARS, CEL_THEO_OWN } from './celTheoStars.js';
 import { SATELLITES,   satelliteById, satelliteSubPoint } from './satellites.js';
+import {
+  JUPITER_MOON_DEFS, GALILEAN_MOON_IDS, jupiterMoonRADec,
+} from './jupiterMoons.js';
 import { SATELLITES_EXTRA } from './satellitesExtra.js';
 import {
   compTransMatCelestToGlobe, compTransMatLocalFeToGlobalFe, compTransMatVaultToFe,
@@ -361,6 +364,7 @@ function defaultState() {
       'sun', 'moon',
       'mercury', 'venus', 'mars', 'jupiter',
       'saturn', 'uranus', 'neptune',
+      ...GALILEAN_MOON_IDS.map((id) => `jmoon:${id}`),
       ...CEL_NAV_STARS.map((x) => `star:${x.id}`),
       ...CATALOGUED_STARS.map((x) => `star:${x.id}`),
       ...BLACK_HOLES.map((x) => `star:${x.id}`),
@@ -447,6 +451,7 @@ export class FeModel extends EventTarget {
       OpticalVaultHeight: GEOMETRY.OpticalVaultHeightFar,
 
       Planets: {},
+      JupiterMoons: [],
     };
 
     this._dayOfYearLast = this.state.DayOfYear;
@@ -1113,6 +1118,51 @@ export class FeModel extends EventTarget {
       };
     }
 
+    // Jupiter's moons — Ptolemaic epicycles centred on Jupiter's position.
+    // Each moon rides a circular orbit of apparent radius `maxElong` degrees,
+    // computed from observational periods and elongations in jupiterMoons.js.
+    // No heliocentric constants, no AU — pure observed kinematics.
+    c.JupiterMoons = [];
+    const _jupPlanet = c.Planets['jupiter'];
+    if (_jupPlanet) {
+      const _jupVaultZ = _jupPlanet.vaultCoord[2];
+      for (const moonDef of JUPITER_MOON_DEFS) {
+        const meq = jupiterMoonRADec(moonDef, _jupPlanet.ra, _jupPlanet.dec, utcDate);
+        const mCelestCoord  = equatorialToCelestCoord(meq);
+        const mLL           = coordToLatLong(mCelestCoord);
+        const mVaultCoord   = _bodyVault(mLL.lat, mLL.lng, _jupVaultZ);
+        const mGlobeVault   = _globeVaultAt(
+          mLL.lat,
+          _wrapLon180(meq.ra * 180 / Math.PI - c.SkyRotAngle),
+        );
+        const mLocalGlobe   = celestCoordToLocalGlobeCoord(mCelestCoord, c.TransMatCelestToGlobe);
+        const mAnglesGlobe  = localGlobeCoordToAngles(mLocalGlobe);
+        const { lgTrue: mLgTrue, lgApp: mLgApp } = _opticalPair(mLocalGlobe);
+        const mOptTrue = localGlobeCoordToGlobalFeCoord(
+          opticalVaultProject(mLgTrue, c.OpticalVaultRadius, c.OpticalVaultHeightEffective),
+          c.TransMatLocalFeToGlobalFe,
+        );
+        const mGlobeOptTrue = _globeOpticalProject(mLgTrue);
+        const mOpt = mLgApp === mLgTrue
+          ? mOptTrue
+          : localGlobeCoordToGlobalFeCoord(
+              opticalVaultProject(mLgApp, c.OpticalVaultRadius, c.OpticalVaultHeightEffective),
+              c.TransMatLocalFeToGlobalFe,
+            );
+        const mGlobeOpt = mLgApp === mLgTrue ? mGlobeOptTrue : _globeOpticalProject(mLgApp);
+        c.JupiterMoons.push({
+          id: moonDef.id,
+          name: moonDef.name,
+          ra: meq.ra, dec: meq.dec,
+          celestCoord: mCelestCoord, celestLatLong: mLL,
+          vaultCoord: mVaultCoord, globeVaultCoord: mGlobeVault,
+          opticalVaultCoord: mOpt, globeOpticalVaultCoord: mGlobeOpt,
+          opticalVaultCoordTrue: mOptTrue, globeOpticalVaultCoordTrue: mGlobeOptTrue,
+          anglesGlobe: mAnglesGlobe,
+        });
+      }
+    }
+
     // Star projection. The trepidation master forces all three apparent-of-
     // date corrections on; otherwise the three booleans apply independently.
     const starOpts = s.StarTrepidation
@@ -1461,6 +1511,26 @@ export class FeModel extends EventTarget {
             vaultCoord: p.vaultCoord,
             opticalVaultCoordTrue: p.opticalVaultCoordTrue,
             globeOpticalVaultCoordTrue: p.globeOpticalVaultCoordTrue,
+          };
+        }
+      } else if (target.startsWith('jmoon:')) {
+        const moonId = target.slice(6);
+        const mEntry = c.JupiterMoons.find((m) => m.id === moonId);
+        if (mEntry) {
+          info = {
+            target,
+            name: mEntry.name,
+            category: 'jmoon',
+            gpColor: 0x778899,
+            azimuth:   mEntry.anglesGlobe.azimuth,
+            elevation: mEntry.anglesGlobe.elevation,
+            ra: mEntry.ra, dec: mEntry.dec,
+            ptolemyReading: { ra: mEntry.ra, dec: mEntry.dec },
+            gpLat: mEntry.celestLatLong.lat,
+            gpLon: wrapLon(mEntry.ra * 180 / Math.PI - c.SkyRotAngle),
+            vaultCoord: mEntry.vaultCoord,
+            opticalVaultCoordTrue: mEntry.opticalVaultCoordTrue,
+            globeOpticalVaultCoordTrue: mEntry.globeOpticalVaultCoordTrue,
           };
         }
       } else if (target.startsWith('star:')) {

@@ -6090,6 +6090,15 @@ const GP_TRACER_COLORS = {
   mercury: 0xd0b090, venus: 0xfff0c8, mars: 0xd05040,
   jupiter: 0xffa060, saturn: 0xe4c888,
   uranus: 0xa8d8e0, neptune: 0x7fa6e8,
+  // Jupiter's moons
+  'jmoon:io':       0xffe060, 'jmoon:europa':   0xb8ddf0,
+  'jmoon:ganymede': 0xc8b890, 'jmoon:callisto': 0x8899aa,
+  'jmoon:metis': 0x888888, 'jmoon:adrastea': 0x888888,
+  'jmoon:amalthea': 0xaa8866, 'jmoon:thebe': 0xaa8866,
+  'jmoon:leda': 0x778899, 'jmoon:himalia': 0x778899,
+  'jmoon:lysithea': 0x778899, 'jmoon:elara': 0x778899,
+  'jmoon:ananke': 0x99667f, 'jmoon:carme': 0x99667f,
+  'jmoon:pasiphae': 0x99667f, 'jmoon:sinope': 0x99667f,
 };
 
 // External-data overlay: Stellarium-exported (RA, Dec) traces.
@@ -6302,6 +6311,16 @@ export class GPTracer {
         lon = _wrapLon(p.ra * 180 / Math.PI - skyRot);
         optical = ge ? (p.globeOpticalVaultCoord || p.opticalVaultCoord) : p.opticalVaultCoord;
         color = GP_TRACER_COLORS[name] || 0xffffff;
+      } else if (name.startsWith('jmoon:')) {
+        const moonId = name.slice(6);
+        const moons  = c.JupiterMoons;
+        if (!moons) continue;
+        const entry = moons.find((m) => m.id === moonId);
+        if (!entry) continue;
+        lat     = entry.celestLatLong.lat;
+        lon     = _wrapLon(entry.ra * 180 / Math.PI - skyRot);
+        optical = ge ? (entry.globeOpticalVaultCoord || entry.opticalVaultCoord) : entry.opticalVaultCoord;
+        color   = 0x778899;
       } else if (name.startsWith('star:')) {
         const starId = name.slice(5);
         let entry = null;

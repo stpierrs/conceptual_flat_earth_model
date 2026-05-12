@@ -19,6 +19,7 @@ import { GALAXIES_EXTRA2 }    from '../core/galaxiesExtra2.js';
 import { QUASARS_EXTRA }      from '../core/quasarsExtra.js';
 import { QUASARS_EXTRA2 }     from '../core/quasarsExtra2.js';
 import { SATELLITES_EXTRA }   from '../core/satellitesExtra.js';
+import { JUPITER_MOON_DEFS, GALILEAN_MOON_IDS, JUPITER_MOON_COLORS } from '../core/jupiterMoons.js';
 import { listProjections, listGeneratedProjections, listHqMaps, listGeMaps, PROJECTIONS } from '../core/projections.js';
 import { Autoplay } from './autoplay.js';
 import { t, setLang, onLangChange, LANGUAGES } from './i18n.js';
@@ -66,6 +67,10 @@ const BODY_SEARCH_INDEX = (() => {
   for (const q of QUASARS_EXTRA2)         out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const s of SATELLITES_EXTRA)       out.push({ id: `star:${s.id}`, name: s.name, color: '#66ff88' });
   out.push({ id: 'star:pluto', name: 'Pluto', color: '#a07c66' });
+  for (const m of JUPITER_MOON_DEFS) {
+    const hex = (JUPITER_MOON_COLORS[m.id] || 0x778899).toString(16).padStart(6, '0');
+    out.push({ id: `jmoon:${m.id}`, name: m.name, color: `#${hex}` });
+  }
   return out;
 })();
 
@@ -96,6 +101,14 @@ function resolveTargetAngles(targetId, c) {
   if (targetId === 'sun')  return c.SunAnglesGlobe  || null;
   if (targetId === 'moon') return c.MoonAnglesGlobe || null;
   if (c.Planets && c.Planets[targetId]) return c.Planets[targetId].anglesGlobe || null;
+  if (targetId.startsWith('jmoon:')) {
+    const moonId = targetId.slice(6);
+    if (c.JupiterMoons) {
+      const m = c.JupiterMoons.find((x) => x.id === moonId);
+      if (m) return m.anglesGlobe || null;
+    }
+    return null;
+  }
   if (targetId.startsWith('star:')) {
     const id = targetId.slice(5);
     for (const list of [c.CelNavStars, c.CataloguedStars, c.BlackHoles, c.Quasars, c.Galaxies, c.CelTheoStars]) {
@@ -705,6 +718,7 @@ const FIELD_GROUPS = [
                 'sun', 'moon',
                 'mercury', 'venus', 'mars', 'jupiter',
                 'saturn', 'uranus', 'neptune',
+                ...JUPITER_MOON_DEFS.map((md) => `jmoon:${md.id}`),
                 ...CEL_NAV_STARS.map((x) => `star:${x.id}`),
                 ...CATALOGUED_STARS.map((x) => `star:${x.id}`),
                 ...BLACK_HOLES.map((x) => `star:${x.id}`),
@@ -784,6 +798,38 @@ const FIELD_GROUPS = [
           { value: 'saturn',  label: 'Saturn',  color: '#e4c888' },
           { value: 'uranus',  label: 'Uranus',  color: '#a8d8e0' },
           { value: 'neptune', label: 'Neptune', color: '#7fa6e8' },
+        ]},
+      ]},
+      { title: "Jupiter's Moons", rows: [
+        { label: '', buttonLabel: 'Enable Galilean',
+          onClick: (m) => m.setState({
+            TrackerTargets: [
+              ...new Set([
+                ...(Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : []),
+                ...GALILEAN_MOON_IDS.map((id) => `jmoon:${id}`),
+              ]),
+            ],
+          }) },
+        { label: '', buttonLabel: 'Enable All Moons',
+          onClick: (m) => m.setState({
+            TrackerTargets: [
+              ...new Set([
+                ...(Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : []),
+                ...JUPITER_MOON_DEFS.map((md) => `jmoon:${md.id}`),
+              ]),
+            ],
+          }) },
+        { label: '', buttonLabel: 'Disable All Moons',
+          onClick: (m) => {
+            const ids = new Set(JUPITER_MOON_DEFS.map((md) => `jmoon:${md.id}`));
+            const cur = Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : [];
+            m.setState({ TrackerTargets: cur.filter((t) => !ids.has(t)) });
+          } },
+        { key: 'TrackerTargets', label: '', buttonGrid: [
+          ...JUPITER_MOON_DEFS.map((md) => {
+            const hex = (JUPITER_MOON_COLORS[md.id] || 0x778899).toString(16).padStart(6, '0');
+            return { value: `jmoon:${md.id}`, label: md.name, color: `#${hex}` };
+          }),
         ]},
       ]},
       { title: 'Cel Nav', rows: [

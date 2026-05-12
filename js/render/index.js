@@ -22,6 +22,7 @@ import { FlightRoutes } from './flightRoutes.js';
 import { StarfieldChart } from './starfieldChart.js';
 import { getProjection } from '../core/projections.js';
 import { FE_RADIUS } from '../core/constants.js';
+import { JUPITER_MOON_DEFS, JUPITER_MOON_COLORS } from '../core/jupiterMoons.js';
 import { ToRad } from '../math/utils.js';
 import { V } from '../math/vect3.js';
 import { celestLatLongToVaultCoord, feLatLongToGlobalFeCoord } from '../core/feGeometry.js';
@@ -290,6 +291,21 @@ export class Renderer {
       this.planetMarkers[name] = m;
       this.sm.world.add(m.group);
     }
+
+    // Jupiter's moons — one CelestialMarker per moon, smaller than planet dots,
+    // no halo so they stay distinct from Jupiter itself.
+    this.jupiterMoonMarkers = {};
+    for (const moonDef of JUPITER_MOON_DEFS) {
+      const color = JUPITER_MOON_COLORS[moonDef.id] || 0x99aacc;
+      const mk = new CelestialMarker(
+        color,
+        { vaultSize: 0.0028, opticalSize: 0.0014, haloScale: 1.8, showHalo: false },
+        clipPlanes,
+      );
+      this.jupiterMoonMarkers[moonDef.id] = mk;
+      this.sm.world.add(mk.group);
+    }
+
     this.sm.world.add(this.sunMarker.group);
     this.sm.world.add(this.moonMarker.group);
 
@@ -901,6 +917,26 @@ export class Renderer {
                 planetElevForFade, c.NightFactor);
     }
 
+    // Jupiter's moon markers — same gating rules as planets (night-only,
+    // must be in trackerSet, master celestial-bodies toggle must be on).
+    const moons = c.JupiterMoons || [];
+    for (const [moonId, mk] of Object.entries(this.jupiterMoonMarkers)) {
+      const mEntry = moons.find((m) => m.id === moonId);
+      if (!mEntry || !bodyCategoryOn || !planetNightOn) {
+        mk.group.visible = false;
+        continue;
+      }
+      if (!trackerSet.has(`jmoon:${moonId}`)) {
+        mk.group.visible = false;
+        continue;
+      }
+      mk.group.visible = true;
+      const mVault = _ge ? (mEntry.globeVaultCoord || mEntry.vaultCoord) : mEntry.vaultCoord;
+      const mOpt   = _ge ? (mEntry.globeOpticalVaultCoord || mEntry.opticalVaultCoord) : mEntry.opticalVaultCoord;
+      mk.update(mVault, mOpt, showTrueVault, s.ShowOpticalVault,
+                mEntry.anglesGlobe.elevation, c.NightFactor);
+    }
+
     this._updateTracks();
     this._updateRays();
 
@@ -1000,6 +1036,11 @@ export class Renderer {
     ];
     for (const obj of layers) setDT(obj);
     for (const mk of Object.values(this.planetMarkers || {})) {
+      if (!mk) continue;
+      setDT(mk.sphereDot);
+      setDT(mk.sphereHalo);
+    }
+    for (const mk of Object.values(this.jupiterMoonMarkers || {})) {
       if (!mk) continue;
       setDT(mk.sphereDot);
       setDT(mk.sphereHalo);
