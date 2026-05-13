@@ -429,13 +429,22 @@ export function planetEquatorial(name, date) {
   return { ra: NaN, dec: NaN };
 }
 
-// Venus epicycle true anomaly — the angle that drives the visible phase.
-// tepianomve = 0°  → Venus at apogee of its epicycle (far from Earth,
-//                    near superior conjunction) → fully illuminated, f = 1.
-// tepianomve = 180° → Venus at perigee (nearest Earth, inferior conjunction)
-//                    → dark side facing observer, f = 0.
+// Venus phases — straight out of the epicycle geometry, no heliocentric
+// stage required.
+//
+// Venus rides an epicycle. When it's at the far end of that epicycle
+// (tepianomve = 0°) it's near superior conjunction — fully lit from our
+// perspective, like a full moon. When it's at the near end (180°) it's
+// at inferior conjunction — dark side facing us, new moon equivalent.
+// Every point in between gives you the crescent or gibbous you'd actually
+// see in the sky. Ptolemy's geometry gives you this for free.
+//
 // Illuminated fraction: f = (1 + cos(tepianomve)) / 2
-// No heliocentric stage — this is pure Ptolemaic epicycle geometry.
+//   0° → f = 1.0 (full)    180° → f = 0.0 (new)
+//
+// All parameters — apogee longitude, epicycle radius, mean anomaly rate —
+// come from Almagest tables built by watching Venus over centuries.
+// Not a single AU or solar distance constant anywhere in this function.
 export function venusPhaseAngle(date) {
   const ddays     = ptolemyDay(date);
   const { mlongsu } = sunLongitude(ddays);

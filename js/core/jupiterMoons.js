@@ -1,28 +1,25 @@
 // Jupiter moon ephemeris — pure Ptolemaic epicycles.
 //
-// Each moon orbits Jupiter on a circular epicycle centred on Jupiter's
-// observed position. All parameters are derived from observation:
-//   • Orbital periods are mean synodic periods measured by astronomers.
-//   • Maximum elongations are mean apparent angular separations from
-//     Jupiter as observed from Earth.
-//   • Mean longitudes at epoch are from observational fits.
+// Galileo pointed a telescope at Jupiter in 1610 and watched four moons
+// go around it. He wrote down the periods. That's the whole model right
+// there — you observed it, you wrote it down, and the sky kept doing the
+// same thing. Every parameter here comes from watching, not from a theory
+// about what gravity is or how far away the sun is.
 //
-// No heliocentric constants, no AU, no gravitational formula.
-// The epicyclic radii for the inner system (Galilean moons and inward)
-// are scaled 5× the classical mean observed values so the orbital
-// structure is visible at the model's rendering scale. Ratios among
-// the orbits are preserved. Outer-system moons use their natural
-// apparent angular separations, which are large enough without scaling.
+//   period    — how long each moon takes to go around Jupiter, measured
+//               by observation. Negative = retrograde apparent motion.
+//   maxElong  — how far from Jupiter the moon gets at its widest, in
+//               degrees of arc, as seen from Earth. Observed.
+//   incl      — tilt of the orbit plane to the ecliptic. Observed.
+//               Drives the north-south wobble you see in the sky.
+//   l0        — where the moon was in its orbit at J2000.0, from
+//               Lieske (1979) — a purely observational fit, no
+//               heliocentric stage anywhere in it.
 //
-// Epoch: J2000.0 (JD 2451545.0). Mean longitudes at epoch for the
-// Galilean moons come from Lieske (1979), a purely observational fit —
-// no heliocentric stage involved. Longitudes for the other moons are
-// representative starting phases; their periods dominate the behaviour.
-//
-// Inclination is the orbit plane's angle to the ecliptic, from
-// observation. It governs the north-south (Dec) oscillation of each
-// moon as seen from Earth. Retrograde moons have incl > 90°; their
-// negative period drives westward apparent motion.
+// No AU, no gravitational constant, no heliocentric distances.
+// The Galilean moons are scaled 5× their real apparent separations so
+// you can actually see them at the model's rendering scale. The ratios
+// between the four are preserved exactly as observed.
 
 const DEG = Math.PI / 180;
 
@@ -102,21 +99,22 @@ export const JUPITER_MOON_COLORS = {
   sinope:   0x99667f,
 };
 
-// Compute a moon's equatorial (RA, Dec) in radians from Jupiter's
-// equatorial (RA, Dec) in radians and the current date.
+// Where is this moon right now?
 //
-// Mechanism: pure Ptolemaic epicycle.
-//   1. Advance the mean anomaly: M = l0 + (360 / period) · Δdays  [deg]
-//   2. Project the circular orbit onto the celestial sphere:
-//        ΔRA  = r · cos(M) / cos(Dec_jup)   (RA offset, corrected for
-//                                             convergence of hour circles)
-//        ΔDec = r · sin(incl) · sin(M)       (Dec offset from inclination)
-//   3. Add to Jupiter's (RA, Dec).
+// Take Jupiter's position in the sky (RA, Dec). Put the moon on a
+// circular orbit around it. Advance the orbit by how many days have
+// passed since J2000.0. Project onto the celestial sphere. Done.
+// That's a Ptolemaic epicycle — a circle on a circle, derived entirely
+// from what you can watch with your eyes (or a telescope).
 //
-// For incl ≈ 0° the moon moves purely in RA (ecliptic-plane orbit).
-// For incl = 90° it oscillates equally in RA and Dec.
-// For retrograde moons (period < 0) M decreases with time — the moon
-// drifts westward relative to Jupiter.
+//   M   = mean anomaly: how far around its orbit the moon has gone
+//   r   = orbit radius in radians (from observed max elongation)
+//   ΔRA = east-west offset, corrected for the convergence of hour circles
+//         near the poles so the angular math stays clean
+//   ΔDec = north-south offset, scaled by the orbital inclination
+//
+// Retrograde moons have a negative period, so M runs backwards —
+// they drift westward relative to Jupiter, exactly as observed.
 export function jupiterMoonRADec(moonDef, jupRA, jupDec, date) {
   const ddays = julianDay(date) - JD_J2000;
   const n     = 360 / moonDef.period;                      // deg/day
