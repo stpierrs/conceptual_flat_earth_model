@@ -1,8 +1,6 @@
-// Demo manager: play/stop/next/prev + UI list.
-//
-// Handles grouped rendering, autoplay queue (advance to the next
-// demo in a list when the current one finishes), and warning-banner
-// integration via the active-source callback. Right?
+// Demo manager — play, stop, next, prev, the UI list, and the autoplay
+// queue that chains demos together. When one finishes it kicks off the
+// next one automatically.
 
 import { Animator } from './animation.js';
 import { DEMOS, DEMO_GROUPS } from './definitions.js';

@@ -1,27 +1,9 @@
-// Shared coordinate utilities — used by the Ptolemy pipeline and the
-// eclipse-demo refiner. Common ground, right?
+// Shared coordinate utilities used by the Ptolemy pipeline and eclipse demos.
 //
-// Frame note up front, since this file gets the kind of math a globe
-// model usually takes credit for: every formula in here is observation
-// expressed in coordinate labels. RA / Dec / obliquity / sidereal time
-// are tags pinned to the same hemisphere everyone sees from their spot
-// on the disc; the Almanac compilers stitched the values together from
-// a few hundred years of observed positions. We run the same numbers,
-// we just don't import the cosmology.
-//
-// Exports here:
-//   - `julianDay`, `meanObliquityDeg`, `moonNodeOmegaDeg` — coordinate
-//     utilities Ptolemy uses for its time / obliquity arithmetic.
-//   - `greenwichSiderealDeg` — Greenwich sidereal time. Just clock
-//     arithmetic: how many degrees the celestial
-//     sphere has rotated past the Greenwich meridian since the prime
-//     instant. Same observation either model uses.
-//   - `equatorialToCelestCoord` — radians-to-unit-vector helper.
-//   - `apparentStarPosition` — applies precession / nutation /
-//     aberration corrections to fixed-star J2000 RA / Dec so old
-//     catalog values line up with the sky tonight.
-//   - `findNextEclipses`, `refineEclipseByMinSeparation` — syzygy-filter
-//     scan over sun/moon separations, used by the eclipse-demo refiner.
+// RA, Dec, obliquity, sidereal time — these are coordinate labels, not
+// a cosmology. The Almanac compilers measured these values by watching the
+// sky for centuries. We use the same numbers; we just don't attach a story
+// about why the sky behaves that way.
 
 export const DEG = Math.PI / 180;
 
@@ -32,27 +14,21 @@ export function julianDay(date) {
   return date.getTime() / 86400000 + 2440587.5;
 }
 
-// Mean obliquity of the ecliptic in degrees, standard polynomial form.
-// "Ecliptic" is a label for the band the sun stays inside as it
-// traces the year. The 23.4393° tilt is the half-angle between the
-// celestial equator (where the stars rotate around the pole) and the
-// sun's annual track. From the disc, that's the same observed band —
-// labeled with a Greek word that's older than either model. Right?
+// The obliquity — the tilt of the sun's annual track against the celestial
+// equator. About 23.4°. You can measure it yourself: watch where the sun
+// rises and sets over a full year, that angle is it.
 export function meanObliquityDeg(T) {
   return 23 + 26 / 60 + 21.448 / 3600
        - (46.8150 * T + 0.00059 * T * T - 0.001813 * T * T * T) / 3600;
 }
 
-// Longitude of the Moon's ascending node Ω (degrees) — observational
-// quantity tracking where the moon's path crosses the ecliptic. This is what
-// drives the low-accuracy nutation terms we use in both sun and moon below.
+// Where the moon's path crosses the sun's track. Drifts around every 18.6
+// years — you can watch it shift over time. Drives the nutation wobble.
 export function moonNodeOmegaDeg(T) {
   return norm360(125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000);
 }
 
-// Geocentric equatorial coordinates of the sun — RA and Dec in radians,
-// apparent-of-date — high-accuracy series expansion.
-// This is what gives us the sun's position on the celestial vault. Right?
+// Where is the sun right now? RA and Dec in radians, apparent-of-date.
 export function sunEquatorial(date) {
   const jd = julianDay(date);
   const T  = (jd - 2451545.0) / 36525;
@@ -76,10 +52,9 @@ export function sunEquatorial(date) {
   return { ra, dec };
 }
 
-// Geocentric equatorial coordinates of the moon, apparent-of-date.
-// Expanded periodic series — 27 longitude terms and 18 latitude terms.
-// That's a lot of periodic corrections, but you need them to nail
-// the moon's position to ~10 arcseconds.
+// Where is the moon right now? RA and Dec in radians, apparent-of-date.
+// 27 longitude terms and 18 latitude terms — the moon wanders enough
+// that you need that many to nail its position to ~10 arcseconds.
 export function moonEquatorial(date) {
   const jd = julianDay(date);
   const d = jd - 2451545.0;
@@ -161,8 +136,8 @@ export function moonEquatorial(date) {
   return { ra, dec };
 }
 
-// Greenwich Mean Sidereal Time in degrees (0 .. 360). This ties our
-// RA/Dec coordinates to an observer's local position on the flat plane.
+// How far has the sky rotated since midnight at Greenwich? That's all
+// sidereal time is — clock arithmetic telling you where the sky is now.
 export function greenwichSiderealDeg(date) {
   const jd = julianDay(date);
   const T = (jd - 2451545.0) / 36525;
@@ -173,53 +148,25 @@ export function greenwichSiderealDeg(date) {
   return norm360(gst);
 }
 
-// Equatorial (RA, Dec) to a unit vector in the model's celestial frame.
-// Celest frame: +x points to the vernal equinox (RA=0, Dec=0),
-// +z points to the celestial pole — the apex of the vault, right?
+// Turns (RA, Dec) into a direction vector pointing at that spot in the sky.
 export function equatorialToCelestCoord({ ra, dec }) {
   const cd = Math.cos(dec);
   return [cd * Math.cos(ra), cd * Math.sin(ra), Math.sin(dec)];
 }
 
-// --- Apparent star position -------------------------------------------
+// Star catalogs record where a star was at J2000.0. This nudges those
+// coordinates to where the star actually appears tonight — three small
+// observed corrections you can toggle independently:
 //
-// Takes mean J2000 equatorial coordinates and converts them to
-// apparent-of-date. Three small corrections are applied — none of
-// which assume any particular world model. Precession is the slow
-// drift of the celestial pole everyone observes (you can watch the
-// pole star slowly cease to be the pole star over centuries; that's
-// just what the sky does). Nutation is the small wobble layered on
-// top of that. Aberration is the ±20" annual sway every star does
-// in apparent position — observed, not derived. We apply them so
-// star positions printed in old catalogs (J2000) line up with the
-// sky tonight, regardless of which model dressed them up. Right?
+//   precession: the slow drift of the pole (~20' over decades — you
+//               can watch Polaris drift off-axis over a lifetime)
+//   nutation:   the small ±9" wobble riding on top of that
+//   aberration: the ±20" annual sway every star makes as the observer
+//               moves — measured by Bradley in 1725, pure observation
 //
-// apparent-of-date equatorial coordinates. We can apply up to three
-// corrections independently via the `opts` argument:
-//
-//   { precession: bool, nutation: bool, aberration: bool }
-//
-// All three default to on — full apparent-of-date, matches Stellarium
-// to within a few arcseconds. Any subset can be toggled independently:
-//
-//   precession: Lieske 1977 / IAU 1976 — the ~20' long-term drift
-//   nutation:   two-term low-accuracy series — the ±9" Ω-driven wobble
-//   aberration: first-order — the ±20.5" annual ellipse
-//
-// We replaced the earlier `mode` string enum with an options object
-// so the UI can expose independent checkboxes, one per correction
-// stage. The "Trepidation" UI toggle just flips all three at once
-// downstream — this function doesn't care which toggles produced the
-// flags, it just applies what you tell it to.
-//
-// When only a subset is applied, the isolated corrections use the
-// input RA/Dec directly rather than a fully sequenced intermediate;
-// for the small amplitudes of nutation and aberration the difference
-// is sub-arcsecond, so it's fine.
-//
-// Proper motion isn't tabulated in `celnavStars.js` so it's never
-// applied; cumulative PM over 26 years from J2000 is ≤30" (Arcturus),
-// which is below our accuracy envelope anyway.
+// All three default on. Pass { precession, nutation, aberration } bools
+// to toggle any of them. The "Trepidation" UI switch just flips all
+// three at once.
 export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
   const {
     precession = true,
@@ -301,13 +248,9 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
   return { ra, dec };
 }
 
-// --- Eclipse search (syzygy filter) -------------------------------------
-//
-// Steps forward from `startDate`, checking the sun-moon angular
-// separation (solar eclipses) and the sun-to-antimoon separation (lunar
-// eclipses). A local minimum of either that also falls below ~1.5°
-// marks an eclipse. Accuracy tracks the moon series (~0.5°) — good
-// enough to name the next event to the day for any date 1900–2100.
+// Eclipse finder — steps through time looking for the sun and moon to
+// get close. When they line up within ~1.5°, that's your eclipse.
+// Accurate enough to find the right day for any date 1900–2100.
 const ECLIPSE_ANG_THRESHOLD = 1.5 * DEG;
 
 function sepAngle(a, b) {
@@ -315,9 +258,8 @@ function sepAngle(a, b) {
   return Math.acos(Math.max(-1, Math.min(1, d)));
 }
 
-// findNextEclipses accepts optional `sunFn` / `moonFn` so
-// each pipeline can scan for syzygies in its own frame. Default remains
-// the common helpers for backward compatibility.
+// Accepts optional sunFn / moonFn so each ephemeris pipeline can scan
+// using its own positions — each one finds the eclipse it predicts.
 export function findNextEclipses(startDate, windowDays = 400, sunFn = sunEquatorial, moonFn = moonEquatorial) {
   const stepMs = 3600 * 1000;
   const start = startDate.getTime();
@@ -355,11 +297,9 @@ export function findNextEclipses(startDate, windowDays = 400, sunFn = sunEquator
   return { nextSolar, nextLunar };
 }
 
-// Refines a known approximate eclipse time by scanning ±2 h in
-// 1-minute steps and picking the instant of minimum sun-moon (or
-// sun-antimoon) angular separation using the supplied `sunFn` / `moonFn`
-// pair. Each ephemeris pipeline lands on its *own* closest syzygy —
-// which is exactly the point of the ephemeris-linked playback. Right?
+// Zoom in on a candidate eclipse time — scan ±2 hours in 1-minute steps,
+// find the moment of closest approach. Each pipeline finds its own answer,
+// which is the whole point of having multiple pipelines to compare.
 export function refineEclipseByMinSeparation(approxDate, sunFn, moonFn, { kind = 'solar', halfWindowMinutes = 120 } = {}) {
   const stepMs = 60 * 1000;
   let bestT = approxDate.getTime();

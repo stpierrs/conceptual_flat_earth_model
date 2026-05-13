@@ -1,18 +1,16 @@
-// Flat-earth disc + dome geometry, all in unitless FE_RADIUS coordinates.
+// Disc and dome geometry, all in unitless FE_RADIUS coordinates.
 //
-// Frame note. The dome is the literal hemisphere of sky observed from
-// the disc — same hemisphere everyone observes from any spot on the
-// plane. The math here projects celestial directions (RA / Dec) onto
-// that vault surface; the trigonometry is the same arc-on-sphere math
-// any observer uses, frame-neutral. Right?
+// Takes a direction in the sky (RA / Dec) and works out where to draw
+// it on the vault surface above the disc. The trig is the same arc-on-
+// sphere math any observer uses — it just describes what you see overhead.
+// No physical size claims, no absolute distances.
 
 import { ToRad, sqr } from '../math/utils.js';
 import { coordToLatLong, localGlobeCoordToGlobalFeCoord } from './transforms.js';
 import { latLongToCoord } from './transforms.js';
 
-// We route (lat, lon) → disc xy through whatever map projection is active,
-// so the observer and every above-disc anchor share the same coordinate
-// framework as the FE grid lines. Right?
+// Everything goes through the active map projection so the disc grid and
+// every object above it stay in the same coordinate system.
 import { canonicalLatLongToDisc } from './canonical.js';
 import { getProjection } from './projections.js';
 
