@@ -14,7 +14,7 @@ import { t, onLangChange, isRtl } from './ui/i18n.js';
 const model = new FeModel();
 const canvas = document.getElementById('feCanvas');
 
-// Build the UI first so the controls are visible even if WebGL fails. Right?
+// Build the UI first — controls stay visible even if WebGL fails.
 const demos = new Demos(model);
 const viewEl_panel = document.getElementById('view');
 buildControlPanel(viewEl_panel, model, demos);
@@ -25,9 +25,7 @@ if (trackerHudEl) buildTrackerHud(trackerHudEl, model);
 const trackingInfoEl = document.getElementById('tracking-info-popup');
 if (trackingInfoEl) buildTrackingInfoPopup(trackingInfoEl, model);
 
-// First load only — we pick a language from navigator.languages
-// so the page comes up in the visitor's locale when there's nothing
-// stored in the URL hash yet. Right?
+// First load only — pick the browser's language if nothing is in the URL hash yet.
 const _hashHasLang = window.location.hash.includes('Language=');
 if (!_hashHasLang) {
   const SUPPORTED = new Set(['en','cs','es','fr','de','it','pt','pl','nl','sk','ru','ar','he','zh','ja','ko','th','hi']);
@@ -43,22 +41,11 @@ if (!_hashHasLang) {
   }
 }
 
-// Tells canonical.js which projection is active for the FE grid.
-//
-// Two ways the active projection can override the default north-pole
-// AE framework:
-//
-//   1. The dual-pole (`dp`) world model — always uses the `dp`
-//      projection's grid, ignores `MapProjection`.
-//   2. Otherwise, if the user-selected `MapProjection` (FE) has
-//      `useProjectionGrid: true` on its registry entry (e.g. the
-//      Hellerick boreal triaxial entry that backs 'Proportional AE
-//      Map'), the grid follows that projection. Observer placement,
-//      sun / moon GPs, eclipse paths and the FE lat/lon graticule all
-//      stay internally consistent with the active layout. Right?
-//
-// We register this before the Renderer so it runs first and rebuilds
-// DiscGrid / LatitudeLines for the new projection.
+// Keep the grid projection consistent with whatever map the user picked.
+// Dual-pole mode always uses the dp grid. Otherwise, if the selected
+// projection has useProjectionGrid: true, the grid follows it so the
+// disc, observer, sun/moon ground points, and graticule all line up.
+// Registered before the Renderer so the grid rebuilds first.
 import { getProjection } from './core/projections.js';
 const refreshActiveProjection = () => {
   if (model.state.WorldModel === 'dp') {
@@ -92,9 +79,7 @@ try {
   model.update();
   model.dispatchEvent(new CustomEvent('update'));
 } catch (err) {
-  // Catch first-paint errors so the controls still show even if the
-  // initial render frame throws. The footer status line tells the user
-  // what went wrong and points them at DevTools. Right?
+  // Catch first-paint errors — controls still show, status line reports it.
   console.error('First-frame update() threw:', err);
   const _desc = document.querySelector('#desc .desc-dynamic');
   if (_desc) {
@@ -107,9 +92,7 @@ try {
 
 const descDynamicEl = document.querySelector('#desc .desc-dynamic');
 
-// Sun elevation formulas for the flat earth model. Right?
-// anti-transit: −(90 − |lat + dec|) → 24h day when |lat+dec| > 90
-// transit:       (90 − |lat − dec|) → 24h night when |lat−dec| > 90
+// Status line — where is the sun and what does that mean for the observer.
 function defaultStatus(s, c) {
   const lat = s.ObserverLat;
   const dec = (c.SunDec || 0) * 180 / Math.PI;
@@ -140,13 +123,11 @@ if (logoEl) {
   syncLogo();
 }
 
-// When we enter Optical mode we snap to FOV 75° and pitch 7.5° so
-// 45° elevation sits near the top of the viewport. Right?
+// Snap camera on Optical mode entry so 45° elevation sits near viewport top.
 const OPTICAL_ENTRY_ZOOM  = 1.0;
 const OPTICAL_ENTRY_PITCH = 7.5;
-// When leaving Optical while tracking a body, we snap to a bird's-eye
-// preset in Heavenly mode so the disc is visible with the tracked body's
-// ground point near center. The user can pan from there. Right?
+// Leaving Optical while tracking — snap to bird's-eye so the disc is
+// visible with the tracked body's ground point near center.
 const HEAVENLY_TRACK_PITCH = 80.3;
 const HEAVENLY_TRACK_DIST  = 10;
 const HEAVENLY_TRACK_ZOOM  = 4.67;
@@ -155,10 +136,8 @@ model.addEventListener('update', () => {
   const now = !!model.state.InsideVault;
   if (now && !_prevInsideVault) {
     if (model.state.FollowTarget) {
-      // Entering Optical while tracking — we keep the zoom but skip
-      // the pitch snap. The follow listener in mouseHandler re-aims
-      // heading/pitch at the target on the very next update tick,
-      // so the body stays centered. Right?
+      // Tracking while entering Optical — keep zoom, skip pitch snap.
+      // mouseHandler re-aims at the target on the next tick.
       model.setState({
         OpticalZoom: OPTICAL_ENTRY_ZOOM,
         FreeCamActive: false,
@@ -180,8 +159,8 @@ model.addEventListener('update', () => {
   _prevInsideVault = now;
 });
 
-// Cadence chip — shows wheel-step, FOV, and heading in Optical mode.
-// I mean, when you're looking up at the dome you need to know those. Right?
+// Cadence chip — step size, FOV, and heading when in Optical mode.
+// When you're looking up at the dome you need to know where you're pointed.
 const cadenceChip = document.createElement('div');
 cadenceChip.id = 'cadence-chip';
 cadenceChip.style.cssText = `
@@ -202,8 +181,8 @@ cadenceChip.style.cssText = `
 const viewEl = document.getElementById('view');
 if (viewEl) viewEl.appendChild(cadenceChip);
 
-// Must match refinedAzCadenceForFov in worldObjects.js and
-// opticalCadenceStepDeg in mouseHandler.js. Right?
+// Must stay in sync with refinedAzCadenceForFov (worldObjects.js)
+// and opticalCadenceStepDeg (mouseHandler.js).
 function activeCadenceLabel(fovDeg) {
   if (fovDeg >= 30) return '15°';
   if (fovDeg >= 8)  return '5°';
@@ -242,9 +221,7 @@ if (aboutBtn && aboutPopup) {
   aboutBtn.addEventListener('click', (e) => { e.stopPropagation(); openInfoPopup(aboutPopup); });
 }
 if (legendBtn && legendPopup) {
-  // We try `about_<lang>.md` first for the current language,
-  // then fall back to `about.md` (English) if it's not there.
-  // Re-fetch and re-render whenever the language changes. Right?
+  // Try the translated about_<lang>.md first, fall back to English.
   let legendLoadedLang = null;
   let legendLoading = null;
   const loadLegend = async () => {
@@ -280,8 +257,7 @@ if (legendBtn && legendPopup) {
     await loadLegend();
     openInfoPopup(legendPopup);
   });
-  // When the language changes, bust the cache so the next click
-  // (or the open popup right now) pulls fresh translated content. Right?
+  // Language changed — bust the cache so the next open pulls fresh content.
   onLangChange(() => {
     legendLoadedLang = null;
     if (!legendPopup.hidden) loadLegend();
@@ -296,9 +272,8 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Minimal markdown renderer for the Legend popup. Handles headings,
-// paragraphs, bullet lists, GFM tables, code spans, bold, italic.
-// That's all we need here. Right?
+// Minimal markdown renderer for the Legend popup — headings, paragraphs,
+// bullet lists, GFM tables, code spans, bold, italic. Nothing more needed.
 function renderMarkdown(src) {
   const lines = src.replace(/\r\n?/g, '\n').split('\n');
   const out = [];
@@ -349,7 +324,7 @@ function renderMarkdown(src) {
   return out.join('\n');
 }
 
-// Walk the DOM and translate all data-i18n nodes — About popup text and so on.
+// Translate all data-i18n nodes in the DOM — About popup text and so on.
 function refreshI18nNodes() {
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const k = el.getAttribute('data-i18n');
@@ -381,11 +356,8 @@ window.model = model;
 window.renderer = renderer;
 window.demos = demos;
 
-// Service-worker registration kept alive so any browser still running
-// the old S669 worker picks up the S671 kill-switch on next load,
-// clears its caches, and self-unregisters. Without this the old worker
-// could persist up to 24h. After one navigation cycle no worker remains.
-// Right?
+// Service-worker kept registered so old cached workers pick up the kill-switch
+// on their next load and clear themselves out.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});

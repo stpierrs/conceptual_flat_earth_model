@@ -1,22 +1,18 @@
-// three.js scene, camera, and renderer setup for the flat earth model.
-// World coords map straight to the FE frame — z-up, x forward, y east.
-// Camera `up` is +z so all the math stays in FE coords. Right?
+// three.js scene setup — camera, renderer, coordinate frame.
 //
-// (three.js doesn't care about world models; it draws triangles and
-// lines wherever you tell it. We pin the renderer's coordinate frame
-// to the FE disc so the math in every other file stays clean.)
+// World coords are FE-native: z-up, x forward, y east. three.js doesn't
+// care what you're drawing; it draws triangles where you put them. We
+// keep the coordinate frame consistent with the disc so every other file
+// can use disc coordinates directly.
 
 import * as THREE from 'three';
 import { ToRad } from '../math/utils.js';
 import { canonicalLatLongToDisc } from '../core/canonical.js';
 import { FE_RADIUS } from '../core/constants.js';
 
-// Given a tracker target id, we pull its ground-point { lat, lon } and
-// its vault coord — where the body actually sits in 3D world space —
-// using the same formulas app.update() runs. Returns null if we can't
-// find the id in the current snapshot. We use the vault coord as the
-// camera look-at so zooming keeps the body centred on screen, not
-// the disc point underneath it. Right?
+// Find where a tracked body sits in 3D space so the camera can point at it.
+// Uses the vault coord (where the body is on the dome) not the ground point
+// underneath it — otherwise zooming would aim at the disc instead of the sky.
 function resolveTargetGp(targetId, c) {
   if (!targetId) return null;
   const wrapLon = (x) => ((x + 180) % 360 + 360) % 360 - 180;

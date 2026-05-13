@@ -1,46 +1,29 @@
-// Coordinate-frame transforms and conversions.
+// Rotates things between the coordinate frames the model uses.
 //
-// Reference frame: stationary flat earth, rotating celestial dome.
-// (Coordinate frames are abstract — they're labels for orientations,
-// not claims about physics. Every observation involves a frame; we
-// pick the ones that match what observers actually see from the disc.)
+// The sky rotates. The disc doesn't. These transforms move positions
+// between those two things and the observer's local "up / east / north."
+// Frames are just labels — they describe what you see, not what's moving.
 //
-//   celest  - +z is the celestial pole (the dome's axis of rotation);
-//             sun/moon directions live here as unit vectors
-//   globe   - local observer frame: +x zenith, +y east, +z north —
-//             this is just the standard "up / east / north" anyone uses
-//             to describe what they see overhead; nothing globe-specific
-//             about it despite the name. Right?
-//   fe-local- local flat-earth frame at the observer: +z up, +x outward, +y east
-//   fe      - global stationary flat-earth disc: z=0 is the disc plane, +z up
-//   dome    - rotating sky frame: the sky's current angular position about +z
-//             determines how a dome-fixed point maps to fe coords
+//   celest   — sky frame, axis at the celestial pole
+//   globe    — observer's local frame: zenith up, east, north
+//   fe-local — flat-earth frame at the observer: +z up
+//   fe       — global disc frame: z=0 is the disc plane
 
 import { ToRad, ToDeg, Limit1 } from '../math/utils.js';
 import { M } from '../math/mat3.js';
 import { V } from '../math/vect3.js';
 import { canonicalLatLongToDisc } from './canonical.js';
 
-// Celest → local-globe: rotate by -(observer-longitude + skyRotAngle) about Z,
-// then tilt by +latitude about Y. That's how we align the dome to the observer. Right?
+// Line up the sky with what the observer sees — spin by longitude and
+// sky rotation, then tilt by latitude.
 export function compTransMatCelestToGlobe(obsLatDeg, obsLongDeg, skyRotAngleDeg) {
   const first = M.RotatingZ(ToRad(-obsLongDeg - skyRotAngleDeg));
   return M.RotatingY(ToRad(obsLatDeg), first);
 }
 
-// Local-fe → global-fe.
-//
-// Local-FE convention: +x = south, +y = east, +z = up. We build the rotation
-// from the active projection's gradient at (obsLat, obsLon) so a non-AE
-// projection like DP gets the right curved-meridian tangent for "north".
-// Sampling `canonicalLatLongToDisc` keeps this in lockstep with the
-// projection-dispatch in canonical.js (S680).
-//
-// For AE polar the gradient collapses to `-(cos λ, sin λ)` for the
-// "north" direction — i.e. `RotatingZ(λ)` — so behaviour is unchanged
-// when no override is active. At the canonical AE pole (lat = 90°)
-// the gradient is singular; we fall back to the longitude rotation so
-// the meridian set by ObserverLong continues to drive the frame.
+// Local-FE → global-FE. Uses the active projection's gradient at the
+// observer's location so "north" stays consistent with the disc grid —
+// an AE map and a DP map have different "north" directions on the disc.
 export function compTransMatLocalFeToGlobalFe(observerCoord, observerLongDeg, observerLatDeg = null) {
   let ax, ay, bx, by;
   if (observerLatDeg === null) {

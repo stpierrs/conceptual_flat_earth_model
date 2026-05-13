@@ -1,9 +1,8 @@
-// Renderer facade: owns the scene, instantiates every world object, and
-// routes model 'update' events to their per-frame update methods.
+// Renderer — owns the scene and every object in it, routes model
+// update events to per-frame redraws.
 //
-// (Pure rendering layer — projects whatever the model state says onto
-// pixels via three.js. No ephemeris, no physics, no cosmology; it just
-// paints the dome and disc the way the model laid them out. Right?)
+// Pure drawing layer. The model computes where everything is;
+// this file puts pixels where the model says. No ephemeris, no physics.
 
 import * as THREE from 'three';
 import { SceneManager } from './scene.js';
