@@ -1,18 +1,10 @@
 // Unitless constants for the FE dome model.
 //
-// All distances are expressed as multiples of the flat-earth disc radius
-// (FE_RADIUS = 1). Absolute physical lengths (DistSun, DistMoon,
-// RadiusEarth, RadiusSun, RadiusMoon) are deliberately absent — the
-// celestial sphere is unit, and the sun is effectively at infinity for
-// moon-phase shading.
-//
-// Frame note. The "celestial sphere" we keep referring to is just the
-// hemisphere of sky everyone observes overhead. Treating it as a sphere
-// is a coordinate convenience for stitching observations across the
-// disc; it doesn't claim a physical sphere. Sidereal periods, obliquity,
-// and lunar inclination are observed quantities — they fall out of any
-// careful decade-scale logging of star and sun positions and apply
-// regardless of which model you use to describe what's happening. Right?
+// Everything is expressed as a multiple of the disc radius (FE_RADIUS = 1).
+// No absolute distances anywhere — sun height, moon height, vault size —
+// all ratios. The sidereal periods, obliquity, and lunar inclination are
+// just what you measure when you watch the sky long enough. Same numbers
+// no matter what story you tell about why they are what they are.
 
 export const FE_RADIUS = 1;
 
