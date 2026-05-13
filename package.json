@@ -1,0 +1,20 @@
+{
+  "name": "shanes-model",
+  "version": "2.0.0",
+  "description": "Ptolemaic flat-earth astronomy simulator",
+  "private": true,
+  "scripts": {
+    "sync":         "cap sync",
+    "open:android": "cap open android",
+    "open:ios":     "cap open ios",
+    "build:android": "cap sync android && cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core":    "^6.0.0",
+    "@capacitor/ios":     "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

@@ -1,19 +1,20 @@
 {
-  "name": "FE Conceptual Model",
-  "short_name": "FE Model",
-  "description": "Conceptual flat-earth astronomy simulation",
+  "name": "Shane's Model 2.0",
+  "short_name": "Shane's Model",
+  "description": "Ptolemaic flat-earth astronomy simulator. Watch epicycles move in real time — planets, Jupiter's moons, Venus phases, solar and lunar eclipses.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0e121a",
   "theme_color": "#0e121a",
+  "categories": ["education"],
   "icons": [
     {
       "src": "assets/ac_logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
