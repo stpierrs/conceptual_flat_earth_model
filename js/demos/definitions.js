@@ -890,7 +890,7 @@ const PLANET_EPICYCLE_DEMOS = [
       FollowTarget: 'venus',
       TrackerTargets: ['venus'],
       SpecifiedTrackerMode: false,
-      OpticalZoom: 3.0,
+      OpticalZoom: 5.0,            // zoom in so the phase disc is clearly legible
       PermanentNight: true,
       VaultSize: 1, VaultHeight: 0.45,
       ShowOpticalVault: true,
@@ -899,9 +899,12 @@ const PLANET_EPICYCLE_DEMOS = [
       ShowTruePositions: true,
     },
     tasks: () => [
-      Ttxt('Venus — January 2025. Phase from the Ptolemaic true epicycle anomaly: 0° = full (superior conjunction), 180° = new (inferior conjunction).'),
-      Tpse(T1),
-      Tval('DateTime', 3141, 25 * T1, 0, 'linear'),
+      Ttxt('Venus — January 2025. The phase disc is driven by the Ptolemaic true epicycle anomaly. Watch it swell from crescent toward full over the next 80 seconds.'),
+      Tpse(T5),
+      // 200 days over 75 s ≈ 2.7 days/wall-sec → phase changes ~1.7°/sec,
+      // slow enough to watch the terminator sweep across the disc.
+      Tval('DateTime', 3141, 75 * T1, 0, 'linear'),
+      Ttxt('Phase cycle complete. 0° = superior conjunction (full), 180° = inferior (new).'),
     ],
   },
   {
