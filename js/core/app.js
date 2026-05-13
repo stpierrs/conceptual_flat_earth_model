@@ -26,6 +26,7 @@ import { SATELLITES,   satelliteById, satelliteSubPoint } from './satellites.js'
 import {
   JUPITER_MOON_DEFS, GALILEAN_MOON_IDS, jupiterMoonRADec,
 } from './jupiterMoons.js';
+import { venusPhaseAngle } from './ephemerisPtolemy.js';
 import { SATELLITES_EXTRA } from './satellitesExtra.js';
 import {
   compTransMatCelestToGlobe, compTransMatLocalFeToGlobalFe, compTransMatVaultToFe,
@@ -452,6 +453,8 @@ export class FeModel extends EventTarget {
 
       Planets: {},
       JupiterMoons: [],
+      VenusPhaseAngle:    0,   // degrees 0-360; 0=superior conj (full), 180=inferior (crescent)
+      VenusPhaseFraction: 0,   // 1=full, 0=crescent
     };
 
     this._dayOfYearLast = this.state.DayOfYear;
@@ -1161,6 +1164,13 @@ export class FeModel extends EventTarget {
           anglesGlobe: mAnglesGlobe,
         });
       }
+    }
+
+    // Venus phase — pure Ptolemaic epicycle geometry.
+    // tepianomve=0° → superior conjunction (fully lit); 180° → inferior conjunction (crescent).
+    if (c.Planets['venus']) {
+      c.VenusPhaseAngle    = venusPhaseAngle(utcDate);
+      c.VenusPhaseFraction = 0.5 * (1 + Math.cos(c.VenusPhaseAngle * Math.PI / 180));
     }
 
     // Star projection. The trepidation master forces all three apparent-of-

@@ -13,7 +13,7 @@ import {
   CelestialPoles, DeclinationCircles, Yggdrasil, MtMeru, ToroidalVortex,
   LongitudeRing, CelNavStars, TrackedGroundPoints, GeocentricMarkers, CatalogPointStars,
   GPPathOverlay, GPTracer, StellariumTraceOverlay, AnalemmaLine, SunMoonGlyph,
-  CentralAngleArcs, MoonOpticalBody, SunOpticalBody,
+  CentralAngleArcs, MoonOpticalBody, SunOpticalBody, VenusOpticalBody,
   MonthMarkers, WorldGlobe, GlobeHeavenlyVault, DomeCausticOverlay,
 } from './worldObjects.js';
 import { loadLandGeo, buildGeoJsonLand, buildImageMap, buildBlankMap, buildLineArtMap } from './earthMap.js';
@@ -327,6 +327,11 @@ export class Renderer {
     // through as corona.
     this.sunOpticalBody = new SunOpticalBody(clipPlanes);
     this.sm.world.add(this.sunOpticalBody.group);
+
+    // Optical-vault Venus phase disc. Render order 51, same layer as sun face,
+    // so it appears as a genuine phase-lit planet in the first-person view.
+    this.venusOpticalBody = new VenusOpticalBody(clipPlanes);
+    this.sm.world.add(this.venusOpticalBody.group);
 
     this._clipPlanes = clipPlanes;
 
@@ -935,6 +940,27 @@ export class Renderer {
       const mOpt   = _ge ? (mEntry.globeOpticalVaultCoord || mEntry.opticalVaultCoord) : mEntry.opticalVaultCoord;
       mk.update(mVault, mOpt, showTrueVault, s.ShowOpticalVault,
                 mEntry.anglesGlobe.elevation, c.NightFactor);
+    }
+
+    // Venus phase disc — visible inside the optical vault when Venus is tracked.
+    {
+      const venP = c.Planets['venus'];
+      const venTracked = trackerSet.has('venus');
+      const venBodyShow = venP && venTracked && bodyCategoryOn && planetNightOn
+                       && s.ShowOpticalVault && s.InsideVault;
+      const venOptPos = venP
+        ? (_ge ? (venP.globeOpticalVaultCoord || venP.opticalVaultCoord) : venP.opticalVaultCoord)
+        : null;
+      const venElev = venP ? venP.anglesGlobe.elevation : 0;
+      const venElevFade = Math.max(0, Math.min(1, (venElev + 3) / 5));
+      this.venusOpticalBody.update(
+        venOptPos || [0, 0, 0],
+        0.016,
+        venBodyShow && !!venOptPos,
+        c.VenusPhaseAngle || 0,
+        this.sm.camera,
+        venElevFade,
+      );
     }
 
     this._updateTracks();

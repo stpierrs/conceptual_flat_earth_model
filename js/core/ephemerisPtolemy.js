@@ -429,6 +429,25 @@ export function planetEquatorial(name, date) {
   return { ra: NaN, dec: NaN };
 }
 
+// Venus epicycle true anomaly — the angle that drives the visible phase.
+// tepianomve = 0°  → Venus at apogee of its epicycle (far from Earth,
+//                    near superior conjunction) → fully illuminated, f = 1.
+// tepianomve = 180° → Venus at perigee (nearest Earth, inferior conjunction)
+//                    → dark side facing observer, f = 0.
+// Illuminated fraction: f = (1 + cos(tepianomve)) / 2
+// No heliocentric stage — this is pure Ptolemaic epicycle geometry.
+export function venusPhaseAngle(date) {
+  const ddays     = ptolemyDay(date);
+  const { mlongsu } = sunLongitude(ddays);
+  const prectab   = ddays / 36525;
+  const apogeeve  = degmod(apogeeven0 + prectab);
+  const mepive    = mlongsu;
+  const mepianomve = degmod(mepianomven_epoch + ddays * nepianomven);
+  const meccanomve = degmod(mepive - apogeeve);
+  const prosve    = eqplan(1, eccven, epiven, meccanomve, mepianomve);
+  return degmod(mepianomve - prosve); // degrees, 0-360
+}
+
 export function bodyGeocentric(name, date) {
   if (name === 'sun')   return sunEquatorial(date);
   if (name === 'moon')  return moonEquatorial(date);

@@ -3190,6 +3190,123 @@ export class SunOpticalBody {
   }
 }
 
+// Venus phase canvas: cream/yellow disc with shadow lune derived from
+// the Ptolemaic true epicycle anomaly. tepianomveDeg=0 → full (superior
+// conjunction); 180 → new/crescent (inferior conjunction).
+function drawVenusBodyToCanvas(ctx, W, H, tepianomveDeg) {
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2;
+  const r = Math.min(W, H) / 2 - 2;
+
+  // Lit disc — pale cream-yellow Venus surface.
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  const g = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, r * 0.05, cx, cy, r);
+  g.addColorStop(0, '#fffae0');
+  g.addColorStop(0.6, '#f5e8a0');
+  g.addColorStop(1, '#d4c060');
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.restore();
+
+  // Shadow lune. Shadow fraction: f = (1 + cos(angle)) / 2.
+  // When tepianomve ∈ (0°, 180°) → waxing from full → shadow grows on RIGHT.
+  // When tepianomve ∈ (180°, 360°) → waning from new → shadow on LEFT.
+  // We mirror by reflecting the coordinate before painting.
+  const angle = tepianomveDeg * Math.PI / 180;
+  const shadowFrac = 0.5 * (1 + Math.cos(angle)); // 1=full, 0=new
+  if (shadowFrac < 0.999) {
+    ctx.save();
+    const flip = tepianomveDeg > 180;
+    if (flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+
+    // Shadow lune = full disc minus the illuminated lune.
+    // Illuminated-lune major-axis half-width = cos(angle/2) * r
+    const halfAngle = angle / 2;
+    const luneW = Math.cos(halfAngle) * r; // can be negative (past 90°)
+
+    ctx.beginPath();
+    // Full dark disc (right side to be covered by shadow).
+    ctx.arc(cx, cy, r, -Math.PI / 2, Math.PI / 2, false);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0,0,0,0.88)';
+    ctx.fill();
+
+    // Carve out the lit crescent using compositing.
+    ctx.globalCompositeOperation = 'destination-out';
+    // The terminator is an ellipse with semi-axes (|luneW|, r).
+    if (luneW > 0) {
+      // Lit crescent on left → ellipse overlaps right shadow.
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, luneW, r, 0, -Math.PI / 2, Math.PI / 2, false);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // When luneW ≤ 0 the shadow covers nearly everything; no carve needed.
+    ctx.restore();
+  }
+
+  // Soft limb fade.
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  const fade = ctx.createRadialGradient(cx, cy, r * 0.75, cx, cy, r);
+  fade.addColorStop(0, 'rgba(0,0,0,0)');
+  fade.addColorStop(1, 'rgba(0,0,0,0.25)');
+  ctx.fillStyle = fade;
+  ctx.fill();
+  ctx.restore();
+}
+
+// Optical-vault Venus body: phase-shaded canvas disc sized slightly
+// smaller than the Moon. Render order 51 (below Moon's 52, same layer
+// as the sun face so phase reads clearly).
+export class VenusOpticalBody {
+  constructor(clippingPlanes = []) {
+    this._canvas = document.createElement('canvas');
+    this._canvas.width = 256;
+    this._canvas.height = 256;
+    this._ctx = this._canvas.getContext('2d');
+    this.tex = new THREE.CanvasTexture(this._canvas);
+    this.tex.colorSpace = THREE.SRGBColorSpace;
+    this.tex.minFilter = THREE.LinearMipMapLinearFilter;
+    this.tex.magFilter = THREE.LinearFilter;
+    this.tex.anisotropy = 4;
+    const geom = new THREE.PlaneGeometry(1, 1);
+    this.material = new THREE.MeshBasicMaterial({
+      map: this.tex,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthTest: false,
+      depthWrite: false,
+      clippingPlanes,
+    });
+    this.mesh = new THREE.Mesh(geom, this.material);
+    this.mesh.renderOrder = 51;
+    this.group = new THREE.Group();
+    this.group.add(this.mesh);
+    this._lastAngle = -999;
+    drawVenusBodyToCanvas(this._ctx, 256, 256, 0);
+    this.tex.needsUpdate = true;
+  }
+
+  update(opticalPos, size, show, tepianomveDeg, camera, alpha = 1) {
+    this.group.visible = !!show;
+    if (!show) return;
+    this.mesh.position.set(opticalPos[0], opticalPos[1], opticalPos[2]);
+    this.mesh.scale.set(size, size, 1);
+    if (camera) this.mesh.quaternion.copy(camera.quaternion);
+    this.material.opacity = alpha;
+    const angle = Math.round(tepianomveDeg);
+    if (angle !== this._lastAngle) {
+      this._lastAngle = angle;
+      drawVenusBodyToCanvas(this._ctx, 256, 256, tepianomveDeg);
+      this.tex.needsUpdate = true;
+    }
+  }
+}
+
 export class SunMoonGlyph {
   constructor(text, color, clippingPlanes = []) {
     const tex = new THREE.CanvasTexture(makeUnderlinedDigitCanvas(text, color));

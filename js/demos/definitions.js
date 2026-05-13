@@ -11,6 +11,7 @@
 //     panel can render them as grouped sections.
 
 import { Ttxt, Tval, Thold, Tcall } from './animation.js';
+import { GALILEAN_MOON_IDS } from '../core/jupiterMoons.js';
 import { SOLAR_ECLIPSE_DEMOS, LUNAR_ECLIPSE_DEMOS } from './eclipseRegistry.js';
 import { FE_ECLIPSE_PREDICTION_DEMOS } from './feEclipseTrack.js';
 import { FLIGHT_ROUTES_DEMOS } from './flightRoutes.js';
@@ -841,6 +842,99 @@ const MOON_24H_DEMOS = [
   },
 ];
 
+// --- Planets & Epicycles demos -------------------------------------------
+// All three demos use only the Ptolemaic ephemeris (BodySource:'ptolemy').
+// No heliocentric constants, no AU — pure observed kinematics.
+//
+// DateTime reference: days since 2017-01-01 00:00 UTC.
+//   2862.875 ≈ 2024-11-03  Jupiter at opposition (moons well-separated)
+//   2940     ≈ 2025-01-19  Both Jupiter and Venus in the evening sky at 45°N
+//   2941     ≈ 2025-01-20  Venus crescent — good phase-cycle start
+
+const _GAL_TARGETS = GALILEAN_MOON_IDS.map((id) => `jmoon:${id}`);
+
+const PLANET_EPICYCLE_DEMOS = [
+  {
+    name: "Galilean Moons — Jupiter's epicycle family",
+    group: 'planets-epicycles',
+    intro: {
+      ObserverLat: 45, ObserverLong: 0,
+      BodySource: 'ptolemy',
+      DateTime: 2862.875,          // Jupiter at opposition 2024-11-03
+      InsideVault: true,
+      FollowTarget: 'jupiter',
+      TrackerTargets: ['jupiter', ..._GAL_TARGETS],
+      SpecifiedTrackerMode: false,
+      OpticalZoom: 6.0,            // zoom in tight to see moon separations
+      VaultSize: 1, VaultHeight: 0.45,
+      ShowOpticalVault: true,
+      ShowStars: true,
+      ShowCelestialBodies: true,
+      ShowTruePositions: true,
+    },
+    tasks: () => [
+      Ttxt('Jupiter at opposition — 2024 Nov 3. Io, Europa, Ganymede and Callisto orbit on pure Ptolemaic epicycles. Watch the inner moons sprint past while Callisto lumbers around the outside.'),
+      Thold(T3),
+      Ttxt('Advancing 20 days — one full Callisto orbit.'),
+      Tval('DateTime', 2882.875, 24 * T1, T1, 'linear'),
+    ],
+  },
+  {
+    name: 'Venus — Ptolemaic phases',
+    group: 'planets-epicycles',
+    intro: {
+      ObserverLat: 45, ObserverLong: 0,
+      BodySource: 'ptolemy',
+      DateTime: 2941,              // Venus crescent in evening sky, Jan 2025
+      InsideVault: true,
+      FollowTarget: 'venus',
+      TrackerTargets: ['venus'],
+      SpecifiedTrackerMode: false,
+      OpticalZoom: 3.0,
+      VaultSize: 1, VaultHeight: 0.45,
+      ShowOpticalVault: true,
+      ShowStars: true,
+      ShowCelestialBodies: true,
+      ShowTruePositions: true,
+    },
+    tasks: () => [
+      Ttxt('Venus in January 2025 — a slim crescent low in the evening sky. The phase is computed from the Ptolemaic true epicycle anomaly: 0° = superior conjunction (full), 180° = inferior conjunction (new).'),
+      Thold(T3),
+      Ttxt('Advancing 200 days — watch Venus swell from crescent through gibbous and back as the epicycle carries it around.'),
+      Tval('DateTime', 3141, 30 * T1, T1, 'linear'),
+    ],
+  },
+  {
+    name: 'Evening sky — Galilean moons + Venus phases',
+    group: 'planets-epicycles',
+    intro: {
+      ObserverLat: 45, ObserverLong: 0,
+      BodySource: 'ptolemy',
+      DateTime: 2940,              // Both Jupiter and Venus in evening sky
+      InsideVault: false,
+      FollowTarget: null,
+      TrackerTargets: ['venus', 'jupiter', ..._GAL_TARGETS],
+      SpecifiedTrackerMode: false,
+      CameraDirection: 0,
+      CameraHeight: 55,
+      CameraDistance: 4,
+      Zoom: 1.2,
+      VaultSize: 1, VaultHeight: 0.45,
+      ShowOpticalVault: true,
+      ShowStars: true,
+      ShowCelestialBodies: true,
+      ShowTruePositions: true,
+      ShowGPTracer: false,
+    },
+    tasks: () => [
+      Ttxt('2025 Jan 19 — Jupiter and Venus share the winter evening sky at 45°N. Epicycles only: Galilean moons orbit Jupiter, Venus wears a crescent phase.'),
+      Thold(T3),
+      Ttxt('Advancing 30 days — watch both planets drift eastward and the moons dance around Jupiter.'),
+      Tval('DateTime', 2970, 28 * T1, T1, 'linear'),
+    ],
+  },
+];
+
 // The final exported list, in section order: general → solar eclipses
 // → lunar eclipses → FE prediction track. Each entry carries a
 // `group` field so the UI can render section headings.
@@ -856,21 +950,23 @@ export const DEMOS = [
   ...LUNAR_ECLIPSE_DEMOS,
   ...FE_ECLIPSE_PREDICTION_DEMOS,
   ...FLIGHT_ROUTES_DEMOS,
+  ...PLANET_EPICYCLE_DEMOS,
 ];
 
 // Section metadata for the UI.
 export const DEMO_GROUPS = [
-  { id: '24h-sun',         label: '24 h Sun' },
-  { id: '24h-moon',        label: '24 h Moon' },
-  { id: 'general',         label: 'General' },
-  { id: 'sun-analemma',    label: 'Sun Analemma' },
-  { id: 'moon-analemma',   label: 'Moon Analemma' },
-  { id: 'combo-analemma',  label: 'Sun + Moon Analemma' },
-  { id: 'moon-synodic',    label: 'Moon Path (Synodic)' },
-  { id: 'sun-paired',      label: 'Sun Analemma Paired (lon 0 + lon 180)' },
-  { id: 'eclipse-map',     label: 'Eclipse Position Map' },
-  { id: 'solar-eclipses',  label: 'Solar Eclipses (AstroPixels / DE405, 2021-2040)' },
-  { id: 'lunar-eclipses',  label: 'Lunar Eclipses (AstroPixels / DE405, 2021-2040)' },
-  { id: 'fe-predictions',  label: 'FE Eclipse Predictions (placeholder)' },
-  { id: 'flight-routes',   label: 'Flight Routes — Southern Non-Stop' },
+  { id: '24h-sun',           label: '24 h Sun' },
+  { id: '24h-moon',          label: '24 h Moon' },
+  { id: 'general',           label: 'General' },
+  { id: 'sun-analemma',      label: 'Sun Analemma' },
+  { id: 'moon-analemma',     label: 'Moon Analemma' },
+  { id: 'combo-analemma',    label: 'Sun + Moon Analemma' },
+  { id: 'moon-synodic',      label: 'Moon Path (Synodic)' },
+  { id: 'sun-paired',        label: 'Sun Analemma Paired (lon 0 + lon 180)' },
+  { id: 'eclipse-map',       label: 'Eclipse Position Map' },
+  { id: 'solar-eclipses',    label: 'Solar Eclipses (AstroPixels / DE405, 2021-2040)' },
+  { id: 'lunar-eclipses',    label: 'Lunar Eclipses (AstroPixels / DE405, 2021-2040)' },
+  { id: 'fe-predictions',    label: 'FE Eclipse Predictions (placeholder)' },
+  { id: 'flight-routes',     label: 'Flight Routes — Southern Non-Stop' },
+  { id: 'planets-epicycles', label: 'Planets & Epicycles' },
 ];
