@@ -3193,69 +3193,58 @@ export class SunOpticalBody {
 // Venus phase canvas: cream/yellow disc with shadow lune derived from
 // the Ptolemaic true epicycle anomaly. tepianomveDeg=0 → full (superior
 // conjunction); 180 → new/crescent (inferior conjunction).
+// Same algorithm as drawMoonBodyToCanvas — clip to disc, paint lit surface,
+// overlay shadow path. No destination-out (that punches through the base disc).
+// tepianomveDeg: 0=superior conjunction (full), 180=inferior conjunction (new).
+// Mirror x for the waning half (180°→360°) so the terminator sweeps back.
 function drawVenusBodyToCanvas(ctx, W, H, tepianomveDeg) {
   ctx.clearRect(0, 0, W, H);
-  const cx = W / 2, cy = H / 2;
   const r = Math.min(W, H) / 2 - 2;
 
-  // Lit disc — pale cream-yellow Venus surface.
   ctx.save();
+  ctx.translate(W / 2, H / 2);
+  if (tepianomveDeg > 180 && tepianomveDeg < 360) ctx.scale(-1, 1);
+
+  // Clip to disc.
   ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-  const g = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, r * 0.05, cx, cy, r);
-  g.addColorStop(0, '#fffae0');
-  g.addColorStop(0.6, '#f5e8a0');
-  g.addColorStop(1, '#d4c060');
+  ctx.arc(0, 0, r, 0, 2 * Math.PI);
+  ctx.clip();
+
+  // Lit Venus surface — pale cream-yellow.
+  const g = ctx.createRadialGradient(0, 0, r * 0.05, 0, 0, r);
+  g.addColorStop(0, '#fffbea');
+  g.addColorStop(0.65, '#f0df90');
+  g.addColorStop(1, '#c8b050');
   ctx.fillStyle = g;
-  ctx.fill();
-  ctx.restore();
+  ctx.fillRect(-r, -r, 2 * r, 2 * r);
 
-  // Shadow lune. Shadow fraction: f = (1 + cos(angle)) / 2.
-  // When tepianomve ∈ (0°, 180°) → waxing from full → shadow grows on RIGHT.
-  // When tepianomve ∈ (180°, 360°) → waning from new → shadow on LEFT.
-  // We mirror by reflecting the coordinate before painting.
-  const angle = tepianomveDeg * Math.PI / 180;
-  const shadowFrac = 0.5 * (1 + Math.cos(angle)); // 1=full, 0=new
-  if (shadowFrac < 0.999) {
-    ctx.save();
-    const flip = tepianomveDeg > 180;
-    if (flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
-
-    // Shadow lune = full disc minus the illuminated lune.
-    // Illuminated-lune major-axis half-width = cos(angle/2) * r
-    const halfAngle = angle / 2;
-    const luneW = Math.cos(halfAngle) * r; // can be negative (past 90°)
-
-    ctx.beginPath();
-    // Full dark disc (right side to be covered by shadow).
-    ctx.arc(cx, cy, r, -Math.PI / 2, Math.PI / 2, false);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(0,0,0,0.88)';
-    ctx.fill();
-
-    // Carve out the lit crescent using compositing.
-    ctx.globalCompositeOperation = 'destination-out';
-    // The terminator is an ellipse with semi-axes (|luneW|, r).
-    if (luneW > 0) {
-      // Lit crescent on left → ellipse overlaps right shadow.
+  // Shadow. Map tepianomve symmetrically to phase ∈ [0, π]:
+  //   0°→0 (full), 180°→π (new), 360°→0 (full, via mirror).
+  const phaseRad = Math.min(tepianomveDeg, 360 - tepianomveDeg) * Math.PI / 180;
+  const frac = 0.5 * (1 + Math.cos(phaseRad));   // 1=full, 0=new
+  if (frac < 0.999) {
+    ctx.fillStyle = 'rgba(0, 0, 8, 0.87)';
+    if (frac < 0.001) {
       ctx.beginPath();
-      ctx.ellipse(cx, cy, luneW, r, 0, -Math.PI / 2, Math.PI / 2, false);
+      ctx.arc(0, 0, r, 0, 2 * Math.PI);
+      ctx.fill();
+    } else {
+      const e = Math.abs(1 - 2 * frac) * r;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, Math.PI / 2, -Math.PI / 2, false);
+      ctx.ellipse(0, 0, e, r, 0, -Math.PI / 2, Math.PI / 2, frac >= 0.5);
       ctx.closePath();
       ctx.fill();
     }
-    // When luneW ≤ 0 the shadow covers nearly everything; no carve needed.
-    ctx.restore();
   }
 
-  // Soft limb fade.
-  ctx.save();
+  // Subtle golden rim.
   ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-  const fade = ctx.createRadialGradient(cx, cy, r * 0.75, cx, cy, r);
-  fade.addColorStop(0, 'rgba(0,0,0,0)');
-  fade.addColorStop(1, 'rgba(0,0,0,0.25)');
-  ctx.fillStyle = fade;
-  ctx.fill();
+  ctx.arc(0, 0, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(210, 185, 70, 0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
   ctx.restore();
 }
 
