@@ -857,16 +857,16 @@ const PLANET_EPICYCLE_DEMOS = [
   {
     name: "Galilean Moons — Jupiter's epicycle family",
     group: 'planets-epicycles',
-    speedScale: 1.0,               // run at authored speed (not the default 1/8)
+    speedScale: 1.0,
     intro: {
       ObserverLat: 45, ObserverLong: 0,
-      BodySource: 'ptolemy',
-      DateTime: 2862.875,          // Jupiter at opposition 2024-11-03
+      DateTime: 2862.875,          // Jupiter at opposition 2024-11-03, 21:00 UTC
       InsideVault: true,
       FollowTarget: 'jupiter',
       TrackerTargets: ['jupiter', ..._GAL_TARGETS],
       SpecifiedTrackerMode: false,
-      OpticalZoom: 6.0,            // zoom in tight to see moon separations
+      OpticalZoom: 5.0,
+      PermanentNight: true,        // guarantee planets/moons render regardless of sun
       VaultSize: 1, VaultHeight: 0.45,
       ShowOpticalVault: true,
       ShowStars: true,
@@ -874,10 +874,9 @@ const PLANET_EPICYCLE_DEMOS = [
       ShowTruePositions: true,
     },
     tasks: () => [
-      Ttxt('Jupiter at opposition — 2024 Nov 3. Io, Europa, Ganymede and Callisto orbit on pure Ptolemaic epicycles. Watch the inner moons sprint past while Callisto lumbers around the outside.'),
-      Tpse(T3),
-      Ttxt('Advancing 17 days — one full Callisto orbit. Io laps the field every 1.8 days.'),
-      Tval('DateTime', 2879.875, 20 * T1, 0, 'linear'),
+      Ttxt('Jupiter at opposition — Io, Europa, Ganymede and Callisto on Ptolemaic epicycles. Io laps the field every 1.8 days; Callisto takes 17.'),
+      Tpse(T1),
+      Tval('DateTime', 2879.875, 25 * T1, 0, 'linear'),
     ],
   },
   {
@@ -886,13 +885,13 @@ const PLANET_EPICYCLE_DEMOS = [
     speedScale: 1.0,
     intro: {
       ObserverLat: 45, ObserverLong: 0,
-      BodySource: 'ptolemy',
-      DateTime: 2941,              // Venus crescent in evening sky, Jan 2025
+      DateTime: 2941,              // Venus crescent, Jan 2025
       InsideVault: true,
       FollowTarget: 'venus',
       TrackerTargets: ['venus'],
       SpecifiedTrackerMode: false,
       OpticalZoom: 3.0,
+      PermanentNight: true,
       VaultSize: 1, VaultHeight: 0.45,
       ShowOpticalVault: true,
       ShowStars: true,
@@ -900,9 +899,8 @@ const PLANET_EPICYCLE_DEMOS = [
       ShowTruePositions: true,
     },
     tasks: () => [
-      Ttxt('Venus — January 2025. Phase computed from the Ptolemaic true epicycle anomaly: 0° = superior conjunction (full disc), 180° = inferior conjunction (new/crescent).'),
-      Tpse(T3),
-      Ttxt('Advancing 200 days — watch Venus swell from crescent through gibbous and back as the epicycle carries it around.'),
+      Ttxt('Venus — January 2025. Phase from the Ptolemaic true epicycle anomaly: 0° = full (superior conjunction), 180° = new (inferior conjunction).'),
+      Tpse(T1),
       Tval('DateTime', 3141, 25 * T1, 0, 'linear'),
     ],
   },
@@ -912,8 +910,7 @@ const PLANET_EPICYCLE_DEMOS = [
     speedScale: 1.0,
     intro: {
       ObserverLat: 45, ObserverLong: 0,
-      BodySource: 'ptolemy',
-      DateTime: 2940,              // Both Jupiter and Venus in evening sky
+      DateTime: 2940,              // Both Jupiter and Venus in evening sky, Jan 2025
       InsideVault: false,
       FollowTarget: null,
       TrackerTargets: ['venus', 'jupiter', ..._GAL_TARGETS],
@@ -922,6 +919,7 @@ const PLANET_EPICYCLE_DEMOS = [
       CameraHeight: 55,
       CameraDistance: 4,
       Zoom: 1.2,
+      PermanentNight: true,
       VaultSize: 1, VaultHeight: 0.45,
       ShowOpticalVault: true,
       ShowStars: true,
@@ -930,9 +928,8 @@ const PLANET_EPICYCLE_DEMOS = [
       ShowGPTracer: false,
     },
     tasks: () => [
-      Ttxt('2025 Jan 19 — Jupiter and Venus share the winter evening sky at 45°N. Epicycles only: Galilean moons orbit Jupiter, Venus wears a crescent phase.'),
-      Tpse(T3),
-      Ttxt('Advancing 30 days — both planets drift eastward, moons dance around Jupiter.'),
+      Ttxt('2025 Jan 19 — Jupiter and Venus in the winter evening sky at 45°N. Galilean moons orbit Jupiter; Venus carries a Ptolemaic crescent phase.'),
+      Tpse(T1),
       Tval('DateTime', 2970, 22 * T1, 0, 'linear'),
     ],
   },
