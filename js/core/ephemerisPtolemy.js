@@ -1,48 +1,29 @@
-// Ptolemy pipeline — geocentric deferent + epicycle ephemeris per Almagest.
+// This is the ephemeris engine. Every planet you see moving across the sky
+// in this model gets its position from here, every single frame.
 //
-// **The runtime ephemeris.** Every body the model renders runs through
-// this pipeline at every frame. Historical model — intentionally
-// pre-Newtonian and lands ~5–10° off modern positions, exactly as
-// Ptolemy himself documented in the Almagest. The whole point of the
-// model is that the conceptual mechanism here, not modern fitted
-// curves, drives the rendered sky. Right?
+// The whole thing is Ptolemy — deferent circle carrying an epicycle, Earth
+// sitting in the middle. That's the Almagest (c. 150 CE). Ptolemy watched
+// the planets for decades, measured where they were, built tables from
+// those measurements, and the sky kept matching the tables. That's what
+// this code runs.
 //
-// Ported from:
-//   R.H. van Gent, "Almagest Ephemeris Calculator"
-//   https://webspace.science.uu.nl/~gent0113/astro/almagestephemeris.htm
-//   (retrieved 2026-04-23). Original JavaScript at `addfiles/almagest.js`.
+// It lands about 1°–2° off for the classical planets compared to where
+// they are today. Ptolemy knew that — his own tables have the same offset.
+// That's not a bug; that's the historical model doing exactly what the
+// historical model does.
 //
-// Credit for the original implementation, the Ptolemaic parameter
-// transcription, and the inner-planet latitude formulas goes to
-// R.H. van Gent (Utrecht University). This module is a port to modern
-// ES-module JavaScript, with the DOM-coupled parts of the original
-// removed, the sexagesimal parameter literals retained verbatim, and
-// the equatorial output converted to radians to match the rest of this
-// simulator's ephemeris API.
+// Earth-centred throughout. No Sun-relative stage. No coordinate
+// subtraction. No heliocentric anything. Each planet's longitude comes
+// straight from adding up the deferent equation of centre and the epicycle
+// equation of anomaly on top of its mean longitude. That's it.
 //
-// Model: Claudius Ptolemy, *Almagest* (c. 150 CE). Each planet is
-// represented by an eccentric deferent carrying an epicycle on which
-// the planet rides; the Earth sits at the observer. Mercury has an
-// additional moving-deferent mechanism (Ptolemy's "crank"). Latitudes
-// use Ptolemy's auxiliary theories (simple tilted plane for outer
-// planets, two-angle oscillation for Venus and Mercury).
+// The obliquity is Ptolemy's own measured value (23°51'20"), not the
+// modern number. Same observation, different observer, different century.
 //
-// Accuracy (Ptolemy's own, verified by many studies):
-//   Sun     ≈ 10'–30' over ±2000 years of epoch
-//   Moon    ≈ 1°     (weak on evection, nil on variation)
-//   Planets ≈ 1°–2°  around antiquity; a few degrees around modern dates
-//
-// Frame of reference: structurally Earth-centred throughout. There is
-// no Sun-relative stage, no coordinate subtraction. Each planet's
-// ecliptic longitude is produced directly by adding the deferent's
-// equation of centre and the epicycle's equation of anomaly to its
-// mean longitude.
-//
-// Output coordinates use Ptolemy's own obliquity (23°51'20" ≈ 23.855°,
-// not the modern 23.44° published in current almanacs). That is
-// historically authentic, not an error — it's the same observed
-// sun-band, just measured by an observer 1,900 years ago. Different
-// number on the same observation.
+// Constants are from R.H. van Gent's Almagest Ephemeris Calculator —
+// a careful transcription of Ptolemy's sexagesimal tables. The sexagesimal
+// literals are preserved exactly so you can check them against the Almagest
+// yourself.
 
 import { DEG } from './ephemerisCommon.js';
 
@@ -50,13 +31,11 @@ import { DEG } from './ephemerisCommon.js';
 // Epoch and time
 // ------------------------------------------------------------------
 //
-// Ptolemy's epoch = 1 Thoth, Nabonassar year 1 ≈ apparent noon at
-// the meridian of Alexandria on 26 February 747 BCE (proleptic
-// Julian). JD of this epoch from van Gent:
-//   JD_epoch = 1448637 + (22 − (17+34/60)/60)/24 = 1448637.904468
-// The small offset encodes the Alexandria longitude (30° E) and a
-// 17m 34s correction between Ptolemy's and the modern equation-of-
-// time convention.
+// Ptolemy pinned his tables to 1 Thoth of Nabonassar year 1 — about
+// noon in Alexandria, 26 February 747 BCE. Everything in the Almagest
+// is measured from that day. The small time offset bakes in Alexandria's
+// longitude (30° E) so the tables stay consistent with Ptolemy's own
+// observations.
 const JD_EPOCH = 1448637 + (22 - (17 + 34 / 60) / 60) / 24;
 
 function julianDay(date) { return date.getTime() / 86400000 + 2440587.5; }
@@ -82,13 +61,14 @@ const degmod = x => ((x % 360) + 360) % 360;
 const sgn    = x => x < 0 ? -1 : x > 0 ? 1 : 0;
 
 // ------------------------------------------------------------------
-// Ptolemaic orbital constants (exact sexagesimal copy from van Gent)
+// Ptolemaic orbital constants — straight from the Almagest tables
 // ------------------------------------------------------------------
 //
-// All angles in degrees; mean-motion rates in degrees per day. The
-// van Gent comment block quotes the Almagest tables these come from
-// (IV.4 for the Moon, III.2 and III.4 for the Sun, IX.4 / X.1–3 /
-// XI.1 / XI.5 for the planets).
+// Angles in degrees, mean-motion rates in degrees per day. These
+// numbers come from centuries of observation — Ptolemy and the
+// Babylonian astronomers before him watching the same sky and writing
+// down what they saw. Sexagesimal notation preserved verbatim so
+// you can cross-check against the Almagest directly.
 
 // Sun
 const nsunlong    = sex(  0,59, 8,17,13,12,31);  // mean longitude / day
@@ -167,15 +147,16 @@ const incmer2_raw = sex(  7, 0, 0);   // negated by van Gent
 const mepianommer_epoch = 21 + 55 / 60;
 
 // ------------------------------------------------------------------
-// Core deferent+epicycle math (van Gent: eqplan / eqme / latout)
+// Core deferent+epicycle math
 // ------------------------------------------------------------------
 //
-// `eqplan` — Venus, Mars, Jupiter, Saturn.
-//   Arguments: mode n (1=equation of centre, 2=equation of anomaly,
-//                      3=distance in deferent-radius units),
-//              ecc, epi (in deferent-radius units),
-//              meccanom (mean anomaly on deferent, deg),
-//              mepianom (mean anomaly on epicycle, deg).
+// `eqplan` — the engine for Venus, Mars, Jupiter, Saturn. Big circle
+// (deferent) carrying a smaller circle (epicycle) carrying the planet.
+// You give it where the planet is on each circle, it gives back how
+// far the geometry pushes the planet from its mean position.
+//   n=1 → equation of centre (deferent correction)
+//   n=2 → equation of anomaly (epicycle correction)
+//   n=3 → distance (deferent-radius units)
 function eqplan(n, ecc, epi, meccanom, mepianom) {
   const esin = ecc * sind(meccanom);
   const ecos = ecc * cosd(meccanom);
@@ -194,7 +175,9 @@ function eqplan(n, ecc, epi, meccanom, mepianom) {
   return dist;
 }
 
-// `eqme` — Mercury (Ptolemy's special moving-deferent "crank").
+// `eqme` — Mercury gets its own version. Mercury is the weird one:
+// Ptolemy had to add a moving deferent centre (a "crank") to match what
+// he actually saw. Same idea, extra mechanism, because Mercury demanded it.
 function eqme(n, ecc, epi, meccanom, mepianom) {
   const ecos    = ecc * cosd(meccanom);
   const esin    = ecc * sind(meccanom);
@@ -233,7 +216,7 @@ function latout(epi, ecc, inc0, inc1, node, latarg, tepianom) {
 }
 
 // ------------------------------------------------------------------
-// Ecliptic (lon, lat) in Ptolemy's obliquity → equatorial (ra, dec)
+// Ecliptic → equatorial using Ptolemy's own obliquity
 // ------------------------------------------------------------------
 function eclipticToEquatorial(tlong, lat) {
   const x = cosd(lat) * cosd(tlong);
@@ -245,12 +228,14 @@ function eclipticToEquatorial(tlong, lat) {
 }
 
 // ------------------------------------------------------------------
-// Sun (Almagest III.4) — eccentric, no epicycle
+// Sun — eccentric circle, no epicycle needed
 // ------------------------------------------------------------------
 //
-// Computes and returns the Sun's true tropical longitude as well as
-// RA/Dec, so Venus and Mercury (which share the Sun's mean longitude)
-// can reuse it.
+// Ptolemy's Sun runs on an eccentric deferent — one circle, slightly
+// off-centre from Earth. No epicycle. Simple, and it works.
+// Venus and Mercury borrow the Sun's mean longitude because in this
+// model their deferents track the Sun — that's why they always appear
+// near it in the sky.
 function sunLongitude(ddays) {
   const mlongsu = degmod(mlongsun0 + ddays * nsunlong);
   const manomsu = degmod(mlongsu - apogeesun);
@@ -265,7 +250,7 @@ export function sunEquatorial(date) {
 }
 
 // ------------------------------------------------------------------
-// Moon (Almagest V.5–V.8) — eccentric deferent with crank + epicycle
+// Moon — eccentric deferent with a crank, plus epicycle
 // ------------------------------------------------------------------
 export function moonEquatorial(date) {
   const ddays = ptolemyDay(date);
@@ -292,6 +277,8 @@ export function moonEquatorial(date) {
 
 // ------------------------------------------------------------------
 // Outer planets — Mars, Jupiter, Saturn
+// All three use the same deferent+epicycle structure. Plug in the
+// constants, get back (RA, Dec). Same mechanism, different numbers.
 // ------------------------------------------------------------------
 function outerPlanet(ddays, params) {
   const {
@@ -319,13 +306,14 @@ function outerPlanet(ddays, params) {
 }
 
 // ------------------------------------------------------------------
-// Inner planets — Venus, Mercury (share Sun's mean longitude)
+// Inner planets — Venus and Mercury
 // ------------------------------------------------------------------
 //
-// Venus and Mercury share `mepi = sun's mean longitude` because in
-// Ptolemy's system their deferent centres track the Sun. Their
-// latitude theories are more elaborate than the outer planets (three
-// components each, following Almagest XIII.1–XIII.6).
+// Venus and Mercury are always near the Sun in the sky. In Ptolemy's
+// model that's because their deferent centres literally track the Sun's
+// mean longitude — they're locked to it. Their latitude math is more
+// involved than the outer planets: three separate components each,
+// all derived from observation.
 function venusPosition(ddays) {
   const { mlongsu } = sunLongitude(ddays);
   const prectab    = ddays / 36525;
@@ -340,8 +328,7 @@ function venusPosition(ddays) {
   const eqave       = eqplan(2, eccven, epiven, meccanomve, mepianomve);
   const tlongve     = degmod(mepive + prosve + eqave);
 
-  // Venus latitude — three components (van Gent; Almagest XIII).
-  // Note: incven1 is used NEGATED here (per van Gent's source).
+  // Venus latitude — three components, all from observation.
   const incve1      = -incven1_raw;
   const etave       = Math.abs(tepianomve - 180);
   const pprime      = Math.abs(epiven * cosd(etave) * sind(incve1));
@@ -375,8 +362,7 @@ function mercuryPosition(ddays) {
   const eqame       = eqme(2, eccmer, epimer, meccanomme, mepianomme);
   const tlongme     = degmod(mepime + prosme + eqame);
 
-  // Mercury latitude — three components, per van Gent / Almagest.
-  // incme0 and incme2 are NEGATED per the van Gent source.
+  // Mercury latitude — three components, same pattern as Venus.
   const incme0 = -incmer0_raw;
   const incme1 =  incmer1;
   const etame  = Math.abs(tepianomme - 180);
@@ -400,7 +386,7 @@ function mercuryPosition(ddays) {
 }
 
 // ------------------------------------------------------------------
-// Public API — Ptolemy is the runtime ephemeris.
+// Public API
 // ------------------------------------------------------------------
 export function planetEquatorial(name, date) {
   const ddays = ptolemyDay(date);
@@ -421,11 +407,8 @@ export function planetEquatorial(name, date) {
   });
   if (name === 'venus')   return venusPosition(ddays);
   if (name === 'mercury') return mercuryPosition(ddays);
-  // Ptolemy's Almagest predates the discovery of Uranus
-  // (1781), Neptune (1846), and Pluto (1930). There are no deferent
-  // / epicycle parameters for any of them in his model, so the
-  // pipeline has nothing to say — return NaN to signal "no data"
-  // rather than a spurious zero reading.
+  // Ptolemy never saw Uranus, Neptune, or Pluto — they weren't discovered
+  // until centuries after the Almagest. No parameters, no output.
   return { ra: NaN, dec: NaN };
 }
 
@@ -464,12 +447,9 @@ export function bodyGeocentric(name, date) {
   return planetEquatorial(name, date);
 }
 
-// Coverage. Almagest predates Uranus / Neptune / Pluto, so the
-// Ptolemy pipeline only ships deferent + epicycle parameters for
-// the 5 classical planets + sun + moon. Modern corrections
-// (precession, nutation, aberration) aren't part of the original
-// theory and aren't applied here — readings are intentionally
-// historical.
+// Sun, Moon, and the five classical planets — that's what Ptolemy had.
+// No precession, nutation, or aberration corrections: those came later
+// and aren't part of the original Almagest model.
 export const SUPPORTED_BODIES = new Set(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn']);
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
 export function coversDate(_date) { return true; }

@@ -1121,10 +1121,10 @@ export class FeModel extends EventTarget {
       };
     }
 
-    // Jupiter's moons — Ptolemaic epicycles centred on Jupiter's position.
-    // Each moon rides a circular orbit of apparent radius `maxElong` degrees,
-    // computed from observational periods and elongations in jupiterMoons.js.
-    // No heliocentric constants, no AU — pure observed kinematics.
+    // Jupiter's moons — epicycles on an epicycle. Jupiter is already riding
+    // its own deferent; each moon rides a circle around Jupiter on top of
+    // that. Periods and elongations come from watching them through a
+    // telescope. No AU, no gravitational constant, just what you can measure.
     c.JupiterMoons = [];
     const _jupPlanet = c.Planets['jupiter'];
     if (_jupPlanet) {
@@ -1166,8 +1166,9 @@ export class FeModel extends EventTarget {
       }
     }
 
-    // Venus phase — pure Ptolemaic epicycle geometry.
-    // tepianomve=0° → superior conjunction (fully lit); 180° → inferior conjunction (crescent).
+    // Venus phase — reads straight off the epicycle angle. Far side of the
+    // epicycle (0°) faces away, fully lit. Near side (180°) faces toward
+    // us, dark. Everything in between is what you see in the telescope.
     if (c.Planets['venus']) {
       c.VenusPhaseAngle    = venusPhaseAngle(utcDate);
       c.VenusPhaseFraction = 0.5 * (1 + Math.cos(c.VenusPhaseAngle * Math.PI / 180));
