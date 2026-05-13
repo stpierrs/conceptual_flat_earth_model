@@ -3193,10 +3193,13 @@ export class SunOpticalBody {
 // Venus phase canvas: cream/yellow disc with shadow lune derived from
 // the Ptolemaic true epicycle anomaly. tepianomveDeg=0 → full (superior
 // conjunction); 180 → new/crescent (inferior conjunction).
-// Same algorithm as drawMoonBodyToCanvas — clip to disc, paint lit surface,
-// overlay shadow path. No destination-out (that punches through the base disc).
-// tepianomveDeg: 0=superior conjunction (full), 180=inferior conjunction (new).
-// Mirror x for the waning half (180°→360°) so the terminator sweeps back.
+// Paint Venus the way you'd actually see it — lit side, dark side, terminator
+// sweeping across as the epicycle carries it around.
+// tepianomveDeg comes straight from the Ptolemaic epicycle anomaly:
+//   0° = far end of epicycle (superior conjunction) → full disc lit
+//   180° = near end (inferior conjunction) → dark side facing you
+// Mirror x for the second half of the cycle so the terminator sweeps back
+// the other way, same as you'd observe it doing over months in the sky.
 function drawVenusBodyToCanvas(ctx, W, H, tepianomveDeg) {
   ctx.clearRect(0, 0, W, H);
   const r = Math.min(W, H) / 2 - 2;
