@@ -10,7 +10,7 @@
 //     general demos by the `group` field on each entry. The control
 //     panel can render them as grouped sections.
 
-import { Ttxt, Tval, Thold, Tcall } from './animation.js';
+import { Ttxt, Tval, Thold, Tpse, Tcall } from './animation.js';
 import { GALILEAN_MOON_IDS } from '../core/jupiterMoons.js';
 import { SOLAR_ECLIPSE_DEMOS, LUNAR_ECLIPSE_DEMOS } from './eclipseRegistry.js';
 import { FE_ECLIPSE_PREDICTION_DEMOS } from './feEclipseTrack.js';
@@ -857,6 +857,7 @@ const PLANET_EPICYCLE_DEMOS = [
   {
     name: "Galilean Moons — Jupiter's epicycle family",
     group: 'planets-epicycles',
+    speedScale: 1.0,               // run at authored speed (not the default 1/8)
     intro: {
       ObserverLat: 45, ObserverLong: 0,
       BodySource: 'ptolemy',
@@ -874,14 +875,15 @@ const PLANET_EPICYCLE_DEMOS = [
     },
     tasks: () => [
       Ttxt('Jupiter at opposition — 2024 Nov 3. Io, Europa, Ganymede and Callisto orbit on pure Ptolemaic epicycles. Watch the inner moons sprint past while Callisto lumbers around the outside.'),
-      Thold(T3),
-      Ttxt('Advancing 20 days — one full Callisto orbit.'),
-      Tval('DateTime', 2882.875, 24 * T1, T1, 'linear'),
+      Tpse(T3),
+      Ttxt('Advancing 17 days — one full Callisto orbit. Io laps the field every 1.8 days.'),
+      Tval('DateTime', 2879.875, 20 * T1, 0, 'linear'),
     ],
   },
   {
     name: 'Venus — Ptolemaic phases',
     group: 'planets-epicycles',
+    speedScale: 1.0,
     intro: {
       ObserverLat: 45, ObserverLong: 0,
       BodySource: 'ptolemy',
@@ -898,15 +900,16 @@ const PLANET_EPICYCLE_DEMOS = [
       ShowTruePositions: true,
     },
     tasks: () => [
-      Ttxt('Venus in January 2025 — a slim crescent low in the evening sky. The phase is computed from the Ptolemaic true epicycle anomaly: 0° = superior conjunction (full), 180° = inferior conjunction (new).'),
-      Thold(T3),
+      Ttxt('Venus — January 2025. Phase computed from the Ptolemaic true epicycle anomaly: 0° = superior conjunction (full disc), 180° = inferior conjunction (new/crescent).'),
+      Tpse(T3),
       Ttxt('Advancing 200 days — watch Venus swell from crescent through gibbous and back as the epicycle carries it around.'),
-      Tval('DateTime', 3141, 30 * T1, T1, 'linear'),
+      Tval('DateTime', 3141, 25 * T1, 0, 'linear'),
     ],
   },
   {
     name: 'Evening sky — Galilean moons + Venus phases',
     group: 'planets-epicycles',
+    speedScale: 1.0,
     intro: {
       ObserverLat: 45, ObserverLong: 0,
       BodySource: 'ptolemy',
@@ -928,9 +931,9 @@ const PLANET_EPICYCLE_DEMOS = [
     },
     tasks: () => [
       Ttxt('2025 Jan 19 — Jupiter and Venus share the winter evening sky at 45°N. Epicycles only: Galilean moons orbit Jupiter, Venus wears a crescent phase.'),
-      Thold(T3),
-      Ttxt('Advancing 30 days — watch both planets drift eastward and the moons dance around Jupiter.'),
-      Tval('DateTime', 2970, 28 * T1, T1, 'linear'),
+      Tpse(T3),
+      Ttxt('Advancing 30 days — both planets drift eastward, moons dance around Jupiter.'),
+      Tval('DateTime', 2970, 22 * T1, 0, 'linear'),
     ],
   },
 ];
