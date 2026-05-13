@@ -1,0 +1,1 @@
+this is my flat earth model project. i want you to have full control and publish to my github at https://stpierrs.github.io/conceptual_flat_earth_model/ 

@@ -1,0 +1,61 @@
+// Celestial direction vectors (unit sphere — no absolute distances).
+//
+// Frame note. Everyone observes a hemisphere of sky; the whole celestial
+// sphere is just both hemispheres of those observations stitched together
+// and given coordinate labels. RA / Dec / ecliptic / celestial pole are
+// abstract coordinate axes anchored to the same observed motion of the
+// stars regardless of which world model you draw underneath. The "earth
+// equator plane" we mention below is the plane perpendicular to the
+// celestial pole — the plane the equatorial stars trace out — not a
+// statement about physics. Right?
+//
+// This is the celestial half of Ptolemy's two-sphere conceptual model
+// (the terrestrial half — lat / lon graticule — lives in
+// `canonical.js` / `projections.js`). The *Almagest* preface lays out
+// the pairing: every point on the celestial sphere uniquely
+// corresponds to a point on the terrestrial sphere at a given UTC.
+// That correspondence is what makes RA ↔ longitude and Dec ↔
+// latitude work the same way regardless of which world model is
+// drawn underneath. Two spheres, same observation indexed two ways.
+//
+// All three functions return unit vectors in the "celestial" frame, where
+// +z is the celestial pole (perpendicular to the earth equator plane) and
+// the sun's position at spring equinox is on the +x axis.
+
+import { ToRad } from '../math/utils.js';
+import { M } from '../math/mat3.js';
+
+// Ecliptic-to-celestial transform: rotate the ecliptic plane up by the
+// obliquity of the ecliptic. ("Ecliptic" is just the band the sun stays
+// inside as it moves through the year; "obliquity" is the angle between
+// that band and the celestial equator. Both are observed quantities,
+// labeled with words older than either model.)
+export function compTransMatSunToCelest(obliquityDeg) {
+  return M.RotatingX(ToRad(obliquityDeg));
+}
+
+// Moon-orbit -> celestial transform: compose moon orbit inclination,
+// nodal precession (rotation about the ecliptic pole), and ecliptic tilt.
+export function compTransMatMoonToCelest(obliquityDeg, moonInclinationDeg, moonPrecessAngleDeg) {
+  const m1 = M.RotatingX(ToRad(moonInclinationDeg));
+  const m2 = M.RotatingZ(ToRad(moonPrecessAngleDeg), m1);
+  return M.RotatingX(ToRad(obliquityDeg), m2);
+}
+
+// Sun position as a unit vector in the celestial frame.
+export function sunAngleToCelestCoord(sunAngleDeg, transMatSunToCelest) {
+  const a = ToRad(sunAngleDeg);
+  return M.Trans(transMatSunToCelest, [Math.cos(a), Math.sin(a), 0]);
+}
+
+// Moon position as a unit vector in the celestial frame.
+export function moonAngleToCelestCoord(moonAngleDeg, transMatMoonToCelest) {
+  const a = ToRad(moonAngleDeg);
+  return M.Trans(transMatMoonToCelest, [Math.cos(a), Math.sin(a), 0]);
+}
+
+// Unit vector pointing to the moon's own north pole (used for visual
+// phase orientation — which edge of the moon is lit).
+export function moonNorthCelestCoord(transMatMoonToCelest) {
+  return M.Trans(transMatMoonToCelest, [0, 0, 1]);
+}
