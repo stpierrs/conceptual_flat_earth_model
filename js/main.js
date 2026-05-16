@@ -336,11 +336,6 @@ refreshI18nNodes();
 
 attachUrlState(model, demos);
 
-// Legacy 'model-warning' DOM element — markup may still carry it.
-// Hide it on boot; the surrounding banner code is gone.
-const _legacyBanner = document.getElementById('model-warning');
-if (_legacyBanner) _legacyBanner.hidden = true;
-
 // Keep the app title and subtitle translated as language changes.
 const _titleEl = document.getElementById('app-title');
 const _subEl   = document.getElementById('app-subtitle');

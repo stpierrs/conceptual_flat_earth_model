@@ -7,13 +7,14 @@
 // ── Parameter sources ────────────────────────────────────────────
 //
 // Mean motion rates derived from IAU/JPL sidereal periods and
-// synodic periods (USNO / observed-series "Astronomical Algorithms" 2nd ed.).
-// Eccentricities and apogee positions from observed-series Table 33.a (J2000
-// orbital elements) and cross-checked against sky-reference.
+// synodic periods (USNO Astronomical Almanac, cross-checked against
+// observed synodic periods and sky-reference).
+// Eccentricities and apogee positions from standard J2000 orbital elements,
+// cross-checked against sky-reference.
 // Orbital size ratios (field `a`) express each body's mean orbital radius
 // as a multiple of the observer's (Earth's) mean orbital radius = 1.0.
 // All motion is purely angular — no physical distance scale is assumed.
-// Mean longitudes at J2000 from observed-series Table 31.a (L₀ values).
+// Mean longitudes at J2000 from standard J2000 epoch elements (L₀ values).
 //
 // Inner-planet mean motions on the DEFERENT follow the Sun's mean
 // motion exactly (as Ptolemy observed) because Venus and Mercury
@@ -67,7 +68,7 @@ export const SUN = {
 //
 // Sidereal period: 27.321661 days → nlong = 360 / 27.321661
 // Anomalistic period: 27.554550 days → nanom = 360 / 27.554550
-// Mean values from observed-series ch.47.
+// Mean values from observed lunar periods.
 export const MOON = {
   nlong:         13.1763966,   // mean longitude rate °/day
   nanom:         13.0649929,   // mean anomaly (epicycle) rate °/day
@@ -87,7 +88,7 @@ export const MOON = {
 export const MARS = {
   nlong:          0.5240207,
   nanom:          0.5240207,
-  nlong2:         0.000311,    // secular T² coefficient °/century² (observed-series)
+  nlong2:         0.000311,    // secular T² coefficient °/century²
   nsyn:           0.4615195,
   L0:           359.4830,    // calibrated    // empirically corrected at J2000
   M0:           319.7274,
@@ -108,7 +109,7 @@ export const MARS = {
 export const JUPITER = {
   nlong:          0.0830853,
   nanom:          0.0830853,
-  nlong2:         0.000223,    // secular T² coefficient °/century² (observed-series)
+  nlong2:         0.000223,    // secular T² coefficient °/century²
   nsyn:           0.9025862,
   L0:           33.6615,    // calibrated    // empirically corrected at J2000
   M0:            20.9240,
@@ -129,7 +130,7 @@ export const JUPITER = {
 export const SATURN = {
   nlong:          0.0334597,   // °/day (360 / 10759.22)
   nanom:          0.0334597,
-  nlong2:         0.000519,    // secular T² coefficient °/century² (observed-series)
+  nlong2:         0.000519,    // secular T² coefficient °/century²
   nsyn:           0.9517044,   // °/day (360 / 378.09)
   L0:           48.4574,    // calibrated    // empirically corrected at J2000
   M0:            317.0207,     // °
@@ -150,9 +151,9 @@ export const SATURN = {
 export const URANUS = {
   nlong:          0.0117307,   // °/day
   nanom:          0.0117307,
-  nlong2:         0.000304,    // secular T² coefficient °/century² (observed-series)
+  nlong2:         0.000304,    // secular T² coefficient °/century²
   nsyn:           0.9741635,   // °/day
-  L0:           310.0550,    // empirically corrected at J2000      // °  (observed-series J2000 mean long)
+  L0:           310.0550,    // empirically corrected at J2000      // °
   M0:           142.2386,      // °
   apogee0:       173.0053,     // °
   apogeeRate:     0.0000097,
@@ -171,7 +172,7 @@ export const URANUS = {
 export const NEPTUNE = {
   nlong:          0.0059802,   // °/day
   nanom:          0.0059802,
-  nlong2:         0.000309,    // secular T² coefficient °/century² (observed-series)
+  nlong2:         0.000309,    // secular T² coefficient °/century²
   nsyn:           0.9797636,   // °/day
   L0:           306.3487,    // empirically corrected at J2000      // °
   M0:           256.2284,      // °
@@ -230,7 +231,7 @@ export const MERCURY = {
 export const PLUTO = {
   nlong:          0.0039770,    // °/day (360 / 90518)
   nanom:          0.0039770,
-  L0:           238.9288,       // mean longitude at J2000 (observed-series)
+  L0:           238.9288,       // mean longitude at J2000
   M0:            14.8600,       // mean anomaly at J2000
   a:             39.48168,
   ecc:            0.24882,

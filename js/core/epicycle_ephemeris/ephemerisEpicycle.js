@@ -65,13 +65,13 @@ function sunMeanAnomaly(t) {
 //
 // Single eccentric deferent.  The Sun moves on the ecliptic (β = 0).
 // True longitude = mean longitude − equation of centre.
-// We add the standard perturbation terms from observed-series ch.25 (light
-// terms only — no nutation, no aberration) to get to ~3' accuracy.
+// Standard three-term perturbation series (light terms only —
+// no nutation, no aberration) accurate to ~3'.
 function sunEquatorial(t) {
   const L = sunMeanLongitude(t);
   const M = sunMeanAnomaly(t);
 
-  // Equation of centre — two-term series (observed-series 25.4)
+  // Equation of centre — three-term series
   const C = (1.9146 - 0.004817 * t / 36525) * sind(M)
            + 0.019993 * sind(2 * M)
            + 0.000290 * sind(3 * M);
@@ -82,7 +82,7 @@ function sunEquatorial(t) {
 
 // ── Moon ─────────────────────────────────────────────────────────
 //
-// Eccentric deferent + thirteen perturbation terms (observed-series Ch.22/47).
+// Eccentric deferent + thirteen perturbation terms (classical lunar theory).
 // Terms 1–4 were the original set; terms 5–13 added here bring
 // accuracy from ~15–20' to ~0.1° (6').
 //
@@ -102,7 +102,7 @@ function moonEquatorial(t) {
   // Equation of centre (eccentric deferent, ×2 for Ptolemaic amplification)
   const eqc = eqCenter(Mm, MOON.ecc) * 2;
 
-  // Thirteen perturbation terms (amplitudes from observed-series Ch.47 simplified)
+  // Thirteen perturbation terms (classical lunar theory, simplified)
   const tlong = degmod(Lm + eqc
     + 1.2740 * sind(2*D - Mm)         // evection — Ptolemy's prosneusis
     + 0.6583 * sind(2*D)               // variation — Tycho Brahe

@@ -1192,7 +1192,9 @@ export class FeModel extends EventTarget {
       if (!apparent) {
         const raJ2000  = (star.raH / 24) * 2 * Math.PI;
         const decJ2000 = star.decD * Math.PI / 180;
-        apparent = apparentStarPosition(raJ2000, decJ2000, utcDate, starOpts);
+        apparent = (!starOpts.precession && !starOpts.nutation && !starOpts.aberration)
+          ? { ra: raJ2000, dec: decJ2000 }
+          : apparentStarPosition(raJ2000, decJ2000, utcDate, starOpts);
         _starApparentById.set(star.id, apparent);
       }
       const ra  = apparent.ra;

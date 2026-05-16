@@ -20,7 +20,7 @@ what an epicycle is.
 | `ephemerisEpicycle2.js` | **Phase 2** — two-epicycle stack (Ibn al-Shatir method) |
 | `ephemeris_integration_patch.js` | Step-by-step wiring instructions for `ephemeris.js` |
 | `epiTest.mjs` | Smoke test: prints all bodies + zodiac stars for one date |
-| `epiValidate.mjs` | Error comparison vs observed-series reference positions over 10 years |
+| `epiValidate.mjs` | Error comparison vs reference positions over 10 years |
 
 ---
 
@@ -81,7 +81,7 @@ subtraction always produces the correct elongation-bounded behaviour.
 
 ### Sun
 
-Two-term equation-of-centre series (observed-series Ch.25). Accurate to ~0.5°.
+Three-term equation-of-centre series. Accurate to ~0.5°.
 No equation of time applied.
 
 ### Moon
@@ -94,7 +94,7 @@ Ascending node tracked for ecliptic latitude.
 ## Accuracy (Phase 1 — single circle)
 
 This is a **pure Keplerian** pipeline with no perturbation series.
-Expected accuracy matches what observed-series warns about for simplified elements:
+Expected accuracy for simplified elements:
 
 | Body | Typical error | Notes |
 |------|-------------|-------|
@@ -156,7 +156,7 @@ epicycle2: epi2,
 ```bash
 # From the epicycle_ephemeris/ directory:
 node epiTest.mjs       # smoke test — all bodies, one date
-node epiValidate.mjs   # error comparison vs observed-series reference, 2000–2010
+node epiValidate.mjs   # error comparison vs reference positions, 2000–2010
 ```
 
 ---

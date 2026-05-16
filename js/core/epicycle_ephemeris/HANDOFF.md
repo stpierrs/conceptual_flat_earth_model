@@ -40,7 +40,7 @@ js/core/epicycle_ephemeris/
   fetchsky-reference.mjs              Fetches sky-reference reference data from sky-observations
   parsesky-reference.mjs              Parses cached sky-reference HTML into JSON
   epiTest.mjs                 Smoke test: node epiTest.mjs
-  epiValidate.mjs             Error comparison vs observed-series reference
+  epiValidate.mjs             Error comparison vs reference positions
   ephemeris_integration_patch.js  Integration notes (readable comments)
   README.md                   Architecture overview
   HANDOFF.md                  This file — update with every session
@@ -111,7 +111,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 | Jupiter | 1.96° | 1.96° | Systematic offset |
 | Mercury | 2.54° | 2.54° | Large eccentricity |
 | Moon | ~15–20' | ~15–20' | Evection + variation + annual eq + 2nd anomaly |
-| Mars | ~1–2°* | ~0.5–1°* | *Chunk 3: eqCenterobserved-series + Jupiter terms; post-fix estimate |
+| Mars | ~1–2°* | ~0.5–1°* | *Chunk 3: equation-of-centre + Jupiter terms; post-fix estimate |
 | Uranus | ~2–3° | ~2–3° | Uncalibrated |
 | Neptune | ~1–2° | ~1–2° | Uncalibrated |
 | Pluto | ~3–5° | ~3–5° | Uncalibrated, high ecc |
@@ -130,11 +130,11 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 3. **L₀ corrections baked into `epiParams.js`** (fitted vs sky-reference):
    - Mars: +7.65°, Jupiter: −7.69°, Saturn: −5.12°, Venus: −4.26°, Mercury: −0.34°
 
-4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (not observed-series Table 31.a values)
+4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (not standard J2000 orbital elements values)
 
 5. **`eqCenter()` is NOT used for planets** — only for Moon (×2 kludge). All planets use
-   `eqCenterobserved-series()` (Chunk 3). The arctan formula gives ~half the Keplerian equation of
-   center; switching to observed-series series gives the correct 2e sinM + ... expansion.
+   `eqCenterSeries()` (Chunk 3). The arctan formula gives ~half the Keplerian equation of
+   center; switching to equation-of-centre series gives the correct 2e sinM + ... expansion.
 
 ---
 
@@ -142,10 +142,10 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 
 | Body | Source | Calibrated? |
 |------|--------|-------------|
-| Sun, Moon | observed-series Ch.25/47 + sky-reference fit | Yes |
-| Mercury–Saturn | observed-series Table 31.a + sky-reference fit | Yes |
-| Uranus, Neptune | observed-series Table 31.a | No |
-| Pluto | observed-series (approximate J2000) | No |
+| Sun, Moon | standard astronomical series/47 + sky-reference fit | Yes |
+| Mercury–Saturn | standard J2000 orbital elements + sky-reference fit | Yes |
+| Uranus, Neptune | standard J2000 orbital elements | No |
+| Pluto | approximate J2000 | No |
 | Ceres, Pallas, Juno, Vesta | JPL Small-Body Database J2000 | No |
 | Fixed stars | HYG v4.1 catalogue | N/A |
 
@@ -181,13 +181,13 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
   - Applied as `lonCorr` in `outerBody()` / `outerBody2()`
 - **epi2:** Added `lonCorr = 0` parameter to `outerBody2()`, plumbed through Jupiter/Saturn cases
 
-**Chunk 3 — eqCenterobserved-series + Mars perturbation series (both pipelines)**
+**Chunk 3 — equation-of-centre + Mars perturbation series (both pipelines)**
 - **Root cause found:** `eqCenter()` (arctan approximation) gives ~half the Keplerian equation
   of center. For Mars (e=0.093) this was a ~5.3° peak error, explaining the 6.59° RMS.
   The arctan formula is Ptolemaic epicycle geometry; the Keplerian formula is `2e sinM + ...`
-- **Fix:** Added `eqCenterobserved-series(M, e)` to `epiCore.js` — three-term observed-series series:
+- **Fix:** Added `eqCenterSeries(M, e)` to `epiCore.js` — three-term equation-of-centre series:
   `((2e - e³/4) sinM + (5e²/4) sin2M + (13e³/12) sin3M) × DEG`
-- **Applied** `eqCenterobserved-series` in `outerBody()`, `innerBody()` (epi1) and `outerBody2()`,
+- **Applied** `eqCenterSeries` in `outerBody()`, `innerBody()` (epi1) and `outerBody2()`,
   `innerBody2()` (epi2). Moon still uses `eqCenter × 2` (equivalent, kept as-is).
 - **Mars-Jupiter perturbation:** Added 6-term resonance series `marsLonCorr(t)`:
   main term 0.2726° at (5λ_J − 2λ_M − 2.83°) + 5 additional terms.
