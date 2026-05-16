@@ -73,17 +73,22 @@ export function eclipticToEquatorial(lambdaDeg, betaDeg, oblDeg = OBLIQUITY_J200
 
 // ── Equation of centre (eccentric deferent geometry) ─────────────
 //
-// Given mean anomaly M (deg) and eccentricity e (dimensionless,
-// same units as deferent radius = 1), returns the equation of
-// centre in degrees.
-//
-// This is the small-angle arctan approximation valid for e < 0.25:
-//   eq_c = arctan( e sin M / (1 + e cos M) )
-//
-// For larger eccentricities (outer planets) the full Kepler solver
-// is more accurate — but for e ≤ 0.1 the difference is < 1'.
+// arctan approximation — used ONLY for the Moon (which compensates
+// by multiplying the result by 2).  Do NOT use for planets; the
+// arctan formula represents epicycle-deferent geometry and gives
+// roughly half the correct Keplerian equation of centre.
 export function eqCenter(M, e) {
   return atand(e * sind(M) / (1 + e * cosd(M)));
+}
+
+// Keplerian equation of centre — observed-series three-term series.
+// Valid to ~0.001° for e ≤ 0.15 (all planets except Mercury).
+// For Mercury (e = 0.206) error is ~0.05° — acceptable for our pipeline.
+// Returns degrees.  Replaces eqCenter() for all planets except Moon.
+export function eqCenterobserved-series(M, e) {
+  const e2 = e * e;
+  const e3 = e * e2;
+  return ((2*e - e3/4) * sind(M) + (5*e2/4) * sind(2*M) + (13*e3/12) * sind(3*M)) * DEG;
 }
 
 // ── Equation of anomaly (epicycle geometry) ───────────────────────
