@@ -196,25 +196,6 @@ function drawGalaxy(ctx) {
   disc(ctx, cx, cy, 3, '#ffffff');
 }
 
-function drawSatellite(ctx) {
-  const cx = ART_SIZE / 2, cy = ART_SIZE / 2;
-  // Body
-  ctx.fillStyle = '#a0a0b0';
-  ctx.fillRect((cx - 3) * SCALE, (cy - 3) * SCALE, 6 * SCALE, 6 * SCALE);
-  ctx.fillStyle = '#404048';
-  ctx.fillRect((cx - 2) * SCALE, (cy - 2) * SCALE, 4 * SCALE, 4 * SCALE);
-  // Solar panels
-  ctx.fillStyle = '#3060a0';
-  ctx.fillRect((cx - 18) * SCALE, (cy - 4) * SCALE, 12 * SCALE, 8 * SCALE);
-  ctx.fillRect((cx + 6) * SCALE, (cy - 4) * SCALE, 12 * SCALE, 8 * SCALE);
-  ctx.fillStyle = '#80a8d0';
-  for (let i = -16; i <= -8; i += 2) ctx.fillRect((cx + i) * SCALE, (cy - 3) * SCALE, SCALE, 6 * SCALE);
-  for (let i = 8; i <= 16; i += 2)   ctx.fillRect((cx + i) * SCALE, (cy - 3) * SCALE, SCALE, 6 * SCALE);
-  // Antenna
-  ctx.fillStyle = '#e0e0e8';
-  for (let i = 0; i <= 6; i++) pix(ctx, cx, cy - 4 - i, '#e0e0e8');
-  pix(ctx, cx, cy - 11, '#ff4040');
-}
 
 function clearCanvas(ctx) {
   ctx.clearRect(0, 0, W, W);
@@ -425,7 +406,6 @@ export function buildTrackingInfoPopup(panelEl, model) {
     else if (kind === 'blackhole')  drawBlackHole(ctx);
     else if (kind === 'quasar')     drawQuasar(ctx);
     else if (kind === 'galaxy')     drawGalaxy(ctx);
-    else if (kind === 'satellite')  drawSatellite(ctx);
     else drawCelNavStar(ctx);
   }
 

@@ -151,9 +151,6 @@ export class Renderer {
     });
     this.sm.world.add(this.celTheoStars.group);
 
-    // Satellites ride the same generic renderer but default off
-    // (visibility is state-gated via ShowSatellites — the computed
-    // array is simply empty when the user hasn't enabled them).
     this.gpPathOverlay = new GPPathOverlay();
     this.sm.world.add(this.gpPathOverlay.group);
 
@@ -204,17 +201,6 @@ export class Renderer {
     this.sm.world.add(this.moonMonthMarkers.group);
     this.sm.world.add(this.eclipseMapSolar.group);
     this.sm.world.add(this.eclipseMapLunar.group);
-
-    this.satelliteStars = new CatalogPointStars({
-      sourceKey: 'Satellites',
-      color: 0x66ff88,
-      domeSize: 4,
-      sphereSize: 3.5,
-      maxCount: 1024,
-      clippingPlanes: clipPlanes,
-      requireMembership: true,
-    });
-    this.sm.world.add(this.satelliteStars.group);
 
     this.constellations = new Constellations(clipPlanes);
     this.sm.world.add(this.constellations.group);
@@ -733,7 +719,6 @@ export class Renderer {
     this.quasarStars.update(m);
     this.galaxyStars.update(m);
     this.celTheoStars.update(m);
-    this.satelliteStars.update(m);
     this.gpPathOverlay.update(m);
     this.centralAngleArcs.update(m);
     this.stellariumTraces.update(m);
@@ -1051,7 +1036,6 @@ export class Renderer {
       this.blackHoleStars && this.blackHoleStars.spherePoints,
       this.quasarStars && this.quasarStars.spherePoints,
       this.galaxyStars && this.galaxyStars.spherePoints,
-      this.satelliteStars && this.satelliteStars.spherePoints,
       this.constellations && this.constellations.sphereStars,
       this.constellations && this.constellations.sphereLines,
       this.sunMarker && this.sunMarker.sphereDot,
@@ -1390,7 +1374,6 @@ export class Renderer {
       blackhole:  0x9966ff,
       quasar:     0x40e0d0,
       galaxy:     0xff80c0,
-      satellite:  0x66ff88,
       bsc:        0xfff5d8,
       celtheo:    0xff8c00,
     };
@@ -1401,7 +1384,6 @@ export class Renderer {
         ['blackhole',  c.BlackHoles],
         ['quasar',     c.Quasars],
         ['galaxy',     c.Galaxies],
-        ['satellite',  c.Satellites],
         ['celtheo',    c.CelTheoStars],
       ];
       for (const [cat, list] of lookups) {
