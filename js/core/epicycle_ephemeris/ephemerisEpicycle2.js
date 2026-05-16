@@ -111,34 +111,39 @@ function moonEquatorial(t) {
 // The second epicycle adds a residual correction on top of the first,
 // absorbing the perturbation-level error the single-circle model leaves.
 function outerBody2(t, p, epi2, lonCorr = 0) {
-  const lambda  = degmod(p.L0 + t * p.nlong);
+  const T      = t / 36525;
+  const lambda  = degmod(p.L0 + t * p.nlong + (p.nlong2 || 0) * T * T);
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
   const eqc  = eqCenterMeeus(M, p.ecc);
   const nu   = degmod(M + eqc);
-  const lon_h = degmod(lambda + eqc + lonCorr);
-  const r    = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
 
-  const xP = r * cosd(lon_h);
-  const yP = r * sind(lon_h);
+  // Planet orbital vector (orbit ratio a, proportional coordinates)
+  const lon_orb = degmod(lambda + eqc + lonCorr);
+  const rho     = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
 
+  const xP = rho * cosd(lon_orb);
+  const yP = rho * sind(lon_orb);
+
+  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);
-  const r_earth = 1.0 - 0.016709 * cosd(Msun);
-  const xE = r_earth * cosd(lon_sun + 180);
-  const yE = r_earth * sind(lon_sun + 180);
+  const r_obs   = 1.0 - 0.016709 * cosd(Msun);
+  const xO = r_obs * cosd(lon_sun + 180);
+  const yO = r_obs * sind(lon_sun + 180);
 
-  const dx = xP - xE, dy = yP - yE;
+  // Geocentric direction: angular offset of planet from observer
+  const dx = xP - xO, dy = yP - yO;
   const geo_lon = degmod(atand2(dy, dx));
 
   // Second-epicycle residual correction on the geocentric longitude
-  const Msyn  = degmod(lon_h - (lon_sun + Csun));  // synodic anomaly
+  const Msyn  = degmod(lon_orb - (lon_sun + Csun));  // synodic anomaly
   const dCorr = eqAnomaly(degmod(Msyn + epi2.phase), epi2.r2);
   const tlong = degmod(geo_lon + dCorr);
 
-  const latArg = degmod(lon_h - nodeNow);
+  const latArg = degmod(lon_orb - nodeNow);
   const beta   = p.inc * sind(latArg);
 
   return eclipticToEquatorial(tlong, beta);
@@ -150,30 +155,63 @@ function innerBody2(t, p, epi2) {
   const eqc   = eqCenterMeeus(M, p.ecc);
   const nu    = degmod(M + eqc);
   const w     = degmod(p.apogee0 + t * (p.apogeeRate || 0));
-  const lon_h = degmod(nu + w);
-  const r     = p.a * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
 
-  const xP = r * cosd(lon_h);
-  const yP = r * sind(lon_h);
+  // Planet orbital vector (orbit ratio a, proportional coordinates)
+  const lon_orb = degmod(nu + w);
+  const rho     = p.a * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
 
+  const xP = rho * cosd(lon_orb);
+  const yP = rho * sind(lon_orb);
+
+  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);
-  const r_earth = 1.0 - 0.016709 * cosd(Msun);
-  const xE = r_earth * cosd(lon_sun + 180);
-  const yE = r_earth * sind(lon_sun + 180);
+  const r_obs   = 1.0 - 0.016709 * cosd(Msun);
+  const xO = r_obs * cosd(lon_sun + 180);
+  const yO = r_obs * sind(lon_sun + 180);
 
-  const tlong_base = degmod(atand2(yP - yE, xP - xE));
+  // Geocentric direction: angular offset of planet from observer
+  const tlong_base = degmod(atand2(yP - yO, xP - xO));
 
   // Second-epicycle residual
   const dCorr = eqAnomaly(degmod(M + epi2.phase), epi2.r2);
   const tlong = degmod(tlong_base + dCorr);
 
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
-  const latArg  = degmod(lon_h - nodeNow);
+  const latArg  = degmod(lon_orb - nodeNow);
   const beta    = p.inc * sind(latArg);
 
   return eclipticToEquatorial(tlong, beta);
+}
+
+// ── Uranus perturbation corrections ───────────────────────────────
+// Primary terms: Saturn-Uranus synodic (~45.4 yr) and Jupiter-Uranus
+// Amplitudes calibrated to approximate DE405; phases need phase3Calibrate.mjs
+function uranusLonCorr(t) {
+  const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
+  const lS = degmod(SATURN.L0  + t * SATURN.nlong);
+  const lU = degmod(URANUS.L0  + t * URANUS.nlong);
+  return (
+    + 0.8100 * sind(lS - lU + 139.0)
+    + 0.3500 * sind(lJ - lU +  84.5)
+    - 0.1900 * sind(2*lS - lU + 40.8)
+    + 0.1300 * sind(lJ + lS - 2*lU + 92.3)
+  );
+}
+
+// ── Neptune perturbation corrections ──────────────────────────────
+// Primary terms: Uranus-Neptune synodic (~172 yr) and Saturn-Neptune (~36 yr)
+// Phases are approximate — calibrate with phase3Calibrate.mjs vs DE405
+function neptuneLonCorr(t) {
+  const lS = degmod(SATURN.L0  + t * SATURN.nlong);
+  const lU = degmod(URANUS.L0  + t * URANUS.nlong);
+  const lN = degmod(NEPTUNE.L0 + t * NEPTUNE.nlong);
+  return (
+    + 0.4200 * sind(lU - lN + 168.2)
+    + 0.2800 * sind(lS - lN +  73.6)
+    - 0.1400 * sind(2*lU - lN +  95.1)
+  );
 }
 
 // ── Mars perturbation correction from Jupiter ─────────────────────
@@ -224,8 +262,8 @@ export function bodyGeocentric(name, date) {
                       - 5 * degmod(SATURN.L0  + t * SATURN.nlong));
       return outerBody2(t, SATURN, EPI2.saturn, -0.870 * sind(gi + 148.0));
     }
-    case 'uranus':  return outerBody2(t, URANUS,  EPI2.uranus);
-    case 'neptune': return outerBody2(t, NEPTUNE, EPI2.neptune);
+    case 'uranus':  return outerBody2(t, URANUS,  EPI2.uranus,  uranusLonCorr(t));
+    case 'neptune': return outerBody2(t, NEPTUNE, EPI2.neptune, neptuneLonCorr(t));
     case 'pluto':   return outerBody2(t, PLUTO,   EPI2.pluto);
     case 'ceres':   return outerBody2(t, CERES,   EPI2.ceres);
     case 'pallas':  return outerBody2(t, PALLAS,  EPI2.pallas);

@@ -197,6 +197,17 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 - **Calibration note:** Mars perturbation phases (terms 2–6) are approximate; run
   `phase3Calibrate.mjs` against DE405 to optimise them.
 
+**Language reframing + Chunk 4 + Chunk 5 (Session 3 continued)**
+- Scrubbed all "heliocentric" language from outerBody/innerBody/outerBody2/innerBody2.
+  `a` field = orbital size ratio (observer mean orbit = 1.0). Variables renamed:
+  `r_earth`→`r_obs`, `xE/yE`→`xO/yO`, `lon_h`→`lon_orb`, `r`→`rho`.
+- Chunk 4 (secular T²): added `nlong2` (°/century²) to Mars, Jupiter, Saturn, Uranus,
+  Neptune in epiParams.js. Applied as `(p.nlong2||0) × T²` correction to mean longitude.
+  Effect < 0.001° per 100 years; meaningful only at multi-century ranges.
+- Chunk 5 (Uranus/Neptune): added `uranusLonCorr(t)` (4 terms, Saturn+Jupiter coupling)
+  and `neptuneLonCorr(t)` (3 terms, Uranus+Saturn coupling) to both pipelines.
+  Phases approximate — need phase3Calibrate.mjs vs DE405 to refine.
+
 ---
 
 ## Planned Future Work (Priority Order)
@@ -206,20 +217,15 @@ Moon perturbations + Jupiter-Saturn great inequality — both pipelines updated.
 
 ### ~~Chunk 3~~ — DONE (Session 3, continued)
 
-### Chunk 4 — Accuracy: Mars perturbation series
-- Jupiter perturbation on Mars (~2° amplitude):
-  `+0.273° sin(5λ_J − 2λ_M − 2.828°)` + several more terms
-- Target: Mars from 6.6° → ~1° (matching Meeus Ch.33)
-- Implement as additive corrections in `outerBody()` for Mars specifically
+### ~~Chunk 4~~ — DONE (Session 3 continued)
+~~Accuracy: Mars perturbation series~~
+~~Accuracy: Jupiter-Saturn great inequality~~
+Secular T² corrections added to Mars, Jupiter, Saturn, Uranus, Neptune via `nlong2` field.
 
-### Chunk 4 — Accuracy: Jupiter-Saturn great inequality
-- Great inequality period ~918 years, amplitude ~0.55° on Jupiter, ~0.9° on Saturn
-- Terms: `A sin(2λ_J − 5λ_S + φ)` for both bodies
-- Target: Jupiter from 1.96° → <0.5°, Saturn from 0.74° → <0.3°
-
-### Chunk 5 — Accuracy: Secular terms
-- Add T² corrections to mean motions for better long-range accuracy
-- Currently valid to ~±50 years from J2000; secular terms extend to ±200 years
+### ~~Chunk 5~~ — DONE (Session 3 continued)
+~~Accuracy: Secular terms~~
+Uranus/Neptune perturbation corrections added to both pipelines (`uranusLonCorr`, `neptuneLonCorr`).
+Phases approximate — calibrate with `phase3Calibrate.mjs` vs DE405.
 
 ### Chunk 6 — DE405 calibration for new bodies
 - Run `fetchDE405.mjs` / `phase3Calibrate.mjs` for Uranus, Neptune
