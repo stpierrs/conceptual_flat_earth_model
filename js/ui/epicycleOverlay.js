@@ -28,6 +28,13 @@ const BODY_COLORS = {
 };
 
 function pickBody(model) {
+  // Prefer the actively followed body (drives "Tracking: X" in the info bar).
+  const follow = model.state.FollowTarget;
+  if (follow) {
+    const name = (typeof follow === 'string' ? follow : '').toLowerCase();
+    if (PTOLEMY_NAMES.has(name)) return name;
+  }
+  // Fall back to the first Ptolemaic body in the tracker list.
   const targets = Array.isArray(model.state.TrackerTargets) ? model.state.TrackerTargets : [];
   for (const t of targets) {
     const name = (typeof t === 'string' ? t : (t && t.id) || '').toLowerCase();
