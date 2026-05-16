@@ -44,8 +44,9 @@ import {
 
 import {
   SUN, MOON, MARS, JUPITER, SATURN, URANUS, NEPTUNE,
-  VENUS, MERCURY,
-  ZODIAC_STARS, ECLIPTIC_GUIDE_STARS,
+  VENUS, MERCURY, PLUTO,
+  CERES, PALLAS, JUNO, VESTA,
+  ZODIAC_STARS, ECLIPTIC_GUIDE_STARS, BRIGHT_STARS,
 } from './epiParams.js';
 
 // ── Utility: Sun's mean longitude (shared by inner planets) ──────
@@ -205,8 +206,7 @@ function innerBody(t, p) {
 // checkbox (which rotates the whole starfield).
 // We build a combined lookup map from both star lists.
 const FIXED_STAR_MAP = new Map();
-for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS]) {
-  // Convert raH (decimal hours) → degrees, store in radians
+for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS, ...BRIGHT_STARS]) {
   FIXED_STAR_MAP.set(s.id, {
     ra:  s.raH * 15 * RAD,
     dec: s.decD * RAD,
@@ -232,6 +232,11 @@ export function bodyGeocentric(name, date) {
     case 'saturn':  return outerBody(t, SATURN);
     case 'uranus':  return outerBody(t, URANUS);
     case 'neptune': return outerBody(t, NEPTUNE);
+    case 'pluto':   return outerBody(t, PLUTO);
+    case 'ceres':   return outerBody(t, CERES);
+    case 'pallas':  return outerBody(t, PALLAS);
+    case 'juno':    return outerBody(t, JUNO);
+    case 'vesta':   return outerBody(t, VESTA);
     case 'earth':   return { ra: 0, dec: 0 };
     default: {
       // Try fixed-star lookup
@@ -245,10 +250,11 @@ export function bodyGeocentric(name, date) {
 export const SUPPORTED_BODIES = new Set([
   'sun', 'moon',
   'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-  'uranus', 'neptune',
-  // Zodiac + guide stars are also supported via starEquatorial()
+  'uranus', 'neptune', 'pluto',
+  'ceres', 'pallas', 'juno', 'vesta',
   ...ZODIAC_STARS.map(s => s.id),
   ...ECLIPTIC_GUIDE_STARS.map(s => s.id),
+  ...BRIGHT_STARS.map(s => s.id),
 ]);
 
 export function coversBody(name) {

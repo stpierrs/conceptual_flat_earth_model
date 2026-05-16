@@ -31,8 +31,9 @@ import {
 
 import {
   SUN, MOON, MARS, JUPITER, SATURN, URANUS, NEPTUNE,
-  VENUS, MERCURY,
-  ZODIAC_STARS, ECLIPTIC_GUIDE_STARS,
+  VENUS, MERCURY, PLUTO,
+  CERES, PALLAS, JUNO, VESTA,
+  ZODIAC_STARS, ECLIPTIC_GUIDE_STARS, BRIGHT_STARS,
 } from './epiParams.js';
 
 // ── Second-epicycle deltas ────────────────────────────────────────
@@ -53,6 +54,12 @@ const EPI2 = {
   saturn:  { r2: 0.000, phase:   0.0 },  // 0.74° — already sub-degree
   uranus:  { r2: 0.012, phase: 180.0 },  // uncalibrated — no sky-reference fetch yet
   neptune: { r2: 0.006, phase: 180.0 },  // uncalibrated — no sky-reference fetch yet
+  // New bodies — no 2nd epicycle calibration yet
+  pluto:   { r2: 0.000, phase:   0.0 },
+  ceres:   { r2: 0.000, phase:   0.0 },
+  pallas:  { r2: 0.000, phase:   0.0 },
+  juno:    { r2: 0.000, phase:   0.0 },
+  vesta:   { r2: 0.000, phase:   0.0 },
 };
 
 // ── Shared Sun helpers (identical to single-epi version) ─────────
@@ -158,7 +165,7 @@ function innerBody2(t, p, epi2) {
 
 // ── Fixed-star lookup (same as single-epi version) ───────────────
 const FIXED_STAR_MAP = new Map();
-for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS]) {
+for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS, ...BRIGHT_STARS]) {
   FIXED_STAR_MAP.set(s.id, {
     ra:  s.raH * 15 * RAD,
     dec: s.decD * RAD,
@@ -184,6 +191,11 @@ export function bodyGeocentric(name, date) {
     case 'saturn':  return outerBody2(t, SATURN,  EPI2.saturn);
     case 'uranus':  return outerBody2(t, URANUS,  EPI2.uranus);
     case 'neptune': return outerBody2(t, NEPTUNE, EPI2.neptune);
+    case 'pluto':   return outerBody2(t, PLUTO,   EPI2.pluto);
+    case 'ceres':   return outerBody2(t, CERES,   EPI2.ceres);
+    case 'pallas':  return outerBody2(t, PALLAS,  EPI2.pallas);
+    case 'juno':    return outerBody2(t, JUNO,    EPI2.juno);
+    case 'vesta':   return outerBody2(t, VESTA,   EPI2.vesta);
     case 'earth':   return { ra: 0, dec: 0 };
     default: {
       const star = starEquatorial(name);
@@ -196,9 +208,11 @@ export function bodyGeocentric(name, date) {
 export const SUPPORTED_BODIES = new Set([
   'sun', 'moon',
   'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-  'uranus', 'neptune',
+  'uranus', 'neptune', 'pluto',
+  'ceres', 'pallas', 'juno', 'vesta',
   ...ZODIAC_STARS.map(s => s.id),
   ...ECLIPTIC_GUIDE_STARS.map(s => s.id),
+  ...BRIGHT_STARS.map(s => s.id),
 ]);
 
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
