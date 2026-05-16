@@ -13,7 +13,7 @@ export class Demos {
     this.currentIndex = -1;
     this._panelHost = null;
     this._listEl = null;
-    this._collapsed = new Set(['solar-eclipses', 'lunar-eclipses']);  // groups collapsed by default
+    this._collapsed = new Set();  // no groups collapsed by default
     // Autoplay queue: when non-null, after the active demo's task
     // queue empties we advance to the next index in `_queue`.
     this._queue = null;
@@ -73,15 +73,11 @@ export class Demos {
     }
     this.currentIndex = index;
     const d = this.list[index];
-    // reset eclipse + flight-routes state before each demo's intro
-    // so panels left over from the previous demo (eclipse shadow,
-    // flight info boxes, race track, per-route colours, central-
-    // angle suppression) don't bleed into the next one when the user
-    // switches.
+    // reset flight-routes state before each demo's intro so panels
+    // left over from the previous demo (flight info boxes, race track,
+    // per-route colours, central-angle suppression) don't bleed into
+    // the next one when the user switches.
     this.model.setState({
-      EclipseActive: false, EclipseKind: null,
-      EclipseEventUTMS: null, EclipsePipeline: null,
-      EclipseMinSepDeg: null, EclipseMagnitude: null, EclipseEventType: null,
       ShowFlightRoutes: false,
       FlightRoutesSelected: 'all',
       FlightRoutesProgress: 1,
@@ -169,11 +165,6 @@ export class Demos {
     const d = this.list[index];
     if (!d) return;
     this.animator.stop();
-    this.model.setState({
-      EclipseActive: false, EclipseKind: null,
-      EclipseEventUTMS: null, EclipsePipeline: null,
-      EclipseMinSepDeg: null, EclipseMagnitude: null, EclipseEventType: null,
-    });
     const introState = typeof d.intro === 'function' ? d.intro(this.model) : d.intro;
     this.model.setState(introState);
     this._refreshPanel();

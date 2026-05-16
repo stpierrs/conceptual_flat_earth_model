@@ -102,7 +102,6 @@ const SKY_HIDDEN = {
   ShowShadow:              false,
   ShowDayNightShadow:      false,
   ShowDayNightSky:         false,
-  ShowEclipseShadow:       false,
 };
 
 // FE grid on; sun/moon GP drops off so the demo isn't visually

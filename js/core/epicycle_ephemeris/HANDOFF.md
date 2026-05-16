@@ -60,7 +60,6 @@ Pipeline registry key → module:
 - `'epicycle'`  → epi1  (default)
 - `'epicycle2'` → epi2
 - `'ptolemy'`   → existing Ptolemy pipeline (fallback of last resort)
-- `'astropixels'` → DE405 table (eclipse demos only, not user-selectable)
 
 Fallback chain: `epicycle → ptolemy`
 

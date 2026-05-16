@@ -250,8 +250,6 @@ function defaultState() {
     SunMonthMarkersWorldSpace: false,
     SunMonthMarkersOpp:      [],
     SunMonthMarkersOppWorldSpace: false,
-    EclipseMapSolar:         [],
-    EclipseMapLunar:         [],
     WorldModel:              'fe',
     ShowDomeCaustic:         false,
     DomeCausticDensity:      120,
@@ -334,22 +332,6 @@ function defaultState() {
     // toggle behaviour of the preset buttons — clicking an active
     // preset deactivates it and reverts the atmosphere knobs back.
     CelTheoPresetActive: null,
-
-    // Eclipse demo state hooks. The registry sets these via intro().
-    EclipseActive:     false,
-    EclipseKind:       null,
-    EclipseEventUTMS:  null,
-    EclipsePipeline:   null,
-    EclipseMinSepDeg:  null,
-    EclipseMagnitude:  null,
-    EclipseEventType:  null,
-    EclipseSunRadiusFE:      null,
-    EclipseMoonRadiusFE:     null,
-    // Eclipse ground-shadow feature gate — disabled pending rework.
-    ShowEclipseShadow:       false,
-    // Deprecated circular-decal overrides — kept around for URL back-compat.
-    EclipseUmbraRadiusFE:    null,
-    EclipsePenumbraRadiusFE: null,
 
     // Pins NightFactor = 1.0 — permanent night, no sun glow.
     PermanentNight: false,
@@ -512,8 +494,6 @@ export class FeModel extends EventTarget {
       s.SunMonthMarkers = [];
       s.MoonMonthMarkers = [];
       s.SunMonthMarkersOpp = [];
-      s.EclipseMapSolar = [];
-      s.EclipseMapLunar = [];
       // ObserverAtCenter is GE-only — we collapse it on any mode flip
       // so an FE switch doesn't inherit a stale "at-centre" flag.
       // ObserverLat / ObserverLong are intentionally preserved across
