@@ -121,7 +121,6 @@ function moonEquatorial(t) {
 
   const Fact = degmod(tlong - Nm);
   const beta = MOON.inc * sind(Fact);
-  const beta = MOON.inc * sind(F);
 
   return eclipticToEquatorial(tlong, beta);
 }
