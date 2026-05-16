@@ -81,16 +81,6 @@ export function eqCenter(M, e) {
   return atand(e * sind(M) / (1 + e * cosd(M)));
 }
 
-// Keplerian equation of centre — Meeus three-term series.
-// Valid to ~0.001° for e ≤ 0.15 (all planets except Mercury).
-// For Mercury (e = 0.206) error is ~0.05° — acceptable for our pipeline.
-// Returns degrees.  Replaces eqCenter() for all planets except Moon.
-export function eqCenterMeeus(M, e) {
-  const e2 = e * e;
-  const e3 = e * e2;
-  return ((2*e - e3/4) * sind(M) + (5*e2/4) * sind(2*M) + (13*e3/12) * sind(3*M)) * DEG;
-}
-
 // ── Equation of anomaly (epicycle geometry) ───────────────────────
 //
 // Given true epicycle anomaly α (deg) and epicycle radius r

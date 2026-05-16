@@ -7,7 +7,7 @@
 //   node epiValidate.mjs
 //
 // The "reference" positions used here are computed from the closed-form
-// Meeus Ch.25/33 formulas (not DE405 tables), which are accurate to
+// Standard J2000 formulas (not DE405 tables), which are accurate to
 // ~1'–5' for planets and ~1" for the Sun over 2000–2050.
 // For a true DE405 comparison you would load astropixels.js from the
 // parent model directory.
@@ -19,11 +19,11 @@ import { bodyGeocentric as epi1 }  from './ephemerisEpicycle.js';
 import { bodyGeocentric as epi2 }  from './ephemerisEpicycle2.js';
 import { RAD, DEG, j2000Day, degmod } from './epiCore.js';
 
-// ── Reference positions: Meeus Ch.25 Sun + simplified planet formulas ──
-// Using the same J2000-based elements as Meeus Table 31.a / 33.a.
+// ── Reference positions: standard J2000 Sun + simplified planet formulas ──
+// Using standard J2000-based orbital elements.
 // These are NOT DE405, but accurate enough to score the pipeline error.
 
-function meesusSun(t) {
+function refSun(t) {
   // t in Julian days from J2000
   const T   = t / 36525;                     // Julian centuries
   const L0  = 280.46646 + 36000.76983 * T;
@@ -43,11 +43,11 @@ function meesusSun(t) {
   };
 }
 
-// Meeus planet positions (Ch.33 simplified — L, a, e, i, Ω, ω elements)
+// Reference planet positions (simplified — L, a, e, i, Ω, ω elements)
 // Returns { ra, dec } in degrees for a given body name and t (days from J2000).
-function meeusPlanet(name, t) {
+function refPlanet(name, t) {
   const T = t / 36525;
-  // Elements from Meeus Table 31.a (J2000 epoch, degrees)
+  // Elements from standard J2000 orbital elements (degrees)
   const EL = {
     mercury: { L: 252.25084 + 149472.67411 * T, a: 0.38709893, e: 0.20563069, i: 7.00487,  Ω: 48.33167,  ω: 77.45645  },
     venus:   { L: 181.97909 +  58517.81538 * T, a: 0.72333199, e: 0.00677323, i: 3.39471,  Ω: 76.68069,  ω: 131.53298 },
@@ -78,7 +78,7 @@ function meeusPlanet(name, t) {
   const latH = Math.asin(Math.sin((lonH - el.Ω) * RAD) * Math.sin(el.i * RAD)) * DEG;
 
   // Geocentric position (approximate: ignore Sun's ecliptic latitude)
-  const sun = meesusSun(t);
+  const sun = refSun(t);
   // Use vector difference in ecliptic plane
   const xs_h = r * Math.cos(latH * RAD) * Math.cos(lonH * RAD);
   const ys_h = r * Math.cos(latH * RAD) * Math.sin(lonH * RAD);
@@ -133,7 +133,7 @@ for (let y = 2000; y < 2010; y++) {
   }
 }
 
-console.log('\nEpicycle ephemeris validation vs Meeus reference');
+console.log('\nEpicycle ephemeris validation vs reference');
 console.log('Sample: monthly 2000–2010 (' + SAMPLES.length + ' dates)\n');
 console.log(
   'Body       '.padEnd(12) +
@@ -151,7 +151,7 @@ for (const body of BODIES) {
     const t = j2000Day(date);
 
     // Reference
-    const ref = (body === 'sun') ? meesusSun(t) : meeusPlanet(body, t);
+    const ref = (body === 'sun') ? refSun(t) : refPlanet(body, t);
     if (!ref) continue;
 
     // Pipeline 1
@@ -190,4 +190,4 @@ for (const body of BODIES) {
 }
 
 console.log('\nNote: errors in radians converted to degrees (small-angle approx).');
-console.log('Uranus/Neptune reference from Meeus simplified elements — accuracy ~1°.\n');
+console.log('Uranus/Neptune from simplified elements — accuracy ~1°.\n');

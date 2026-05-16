@@ -124,7 +124,7 @@ export const SUPPORTED_BODIES = new Set([
 
 ### 2a. Moon — add terms 5–8 to `moonEquatorial()`
 
-The original had 4 terms. Add 4 more from Meeus Ch.47:
+The original had 4 terms. Add 4 more from classical lunar theory:
 
 ```js
 // Original 4 (keep these):
@@ -179,16 +179,16 @@ if not already present and apply it: `lon_orb = degmod(lambda + nu - M + lonCorr
 **Commit:** `503a7ea` — "Chunk 3: Fix Keplerian equation of centre + Mars perturbation"  
 **Files:** `epiCore.js`, `ephemerisEpicycle.js`, `ephemerisEpicycle2.js`
 
-### 3a. Add `eqCenterMeeus()` to `epiCore.js`
+### 3a. Add three-term equation-of-centre to `epiCore.js`
 
 The old `eqCenter()` (arctan formula) gives roughly half the correct
-equation of centre for planets. Replace it with the Meeus 3-term series
+equation of centre for planets. Replace it with a three-term series
 for all planets (keep `eqCenter()` only for the Moon, which compensates
 by doubling):
 
 ```js
 // Add to epiCore.js:
-export function eqCenterMeeus(M, e) {
+export function eqCenterSeries(M, e) {
   const e2 = e * e;
   const e3 = e * e2;
   return ((2*e - e3/4) * sind(M)
@@ -199,7 +199,7 @@ export function eqCenterMeeus(M, e) {
 
 Apply in `outerBody()` and `innerBody()`:
 ```js
-const C   = eqCenterMeeus(M, p.ecc);
+const C   = eqCenterSeries(M, p.ecc);
 const nu  = degmod(M + C);     // true anomaly ≈ M + C
 const lon_orb = degmod(lambda + C + lonCorr);
 ```
@@ -391,13 +391,13 @@ export function trueAnomaly(E_deg, e) {
 }
 ```
 
-### 6b. Replace `eqCenterMeeus` with exact Kepler in `outerBody()` and `innerBody()`
+### 6b. Replace `eqCenterSeries` with exact Kepler in `outerBody()` and `innerBody()`
 
-Remove the `eqCenterMeeus` import. Replace its usage:
+Remove the `eqCenterSeries` import. Replace its usage:
 
 **Old (outerBody):**
 ```js
-const C      = eqCenterMeeus(M, p.ecc);
+const C      = eqCenterSeries(M, p.ecc);
 const nu     = degmod(M + C);
 const lon_orb = degmod(lambda + C + lonCorr);
 ```
@@ -411,7 +411,7 @@ const lon_orb = degmod(lambda + nu - M + lonCorr);
 
 **Old (innerBody):**
 ```js
-const C      = eqCenterMeeus(M, p.ecc);
+const C      = eqCenterSeries(M, p.ecc);
 const nu     = degmod(M + C);
 const lon_orb = degmod(nu + w);
 ```

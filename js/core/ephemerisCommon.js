@@ -185,7 +185,7 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
   const omega = moonNodeOmegaDeg(T) * DEG;
   const eps   = meanObliquityDeg(T) * DEG;
 
-  // --- Precession (Lieske 1977 / IAU 1976) ---
+  // --- Precession (IAU standard rotation angles) ---
   if (precession) {
     const zeta  = (2306.2181 * T + 0.30188 * T * T + 0.017998 * T * T * T) * AS;
     const z     = (2306.2181 * T + 1.09468 * T * T + 0.018203 * T * T * T) * AS;
