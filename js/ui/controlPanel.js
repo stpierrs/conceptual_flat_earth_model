@@ -1812,7 +1812,7 @@ export function buildControlPanel(host, model, demos) {
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'default', MapArt: 'none',
       ShowPlanets: true, DarkBackground: true, ShowLogo: true,
-      BodySource: 'ptolemy',
+      BodySource: 'epicycle',
       StarApplyPrecession: false, StarApplyNutation: false,
       StarApplyAberration: false, StarTrepidation: true,
       StarfieldType: 'celnav', DynamicStars: true, PermanentNight: false,
