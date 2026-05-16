@@ -8,7 +8,7 @@
 // `info-popup` for shared styling.
 
 const ART_SIZE = 96;        // canvas pixel grid
-const SCALE    = 4;         // chunky pixel-art zoom
+const SCALE    = 8;         // chunky pixel-art zoom (doubled)
 const W = ART_SIZE * SCALE;
 
 function pix(ctx, x, y, color, scale = SCALE) {
@@ -433,11 +433,16 @@ export function buildTrackingInfoPopup(panelEl, model) {
     const s = model.state;
     const c = model.computed;
     const info = pickInfo(s, c);
+    panelEl.hidden = false;
     if (!info) {
-      panelEl.hidden = true;
+      clearCanvas(ctx);
+      drawSun(ctx);
+      elName.textContent = '—';
+      elCat.textContent  = 'No body selected';
+      elHeaderName.textContent = 'Tracking';
+      elBody.innerHTML = '<div class="ti-row" style="opacity:0.5;text-align:center;justify-content:center;">Search or select a body to track</div>';
       return;
     }
-    panelEl.hidden = false;
     elName.textContent = info.name || info.target;
     elCat.textContent  = categoryLabel(info);
     elHeaderName.textContent = `Tracking · ${info.name || info.target}`;
