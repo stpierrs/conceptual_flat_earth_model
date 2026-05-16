@@ -86,8 +86,20 @@ function moonEquatorial(t) {
   const Lm = degmod(MOON.L0 + t * MOON.nlong);
   const Mm = degmod(MOON.M0 + t * MOON.nanom);
   const Nm = degmod(MOON.N0 - t * MOON.nnode);
-  const eqc  = eqCenter(Mm, MOON.ecc) * 2;
-  const tlong = degmod(Lm + eqc);
+
+  const Ms = degmod(SUN.M0 + t * SUN.nanom);
+  const Ls = degmod(SUN.L0 + t * SUN.nlong);
+  const D  = degmod(Lm - Ls);
+
+  const eqc = eqCenter(Mm, MOON.ecc) * 2;
+
+  const evection   = +1.2740 * sind(2 * D - Mm);
+  const variation  = +0.6583 * sind(2 * D);
+  const annualEq   = -0.1858 * sind(Ms);
+  const secondAnom = +0.2136 * sind(2 * Mm);
+
+  const tlong = degmod(Lm + eqc + evection + variation + annualEq + secondAnom);
+
   const F    = degmod(tlong - Nm);
   const beta = MOON.inc * sind(F);
   return eclipticToEquatorial(tlong, beta);
@@ -97,14 +109,14 @@ function moonEquatorial(t) {
 // Full vector geocentric approach: planet position − Earth position.
 // The second epicycle adds a residual correction on top of the first,
 // absorbing the perturbation-level error the single-circle model leaves.
-function outerBody2(t, p, epi2) {
+function outerBody2(t, p, epi2, lonCorr = 0) {
   const lambda  = degmod(p.L0 + t * p.nlong);
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
   const eqc  = eqCenter(M, p.ecc);
   const nu   = degmod(M + eqc);
-  const lon_h = degmod(lambda + eqc);
+  const lon_h = degmod(lambda + eqc + lonCorr);
   const r    = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
 
   const xP = r * cosd(lon_h);
@@ -187,8 +199,16 @@ export function bodyGeocentric(name, date) {
     case 'mercury': return innerBody2(t, MERCURY, EPI2.mercury);
     case 'venus':   return innerBody2(t, VENUS,   EPI2.venus);
     case 'mars':    return outerBody2(t, MARS,    EPI2.mars);
-    case 'jupiter': return outerBody2(t, JUPITER, EPI2.jupiter);
-    case 'saturn':  return outerBody2(t, SATURN,  EPI2.saturn);
+    case 'jupiter': {
+      const gi = degmod(2 * degmod(JUPITER.L0 + t * JUPITER.nlong)
+                      - 5 * degmod(SATURN.L0  + t * SATURN.nlong));
+      return outerBody2(t, JUPITER, EPI2.jupiter, 0.549 * sind(gi + 174.0));
+    }
+    case 'saturn': {
+      const gi = degmod(2 * degmod(JUPITER.L0 + t * JUPITER.nlong)
+                      - 5 * degmod(SATURN.L0  + t * SATURN.nlong));
+      return outerBody2(t, SATURN, EPI2.saturn, -0.870 * sind(gi + 148.0));
+    }
     case 'uranus':  return outerBody2(t, URANUS,  EPI2.uranus);
     case 'neptune': return outerBody2(t, NEPTUNE, EPI2.neptune);
     case 'pluto':   return outerBody2(t, PLUTO,   EPI2.pluto);

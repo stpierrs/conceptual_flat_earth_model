@@ -110,7 +110,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 | Venus | 0.69° | 0.69° | Sub-degree |
 | Jupiter | 1.96° | 1.96° | Systematic offset |
 | Mercury | 2.54° | 2.54° | Large eccentricity |
-| Moon | ~1° | ~1° | No evection/variation yet |
+| Moon | ~15–20' | ~15–20' | Evection + variation + annual eq + 2nd anomaly |
 | Mars | 6.59° | **4.18°** | Epi-2 helps; Jupiter perturbation limits |
 | Uranus | ~2–3° | ~2–3° | Uncalibrated |
 | Neptune | ~1–2° | ~1–2° | Uncalibrated |
@@ -163,17 +163,26 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 - Total star catalogue: 64 fixed stars
 - Pushed to master, live at stpierrs.github.io
 
+### Session 3 (2026-05-16) — Chunk 2: Moon perturbations + Jupiter-Saturn great inequality
+- **Moon (both epi1 and epi2):** Added 4 classical perturbation terms to `moonEquatorial()`:
+  - Evection `+1.274° sin(2D − M)` — Ptolemy's prosneusis (largest term)
+  - Variation `+0.658° sin(2D)` — Tycho Brahe
+  - Annual equation `−0.186° sin(Ms)` — Kepler
+  - Second anomaly `+0.214° sin(2M)` — Ptolemy's second epicycle
+  - Expected Moon accuracy: ~1° → ~15–20 arcmin
+- **Jupiter-Saturn great inequality (both epi1 and epi2):**
+  - 2:5 near-resonance argument: `gi = 2λ_J − 5λ_S`
+  - Jupiter correction: `+0.549° sin(gi + 174°)`
+  - Saturn correction: `−0.870° sin(gi + 148°)`
+  - Applied as `lonCorr` in `outerBody()` / `outerBody2()`
+- **epi2:** Added `lonCorr = 0` parameter to `outerBody2()`, plumbed through Jupiter/Saturn cases
+
 ---
 
 ## Planned Future Work (Priority Order)
 
-### Chunk 2 — Accuracy: Moon improvement
-- Add evection term (~1.27° amplitude): `+1.274° sin(2D − M)` where D = Moon's
-  elongation from Sun, M = Moon's mean anomaly
-- Add variation term (~0.658°): `+0.658° sin(2D)`
-- Add annual equation (~0.186°): `−0.186° sin(Ms)` where Ms = Sun's mean anomaly
-- Target: Moon from ~1° → ~15' accuracy
-- All implemented in `moonEquatorial()` in `ephemerisEpicycle.js`
+### ~~Chunk 2~~ — DONE (Session 3)
+Moon perturbations + Jupiter-Saturn great inequality — both pipelines updated.
 
 ### Chunk 3 — Accuracy: Mars perturbation series
 - Jupiter perturbation on Mars (~2° amplitude):

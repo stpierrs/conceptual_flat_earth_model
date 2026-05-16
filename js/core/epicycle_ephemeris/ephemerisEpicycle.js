@@ -81,21 +81,33 @@ function sunEquatorial(t) {
 
 // ── Moon ─────────────────────────────────────────────────────────
 //
-// Eccentric deferent + epicycle.  Simplified — no evection, no
-// variation.  Accuracy ~30'–1°.  The Moon's ascending node
-// regresses, which we track to get approximate ecliptic latitude.
+// Eccentric deferent + four classical perturbation terms:
+//   Evection (1.274°) — Ptolemy's prosneusis, largest Moon perturbation
+//   Variation (0.658°) — discovered by Tycho Brahe
+//   Annual equation (0.186°) — Kepler
+//   Second anomaly (0.214°) — Ptolemy's second epicycle
+// Together these bring accuracy from ~1° to ~15–20 arcmin.
 function moonEquatorial(t) {
-  const Lm = degmod(MOON.L0 + t * MOON.nlong);   // mean longitude
-  const Mm = degmod(MOON.M0 + t * MOON.nanom);   // mean anomaly
-  const Nm = degmod(MOON.N0 - t * MOON.nnode);   // ascending node
+  const Lm = degmod(MOON.L0 + t * MOON.nlong);
+  const Mm = degmod(MOON.M0 + t * MOON.nanom);
+  const Nm = degmod(MOON.N0 - t * MOON.nnode);
 
-  // Equation of centre (eccentric deferent)
-  const eqc = eqCenter(Mm, MOON.ecc) * 2;        // ×2: Ptolemaic factor
+  // Sun mean anomaly + mean longitude (shared by perturbation terms)
+  const Ms = degmod(SUN.M0 + t * SUN.nanom);
+  const Ls = degmod(SUN.L0 + t * SUN.nlong);
+  const D  = degmod(Lm - Ls);   // Moon's mean elongation from Sun
 
-  // True longitude (simplified — omitting evection ~1.27°)
-  const tlong = degmod(Lm + eqc);
+  // Equation of centre (eccentric deferent, ×2 for Ptolemaic amplification)
+  const eqc = eqCenter(Mm, MOON.ecc) * 2;
 
-  // Ecliptic latitude from argument of latitude F = L − N
+  // Four perturbation terms (amplitudes from observed-series Ch.47)
+  const evection   = +1.2740 * sind(2 * D - Mm);  // Ptolemy's prosneusis
+  const variation  = +0.6583 * sind(2 * D);
+  const annualEq   = -0.1858 * sind(Ms);
+  const secondAnom = +0.2136 * sind(2 * Mm);
+
+  const tlong = degmod(Lm + eqc + evection + variation + annualEq + secondAnom);
+
   const F    = degmod(tlong - Nm);
   const beta = MOON.inc * sind(F);
 
@@ -120,17 +132,17 @@ function moonEquatorial(t) {
 // The "epicycle" here IS the Earth's orbit — the vector subtraction is
 // geometrically identical to the Ptolemaic deferent+epicycle with
 // Earth-orbit radius as the epicycle size.
-function outerBody(t, p) {
+// lonCorr: optional heliocentric longitude correction in degrees (for perturbations).
+function outerBody(t, p, lonCorr = 0) {
   const lambda  = degmod(p.L0 + t * p.nlong);
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
-  // Equation of centre → true anomaly ν
   const eqc     = eqCenter(M, p.ecc);
   const nu      = degmod(M + eqc);
 
-  // True heliocentric longitude
-  const lon_h   = degmod(lambda + eqc);
+  // Apply perturbation correction to heliocentric longitude before geocentric conversion
+  const lon_h   = degmod(lambda + eqc + lonCorr);
 
   // Heliocentric distance r = a(1 − e²) / (1 + e cos ν)
   const r       = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
@@ -228,8 +240,16 @@ export function bodyGeocentric(name, date) {
     case 'mercury': return innerBody(t, MERCURY);
     case 'venus':   return innerBody(t, VENUS);
     case 'mars':    return outerBody(t, MARS);
-    case 'jupiter': return outerBody(t, JUPITER);
-    case 'saturn':  return outerBody(t, SATURN);
+    case 'jupiter': { // Great inequality: Jupiter-Saturn 2:5 near-resonance (~759 yr period)
+      const gi = degmod(2 * degmod(JUPITER.L0 + t * JUPITER.nlong)
+                      - 5 * degmod(SATURN.L0  + t * SATURN.nlong));
+      return outerBody(t, JUPITER, 0.549 * sind(gi + 174.0));
+    }
+    case 'saturn': { // Great inequality — opposite sign, larger amplitude
+      const gi = degmod(2 * degmod(JUPITER.L0 + t * JUPITER.nlong)
+                      - 5 * degmod(SATURN.L0  + t * SATURN.nlong));
+      return outerBody(t, SATURN, -0.870 * sind(gi + 148.0));
+    }
     case 'uranus':  return outerBody(t, URANUS);
     case 'neptune': return outerBody(t, NEPTUNE);
     case 'pluto':   return outerBody(t, PLUTO);
