@@ -366,6 +366,7 @@ export function buildEpicycleOverlay(viewEl, model) {
 
   const ctx = canvas.getContext('2d');
   let lastBodyName = null;
+  let prevDateTime = null;   // for pause detection
 
   function syncCanvas() {
     const W = wrap.clientWidth;
@@ -440,21 +441,26 @@ export function buildEpicycleOverlay(viewEl, model) {
     const bodyName = pickBody(model);
     if (!bodyName) { wrap.style.display = 'none'; return; }
 
-    const date = dateTimeToDate(model.state.DateTime);
+    const dt = model.state.DateTime;
+    const date = dateTimeToDate(dt);
     const geom = ptolemyGeometry(bodyName, date);
     if (!geom) { wrap.style.display = 'none'; return; }
 
     wrap.style.display = '';
 
-    // Title colour matches body
+    // Pause detection: time is paused if DateTime hasn't changed.
+    const paused = prevDateTime !== null && dt === prevDateTime;
+    prevDateTime = dt;
+
+    // Title always reflects current body + pause state.
     const bCol = BODY_COLORS[bodyName] || AMBER;
-    if (lastBodyName !== bodyName) {
-      titleEl.textContent = geom.bodyName;
-      titleEl.style.color = bCol;
-      lastBodyName = bodyName;
-    }
+    titleEl.textContent = geom.bodyName + (paused ? '  ⏸' : '');
+    titleEl.style.color = bCol;
+    lastBodyName = bodyName;
 
     if (canvas.width === 0) syncCanvas();
+    // Dim the canvas when paused so it's visually obvious.
+    canvas.style.opacity = paused ? '0.55' : '1';
     drawDiagram(ctx, geom, canvas.width, canvas.height, bodyName);
   }
 
