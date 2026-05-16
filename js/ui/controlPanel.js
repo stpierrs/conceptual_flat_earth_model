@@ -66,7 +66,11 @@ const BODY_SEARCH_INDEX = (() => {
   for (const q of QUASARS_EXTRA)          out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const q of QUASARS_EXTRA2)         out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const s of SATELLITES_EXTRA)       out.push({ id: `star:${s.id}`, name: s.name, color: '#66ff88' });
-  out.push({ id: 'star:pluto', name: 'Pluto', color: '#a07c66' });
+  out.push({ id: 'star:pluto',  name: 'Pluto',  color: '#a07c66' });
+  out.push({ id: 'star:ceres',  name: 'Ceres',  color: '#b0a898' });
+  out.push({ id: 'star:pallas', name: 'Pallas', color: '#a8a0b0' });
+  out.push({ id: 'star:juno',   name: 'Juno',   color: '#b0a0a8' });
+  out.push({ id: 'star:vesta',  name: 'Vesta',  color: '#c0b89a' });
   for (const m of JUPITER_MOON_DEFS) {
     const hex = (JUPITER_MOON_COLORS[m.id] || 0x778899).toString(16).padStart(6, '0');
     out.push({ id: `jmoon:${m.id}`, name: m.name, color: `#${hex}` });
