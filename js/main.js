@@ -6,6 +6,7 @@ import { attachMouseHandler } from './ui/mouseHandler.js';
 import { attachKeyboardHandler } from './ui/keyboardHandler.js';
 import { buildControlPanel, buildHud, buildTrackerHud } from './ui/controlPanel.js';
 import { buildTrackingInfoPopup } from './ui/trackingInfoPopup.js';
+import { buildEpicycleOverlay } from './ui/epicycleOverlay.js';
 import { Demos } from './demos/index.js';
 import { attachUrlState } from './ui/urlState.js';
 import { setActiveProjection } from './core/canonical.js';
@@ -24,6 +25,7 @@ const trackerHudEl = document.getElementById('tracker-hud');
 if (trackerHudEl) buildTrackerHud(trackerHudEl, model);
 const trackingInfoEl = document.getElementById('tracking-info-popup');
 if (trackingInfoEl) buildTrackingInfoPopup(trackingInfoEl, model);
+if (viewEl_panel) buildEpicycleOverlay(viewEl_panel, model);
 
 // First load only — pick the browser's language if nothing is in the URL hash yet.
 const _hashHasLang = window.location.hash.includes('Language=');
