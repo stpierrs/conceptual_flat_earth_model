@@ -437,7 +437,15 @@ export function buildEpicycleOverlay(viewEl, model) {
   makeResizer(resizeHandle,  (dx) => ({ dW: -dx, dX: 1 }));
 
   // ── Render ────────────────────────────────────────────────────────────────
-  function refresh() {
+  // Own RAF loop: draws every frame using current model.state.DateTime.
+  // This guarantees smooth 60fps motion independent of how often the model
+  // fires 'update' events.
+  let prevDateTime = null;
+  let rafId = null;
+
+  function frame() {
+    rafId = requestAnimationFrame(frame);
+
     const bodyName = pickBody(model);
     if (!bodyName) { wrap.style.display = 'none'; return; }
 
@@ -448,23 +456,27 @@ export function buildEpicycleOverlay(viewEl, model) {
 
     wrap.style.display = '';
 
-    // Pause detection: time is paused if DateTime hasn't changed.
+    // Pause detection: DateTime unchanged between consecutive frames.
     const paused = prevDateTime !== null && dt === prevDateTime;
     prevDateTime = dt;
 
-    // Title always reflects current body + pause state.
     const bCol = BODY_COLORS[bodyName] || AMBER;
     titleEl.textContent = geom.bodyName + (paused ? '  ⏸' : '');
     titleEl.style.color = bCol;
-    lastBodyName = bodyName;
 
     if (canvas.width === 0) syncCanvas();
-    // Dim the canvas when paused so it's visually obvious.
     canvas.style.opacity = paused ? '0.55' : '1';
     drawDiagram(ctx, geom, canvas.width, canvas.height, bodyName);
   }
 
-  model.addEventListener('update', refresh);
+  // Also listen for non-time state changes (body switch, resize) so we don't
+  // miss layout updates that happen outside the RAF loop.
+  function refresh() { syncCanvas(); }
+  model.addEventListener('update', () => {
+    // Resize the canvas if the wrapper changed (e.g. zoom).
+    if (wrap.clientWidth !== canvas.width) syncCanvas();
+  });
+
   syncCanvas();
-  refresh();
+  frame();
 }
