@@ -25,9 +25,9 @@ import {
   j2000Day,
   eclipticToEquatorial,
   eqCenter,
-  eqCenterobserved-series,
   eqAnomaly,
-  eqAnomaly2,
+  solveKepler,
+  trueAnomaly,
 } from './epiCore.js';
 
 import {
@@ -109,10 +109,14 @@ function moonEquatorial(t) {
     - 0.0348 * sind(D)
     - 0.0306 * sind(Ms + Mm)
     + 0.0267 * sind(2*D + Ms - Mm)
+    + 0.0117 * sind(4*D - Mm)
+    - 0.0111 * sind(2*D - 2*Ms)
   );
 
   const Fact = degmod(tlong - Nm);
-  const beta = MOON.inc * sind(Fact);
+  const beta = MOON.inc * sind(Fact)
+             - 0.2806 * sind(2*D - F)
+             - 0.2555 * sind(2*D + F);
   return eclipticToEquatorial(tlong, beta);
 }
 
@@ -126,11 +130,11 @@ function outerBody2(t, p, epi2, lonCorr = 0) {
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
-  const eqc  = eqCenterobserved-series(M, p.ecc);
-  const nu   = degmod(M + eqc);
+  const E_deg  = solveKepler(M, p.ecc);
+  const nu     = degmod(trueAnomaly(E_deg, p.ecc));
 
   // Planet orbital vector (orbit ratio a, proportional coordinates)
-  const lon_orb = degmod(lambda + eqc + lonCorr);
+  const lon_orb = degmod(lambda + nu - M + lonCorr);
   const rho     = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
 
   const xP = rho * cosd(lon_orb);
@@ -162,8 +166,8 @@ function outerBody2(t, p, epi2, lonCorr = 0) {
 // ── Two-epicycle inner body ───────────────────────────────────────
 function innerBody2(t, p, epi2) {
   const M     = degmod(p.M0 + t * p.nanom);
-  const eqc   = eqCenterobserved-series(M, p.ecc);
-  const nu    = degmod(M + eqc);
+  const E_deg = solveKepler(M, p.ecc);
+  const nu    = degmod(trueAnomaly(E_deg, p.ecc));
   const w     = degmod(p.apogee0 + t * (p.apogeeRate || 0));
 
   // Planet orbital vector (orbit ratio a, proportional coordinates)
