@@ -1,30 +1,11 @@
 // Demo definitions. The sim's values are in the modular unit-FE frame.
-//
-// eclipse demo system overhauled:
-//   • all 44 solar + 67 lunar sky-observations-tabulated eclipses (2021-2040)
-//     are generated from a data-driven registry (eclipseRegistry.js).
-//     Each demo plays out in whichever ephemeris pipeline is active.
-//   • FE eclipse-prediction track added as a structured placeholder
-//     (feEclipseTrack.js) pending Shane's resource pack.
-//   • The two eclipse tracks are cleanly separated from the original
-//     general demos by the `group` field on each entry. The control
-//     panel can render them as grouped sections.
 
 import { Ttxt, Tval, Thold, Tpse, Tcall } from './animation.js';
 import { GALILEAN_MOON_IDS } from '../core/jupiterMoons.js';
-import { SOLAR_ECLIPSE_DEMOS, LUNAR_ECLIPSE_DEMOS } from './eclipseRegistry.js';
-import { FE_ECLIPSE_PREDICTION_DEMOS } from './feEclipseTrack.js';
 import { FLIGHT_ROUTES_DEMOS } from './flightRoutes.js';
-import { ASTROPIXELS_ECLIPSES } from '../data/sky-observationsEclipses.js';
-import { TIME_ORIGIN } from '../core/constants.js';
 
 const T1 = 1000, T3 = 3000, T5 = 5000, T8 = 8000;
 
-// general / non-eclipse demos. Retains the original 6 demos;
-// eclipse entries are now driven by eclipseRegistry.js and appended
-// below. The old hand-coded Solar Eclipse (Partial) / Total 2024
-// entries are superseded by the full 111-event registry but their
-// behaviour is preserved in the registry's 2024-04-08 demo entry.
 const GENERAL_DEMOS = [
   {
     name: 'North-pole GP trace — slow → 5.33× ramp',
@@ -35,7 +16,7 @@ const GENERAL_DEMOS = [
       // and its optical-vault projection keeps rendering all demo.
       ObserverLat: 82.505, ObserverLong: -62.335,
       InsideVault: false,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       DateTime: 3093,                  // 2025-06-21 solstice
       CameraDirection: 0,
       CameraHeight: 89.9,              // straight-down on the disc
@@ -150,7 +131,7 @@ const GENERAL_DEMOS = [
       // 2022-06-22 21:40 UTC = day 1998 + 21.667/24 = 1998.903
       DateTime: 1998.903,
       ObserverLat: -8.05, ObserverLong: -34.88, ObserverHeading: 180,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       InsideVault: true,
       FollowTarget: 'star:sigmaoct',
       TrackerTargets: ['star:sigmaoct'],
@@ -191,7 +172,7 @@ const GENERAL_DEMOS = [
       // Sigma Octantis demo, this time framed on Crux instead.
       DateTime: 1998.903,
       ObserverLat: -8.05, ObserverLong: -34.88, ObserverHeading: 180,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       InsideVault: true,
       FollowTarget: 'star:acrux',
       // Crux's four stars — Acrux + Gacrux are celnav, Mimosa +
@@ -257,7 +238,7 @@ function makeAnalemma(label, lat, mode) {
     group: groupId,
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       DateTime: ANALEMMA_START,
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -292,8 +273,7 @@ const ANALEMMA_LATS = [
 // 21st of each month so the four solstice / equinox dates (Mar 21,
 // Jun 21, Sep 21, Dec 21) anchor the figure-8 symmetrically — the
 // other eight samples land halfway between, giving the classic
-// evenly-spaced analemma layout. The sky-observations pipeline drives
-// the position data. Right?
+// evenly-spaced analemma layout.
 const ANALEMMA_MONTH_DAYS = [
   3001, // 2025-03-21 — vernal equinox
   3032, // 2025-04-21
@@ -364,7 +344,7 @@ function makeAnalemmaMonthly(label, lat, mode) {
     group: groupId,
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       DateTime: ANALEMMA_MONTH_DAYS[0],
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -426,8 +406,7 @@ const ANALEMMA_DEMOS = [
 // moon to new moon. Sampling daily at the same UTC instant over 28
 // days produces a clean lunar path on the heavenly vault — daily arcs
 // stitched into one continuous trace, with 28 noon-position notches
-// stepping along it. Use sky-observations for ephemeris consistency with
-// the sun analemma variant.
+// stepping along it.
 const SYNODIC_DAYS = 28;
 const SYNODIC_DAY_DURATION_MS = 1500;
 
@@ -453,7 +432,7 @@ function makeMoonSynodic(label, lat) {
     group: 'moon-synodic',
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       DateTime: startDay,
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -539,7 +518,7 @@ function makeSunAnalemmaPaired(label, lat) {
     group: 'sun-paired',
     intro: {
       ObserverLat: lat, ObserverLong: 0, ObserverHeading: heading,
-      BodySource: 'sky-observations',
+      BodySource: 'epicycle',
       DateTime: ANALEMMA_MONTH_DAYS[0],
       InsideVault: true,
       OpticalZoom: 1.0,
@@ -597,76 +576,6 @@ const SUN_PAIRED_DEMOS = ANALEMMA_LATS.map(([lat, t]) =>
   makeSunAnalemmaPaired(`Sun analemma paired · ${t} (lon 0 + lon 180)`, lat),
 );
 
-// Eclipse-position map: at every event in the eclipse registry
-// (2021-2040), set DateTime to that event's UT,
-// snap the heavenly-vault sun coord (solar event) or moon coord
-// (lunar event) into the eclipse-map state arrays. Renders as
-// disc-anchored dots — no closed loop, since these are independent
-// events. The entire scan is one synchronous Tcall.
-function _utisoToDateTime(utISO) {
-  return (new Date(utISO).getTime() / TIME_ORIGIN.msPerDay) - TIME_ORIGIN.ZeroDate;
-}
-
-function plotAllEclipses(model) {
-  const solarPts = [];
-  const lunarPts = [];
-  const origDateTime = model.state.DateTime;
-  const ge = model.state.WorldModel === 'ge';
-  for (const ev of ASTROPIXELS_ECLIPSES.solar) {
-    const dt = _utisoToDateTime(ev.utISO);
-    if (!isFinite(dt)) continue;
-    model.setState({ DateTime: dt }, false);
-    const sv = ge
-      ? (model.computed.SunGlobeVaultCoord || model.computed.SunVaultCoord)
-      : model.computed.SunVaultCoord;
-    if (sv) solarPts.push([sv[0], sv[1], sv[2]]);
-  }
-  for (const ev of ASTROPIXELS_ECLIPSES.lunar) {
-    const dt = _utisoToDateTime(ev.utISO);
-    if (!isFinite(dt)) continue;
-    model.setState({ DateTime: dt }, false);
-    const mv = ge
-      ? (model.computed.MoonGlobeVaultCoord || model.computed.MoonVaultCoord)
-      : model.computed.MoonVaultCoord;
-    if (mv) lunarPts.push([mv[0], mv[1], mv[2]]);
-  }
-  model.setState({
-    DateTime: origDateTime,
-    EclipseMapSolar: solarPts,
-    EclipseMapLunar: lunarPts,
-  });
-}
-
-const ECLIPSE_MAP_DEMO = {
-  name: 'Eclipse position map · 2021-2040 (AstroPixels / sky-reference)',
-  group: 'eclipse-map',
-  intro: {
-    ObserverLat: 0, ObserverLong: 0, ObserverHeading: 0,
-    BodySource: 'sky-observations',
-    DateTime: 2922,                      // 2025-01-01 00:00 UTC
-    InsideVault: false,                  // orbital view
-    Zoom: 1.6,
-    CameraDirection: 0, CameraHeight: 60,
-    VaultSize: 1, VaultHeight: 0.45,
-    TrackerTargets: ['sun', 'moon'],
-    ShowSunAnalemma: false, ShowMoonAnalemma: false,
-    ShowSunTrack: false, ShowMoonTrack: false,
-    ShowShadow: false, ShowTruePositions: true,
-    ShowOpticalVault: false, ShowStars: true,
-    FollowTarget: null, FreeCamActive: false, FreeCameraMode: false,
-    SpecifiedTrackerMode: false,
-    SunVaultArcOn: false, MoonVaultArcOn: false,
-    SunMonthMarkers: [], MoonMonthMarkers: [], SunMonthMarkersOpp: [],
-    EclipseMapSolar: [], EclipseMapLunar: [],
-  },
-  tasks: () => [
-    Ttxt('Plotting all eclipse positions in the AstroPixels / sky-reference registry (44 solar + 67 lunar across 2021-2040)…'),
-    Tcall(plotAllEclipses),
-    Ttxt('Done · 44 solar (gold) + 67 lunar (pale blue) heavenly-vault positions across 20 years. Saros bands cluster the dots into the familiar nodal pattern.'),
-    Thold(),
-  ],
-};
-
 // 24-hour sun demos grouped under their own sub-menu. Order matches
 // the UI section: two 24h overhead-sun demos first, then the two
 // season-spanning midnight-sun demos.
@@ -677,7 +586,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: 82.505, ObserverLong: -62.335,
-        BodySource: 'sky-observations',
+        BodySource: 'epicycle',
         DateTime: 3093,                        // 2025-06-21 00:00 UTC
         InsideVault: true,                     // Optical (first-person)
         FollowTarget: 'sun',                   // camera auto-aims at sun
@@ -701,7 +610,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: -79.76806, ObserverLong: -83.26167,
-        BodySource: 'sky-observations',
+        BodySource: 'epicycle',
         DateTime: 2911,                        // 2024-12-21 solstice
         InsideVault: true,                     // Optical (first-person)
         FollowTarget: 'sun',                   // camera auto-aims at sun
@@ -725,7 +634,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: 75, ObserverLong: 0,
-        BodySource: 'sky-observations',
+        BodySource: 'epicycle',
         DateTime: 3050,                 // ~2025-05-09 — polar day in effect
         ObserverHeading: 0,
         InsideVault: true,              // Optical
@@ -754,7 +663,7 @@ const SUN_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: -75, ObserverLong: 0,
-        BodySource: 'sky-observations',
+        BodySource: 'epicycle',
         DateTime: 3232,                 // ~2025-11-07 — polar day in effect
         ObserverHeading: 180,
         InsideVault: true,              // Optical
@@ -792,7 +701,7 @@ const MOON_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: 75, ObserverLong: 0,
-        BodySource: 'sky-observations',
+        BodySource: 'epicycle',
         DateTime: 2933,                 // ~2025-01-12 — moon near max +dec
         ObserverHeading: 0,
         InsideVault: true,
@@ -819,7 +728,7 @@ const MOON_24H_DEMOS = [
     intro: (m) => {
       const base = {
         ObserverLat: -75, ObserverLong: 0,
-        BodySource: 'sky-observations',
+        BodySource: 'epicycle',
         DateTime: 2947,                 // ~2025-01-26 — moon near max -dec
         ObserverHeading: 180,
         InsideVault: true,
@@ -938,9 +847,8 @@ const PLANET_EPICYCLE_DEMOS = [
   },
 ];
 
-// The final exported list, in section order: general → solar eclipses
-// → lunar eclipses → FE prediction track. Each entry carries a
-// `group` field so the UI can render section headings.
+// The final exported list. Each entry carries a `group` field so the
+// UI can render section headings.
 export const DEMOS = [
   ...SUN_24H_DEMOS,
   ...MOON_24H_DEMOS,
@@ -948,10 +856,6 @@ export const DEMOS = [
   ...ANALEMMA_DEMOS,
   ...MOON_SYNODIC_DEMOS,
   ...SUN_PAIRED_DEMOS,
-  ECLIPSE_MAP_DEMO,
-  ...SOLAR_ECLIPSE_DEMOS,
-  ...LUNAR_ECLIPSE_DEMOS,
-  ...FE_ECLIPSE_PREDICTION_DEMOS,
   ...FLIGHT_ROUTES_DEMOS,
   ...PLANET_EPICYCLE_DEMOS,
 ];
@@ -966,10 +870,6 @@ export const DEMO_GROUPS = [
   { id: 'combo-analemma',    label: 'Sun + Moon Analemma' },
   { id: 'moon-synodic',      label: 'Moon Path (Synodic)' },
   { id: 'sun-paired',        label: 'Sun Analemma Paired (lon 0 + lon 180)' },
-  { id: 'eclipse-map',       label: 'Eclipse Position Map' },
-  { id: 'solar-eclipses',    label: 'Solar Eclipses (AstroPixels / sky-reference, 2021-2040)' },
-  { id: 'lunar-eclipses',    label: 'Lunar Eclipses (AstroPixels / sky-reference, 2021-2040)' },
-  { id: 'fe-predictions',    label: 'FE Eclipse Predictions (placeholder)' },
   { id: 'flight-routes',     label: 'Flight Routes — Southern Non-Stop' },
   { id: 'planets-epicycles', label: 'Planets & Epicycles' },
 ];

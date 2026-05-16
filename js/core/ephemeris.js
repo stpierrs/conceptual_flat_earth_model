@@ -2,7 +2,7 @@
 //
 // Primary pipelines: Epicycle-1 and Epicycle-2 (custom pure-circle geometric
 // model, covers Sun–Neptune for any date).
-// Ptolemy is kept as fallback of last resort and for eclipse-demo refining.
+// Ptolemy is kept as fallback of last resort.
 
 import * as ptol  from './ephemerisPtolemy.js';
 import * as epi1  from './epicycle_ephemeris/ephemerisEpicycle.js';
@@ -11,7 +11,6 @@ import * as epi2  from './epicycle_ephemeris/ephemerisEpicycle2.js';
 export {
   greenwichSiderealDeg,
   equatorialToCelestCoord,
-  findNextEclipses,
   julianDay,
   meanObliquityDeg,
   norm360,
@@ -20,7 +19,6 @@ export {
 // Pipeline namespaces, exported for callers that need several readings at once.
 export { ptol };
 
-// User-selectable pipelines. Astropixels is eclipse-demo only (not listed here).
 export const EPHEMERIS_SOURCES = ['epicycle', 'epicycle2', 'ptolemy'];
 // Uranus and Neptune: no Ptolemaic parameters (he never saw them).
 // Pluto: no tabulated source at all. NaN = no data, skip the row.

@@ -348,47 +348,20 @@ export class SceneManager {
     this.sunLight.target.position.set(0, 0, 0);
   }
 
-  // Eclipse-path darkening for the observer. The renderer pushes
-  // a factor each frame — 0 is unaffected, 1 is fully inside the
-  // umbra. render() folds it into ambient, sunLight, and background
-  // colour so the observer literally "loses the sun" when they're
-  // inside the shadow path. Right?
-  setEclipseDarkFactor(f) {
-    this._eclipseDarkFactor = Math.max(0, Math.min(1, f || 0));
-  }
-
   render() {
     this.updateCamera();
     this.updateLight();
-    const darken = this._eclipseDarkFactor || 0;
-    // Fold the eclipse darken factor into ambient and sun intensities.
-    // Base values (0.9 and 0.5) multiplied by (1 − 0.85·darken) so
-    // the scene never goes pitch black — the corona still glows
-    // faintly during totality. Right?
-    const dimAmbient = 0.9 * (1 - 0.85 * darken);
-    const dimSun     = 0.5 * (1 - 0.90 * darken);
-    if (Math.abs(this.ambient.intensity - dimAmbient) > 1e-4) {
-      this.ambient.intensity = dimAmbient;
-    }
-    if (Math.abs(this.sunLight.intensity - dimSun) > 1e-4) {
-      this.sunLight.intensity = dimSun;
-    }
-    // Inside the vault the background fades to night by NightFactor so
-    // the starfield has dark sky behind it. Eclipse darken pushes
-    // toward night regardless of NightFactor. DarkBackground locks
-    // the scene to near-black nightColor in any mode — eclipse darken
-    // still applies on top of that. Right?
     const forceDark = !!this.model.state.DarkBackground;
     if (forceDark) {
       this.scene.background.copy(this.nightColor);
     } else if (this.model.state.InsideVault) {
-      const nf = Math.max(this.model.computed.NightFactor || 0, darken);
+      const nf = this.model.computed.NightFactor || 0;
       this.scene.background.copy(this.dayColor).lerp(this.nightColor, nf);
     } else {
-      // Heavenly vault mode: lerp the background toward night during
-      // eclipse darken so the shadow reads on scene lighting too. Right?
-      this.scene.background.copy(this.dayColor).lerp(this.nightColor, darken * 0.6);
+      this.scene.background.copy(this.dayColor);
     }
+    this.ambient.intensity = 0.9;
+    this.sunLight.intensity = 0.5;
     this.renderer.render(this.scene, this.camera);
   }
 

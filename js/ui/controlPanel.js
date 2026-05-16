@@ -3,7 +3,6 @@
 
 import { dateTimeToString, dateTimeToDate } from '../core/time.js';
 import { TIME_ORIGIN } from '../core/constants.js';
-import { findNextEclipses } from '../core/ephemeris.js';
 import { raDecToAzEl } from '../core/transforms.js';
 import { CEL_NAV_SELECT_OPTIONS, CEL_NAV_STARS } from '../core/celnavStars.js';
 import { CATALOGUED_STARS, CONSTELLATIONS } from '../core/constellations.js';
@@ -384,52 +383,6 @@ function resolveTrackName(targetId) {
     return id;
   }
   return targetId;
-}
-
-// Eclipse lookup cache — the search costs ~10ms worst case, so we
-// memoize until the current DateTime passes the cached event or jumps
-// backward. Right?
-let _eclipseCache = null;
-function nextEclipses(dateTime) {
-  if (_eclipseCache
-      && dateTime >= _eclipseCache.from
-      && dateTime < _eclipseCache.horizon) {
-    return _eclipseCache.result;
-  }
-  const fromDate = dateTimeToDate(dateTime);
-  const result = findNextEclipses(fromDate);
-  // Refresh the cache when we pass either eclipse date, or after 30 days.
-  const eventDTs = [];
-  if (result.nextSolar) {
-    eventDTs.push(result.nextSolar.getTime() / TIME_ORIGIN.msPerDay - TIME_ORIGIN.ZeroDate);
-  }
-  if (result.nextLunar) {
-    eventDTs.push(result.nextLunar.getTime() / TIME_ORIGIN.msPerDay - TIME_ORIGIN.ZeroDate);
-  }
-  const horizon = eventDTs.length
-    ? Math.min(...eventDTs)
-    : dateTime + 30;
-  _eclipseCache = { from: dateTime - 0.01, horizon, result };
-  return result;
-}
-
-function formatCountdown(fromDate, toDate) {
-  const diffMs = toDate.getTime() - fromDate.getTime();
-  if (diffMs <= 0) return 'now';
-  const days = diffMs / 86400000;
-  if (days < 1) {
-    const hours = diffMs / 3600000;
-    const h = Math.floor(hours);
-    const m = Math.floor((hours - h) * 60);
-    return `in ${h}h ${m}m`;
-  }
-  if (days < 60) return `in ${Math.floor(days)} days`;
-  return `in ${Math.floor(days / 30.4375)} months`;
-}
-
-const ECLIPSE_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function shortDate(d) {
-  return `${ECLIPSE_MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()}`;
 }
 
 // Standard timezone offsets in minutes east of UTC. Fixed offsets only,
@@ -2925,12 +2878,6 @@ export function buildHud(hudEl, model) {
   moonPhaseRow.appendChild(canvas);
   moonPhaseRow.appendChild(moonLabel);
   moonBody.appendChild(moonPhaseRow);
-  const solarEcLine = document.createElement('div');
-  solarEcLine.className = 'line';
-  const lunarEcLine = document.createElement('div');
-  lunarEcLine.className = 'line';
-  moonBody.appendChild(solarEcLine);
-  moonBody.appendChild(lunarEcLine);
   moonWrapper.appendChild(moonBody);
   hudEl.appendChild(moonWrapper);
 
@@ -2957,15 +2904,6 @@ export function buildHud(hudEl, model) {
     lines[2].textContent = c.MoonAnglesGlobe.elevation >= 0
       ? `Moon: az ${fmt(c.MoonAnglesGlobe.azimuth)}°  el ${fmt(c.MoonAnglesGlobe.elevation)}°  phase ${(c.MoonPhaseFraction * 100).toFixed(0)}%`
       : `Moon: ${t('beyond_vault')}  phase ${(c.MoonPhaseFraction * 100).toFixed(0)}%`;
-
-    const ec = nextEclipses(s.DateTime);
-    const now = dateTimeToDate(s.DateTime);
-    solarEcLine.textContent = ec.nextSolar
-      ? `${t('next_solar_eclipse')}: ${shortDate(ec.nextSolar)}  ${formatCountdown(now, ec.nextSolar)}`
-      : `${t('next_solar_eclipse')}: —`;
-    lunarEcLine.textContent = ec.nextLunar
-      ? `${t('next_lunar_eclipse')}: ${shortDate(ec.nextLunar)}  ${formatCountdown(now, ec.nextLunar)}`
-      : `${t('next_lunar_eclipse')}: —`;
 
     // Waxing vs waning comes from the moon-sun longitude difference. When
     // the moon is east of the sun (RA diff 0..π) it's waxing toward full.

@@ -1,4 +1,4 @@
-// Shared coordinate utilities used by the Ptolemy pipeline and eclipse demos.
+// Shared coordinate utilities used by the Ptolemy pipeline.
 //
 // RA, Dec, obliquity, sidereal time — these are coordinate labels, not
 // a cosmology. The Almanac compilers measured these values by watching the
@@ -248,73 +248,3 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
   return { ra, dec };
 }
 
-// Eclipse finder — steps through time looking for the sun and moon to
-// get close. When they line up within ~1.5°, that's your eclipse.
-// Accurate enough to find the right day for any date 1900–2100.
-const ECLIPSE_ANG_THRESHOLD = 1.5 * DEG;
-
-function sepAngle(a, b) {
-  const d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-  return Math.acos(Math.max(-1, Math.min(1, d)));
-}
-
-// Accepts optional sunFn / moonFn so each ephemeris pipeline can scan
-// using its own positions — each one finds the eclipse it predicts.
-export function findNextEclipses(startDate, windowDays = 400, sunFn = sunEquatorial, moonFn = moonEquatorial) {
-  const stepMs = 3600 * 1000;
-  const start = startDate.getTime();
-  let nextSolar = null;
-  let nextLunar = null;
-
-  let prevSolar = null, prevPrevSolar = null;
-  let prevLunar = null, prevPrevLunar = null;
-
-  const totalSteps = windowDays * 24;
-  for (let i = 0; i <= totalSteps; i++) {
-    const t = new Date(start + i * stepMs);
-    const sunVec  = equatorialToCelestCoord(sunFn(t));
-    const moonVec = equatorialToCelestCoord(moonFn(t));
-    const antiMoon = [-moonVec[0], -moonVec[1], -moonVec[2]];
-    const solarSep = sepAngle(sunVec, moonVec);
-    const lunarSep = sepAngle(sunVec, antiMoon);
-
-    if (!nextSolar && prevPrevSolar !== null
-        && prevSolar <= prevPrevSolar && prevSolar <= solarSep
-        && prevSolar < ECLIPSE_ANG_THRESHOLD) {
-      nextSolar = new Date(start + (i - 1) * stepMs);
-    }
-    if (!nextLunar && prevPrevLunar !== null
-        && prevLunar <= prevPrevLunar && prevLunar <= lunarSep
-        && prevLunar < ECLIPSE_ANG_THRESHOLD) {
-      nextLunar = new Date(start + (i - 1) * stepMs);
-    }
-    if (nextSolar && nextLunar) break;
-
-    prevPrevSolar = prevSolar; prevSolar = solarSep;
-    prevPrevLunar = prevLunar; prevLunar = lunarSep;
-  }
-
-  return { nextSolar, nextLunar };
-}
-
-// Zoom in on a candidate eclipse time — scan ±2 hours in 1-minute steps,
-// find the moment of closest approach. Each pipeline finds its own answer,
-// which is the whole point of having multiple pipelines to compare.
-export function refineEclipseByMinSeparation(approxDate, sunFn, moonFn, { kind = 'solar', halfWindowMinutes = 120 } = {}) {
-  const stepMs = 60 * 1000;
-  let bestT = approxDate.getTime();
-  let bestSep = Infinity;
-  for (let k = -halfWindowMinutes; k <= halfWindowMinutes; k++) {
-    const t = approxDate.getTime() + k * stepMs;
-    const d = new Date(t);
-    const sun  = sunFn(d);
-    const moon = moonFn(d);
-    let ra2 = moon.ra, dec2 = moon.dec;
-    if (kind === 'lunar') { ra2 += Math.PI; dec2 = -dec2; }  // anti-moon
-    const dot = Math.cos(sun.dec) * Math.cos(dec2) * Math.cos(sun.ra - ra2)
-              + Math.sin(sun.dec) * Math.sin(dec2);
-    const sep = Math.acos(Math.max(-1, Math.min(1, dot)));
-    if (sep < bestSep) { bestSep = sep; bestT = t; }
-  }
-  return { date: new Date(bestT), minSeparationRad: bestSep };
-}
