@@ -34,7 +34,7 @@ import {
   SUN, MOON, MARS, JUPITER, SATURN, URANUS, NEPTUNE,
   VENUS, MERCURY, PLUTO,
   CERES, PALLAS, JUNO, VESTA,
-  ZODIAC_STARS, ECLIPTIC_GUIDE_STARS, BRIGHT_STARS,
+  ZODIAC_STARS, ECLIPTIC_GUIDE_STARS, BSC_STARS,
 } from './epiParams.js';
 
 // ── Second-epicycle deltas ────────────────────────────────────────
@@ -240,7 +240,7 @@ function marsLonCorr(t) {
 
 // ── Fixed-star lookup (same as single-epi version) ───────────────
 const FIXED_STAR_MAP = new Map();
-for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS, ...BRIGHT_STARS]) {
+for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS, ...BSC_STARS]) {
   FIXED_STAR_MAP.set(s.id, {
     ra:  s.raH * 15 * RAD,
     dec: s.decD * RAD,
@@ -295,7 +295,7 @@ export const SUPPORTED_BODIES = new Set([
   'ceres', 'pallas', 'juno', 'vesta',
   ...ZODIAC_STARS.map(s => s.id),
   ...ECLIPTIC_GUIDE_STARS.map(s => s.id),
-  ...BRIGHT_STARS.map(s => s.id),
+  ...BSC_STARS.map(s => s.id),
 ]);
 
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
