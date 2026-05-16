@@ -216,6 +216,79 @@ export const MERCURY = {
   nodeRate:       0.0003246,
 };
 
+// ── Pluto ─────────────────────────────────────────────────────────
+// Orbital period: 247.94 yr = 90,518 days
+// High eccentricity (0.249) and inclination (17°) limit accuracy to ~3–5°
+// without perturbation series. Uncalibrated vs DE405.
+export const PLUTO = {
+  nlong:          0.0039770,    // °/day (360 / 90518)
+  nanom:          0.0039770,
+  L0:           238.9288,       // mean longitude at J2000 (Meeus)
+  M0:            14.8600,       // mean anomaly at J2000
+  a:             39.48168,
+  ecc:            0.24882,
+  inc:           17.14175,
+  node:         110.30347,
+  nodeRate:      -0.0000128,
+};
+
+// ── Main-belt asteroids ───────────────────────────────────────────
+// Elements from JPL Small-Body Database at J2000.0 epoch.
+// All use outerBody() — same vector geocentric approach as outer planets.
+// L0 = M0 + long_peri (long_peri = Ω + ω). Uncalibrated vs DE405.
+
+// 1 Ceres — largest asteroid / dwarf planet, period 4.60 yr
+export const CERES = {
+  nlong:          0.21408,      // °/day (360 / 1681.6 days)
+  nanom:          0.21408,
+  L0:           230.817,
+  M0:            77.372,
+  a:              2.7658,
+  ecc:            0.07600,
+  inc:           10.593,
+  node:          80.329,
+  nodeRate:      -0.0000234,
+};
+
+// 2 Pallas — 2nd largest asteroid, highly inclined (35°), period 4.62 yr
+export const PALLAS = {
+  nlong:          0.21370,
+  nanom:          0.21370,
+  L0:           201.257,
+  M0:            78.232,
+  a:              2.7713,
+  ecc:            0.23103,
+  inc:           34.841,
+  node:         173.096,
+  nodeRate:      -0.0000091,
+};
+
+// 3 Juno — period 4.36 yr
+export const JUNO = {
+  nlong:          0.22616,
+  nanom:          0.22616,
+  L0:           149.550,
+  M0:            91.628,
+  a:              2.6692,
+  ecc:            0.25545,
+  inc:           12.982,
+  node:         169.857,
+  nodeRate:      -0.0000102,
+};
+
+// 4 Vesta — brightest asteroid (naked-eye at opposition), period 3.63 yr
+export const VESTA = {
+  nlong:          0.27160,
+  nanom:          0.27160,
+  L0:           275.442,
+  M0:            20.863,
+  a:              2.3615,
+  ecc:            0.08874,
+  inc:            7.134,
+  node:         103.851,
+  nodeRate:      -0.0000185,
+};
+
 // ── Zodiac constellation marker stars ────────────────────────────
 //
 // One bright reference star per zodiac constellation, chosen for
@@ -282,4 +355,64 @@ export const ECLIPTIC_GUIDE_STARS = [
   { id: 'fomalhaut',   name: 'Fomalhaut',   raH: 22.9609, decD: -29.6222, mag: 1.16 },
   // Markab (α Peg) — near ecliptic in Pisces sector
   { id: 'markab',      name: 'Markab',      raH: 23.0793, decD:  15.2053, mag: 2.49 },
+];
+
+// ── Bright navigation and reference stars ─────────────────────────
+//
+// Top 40 brightest/most significant stars not already in the zodiac
+// or ecliptic guide lists above. Covers all major navigation stars
+// (Bowditch list), the Southern Cross, Orion, Ursa Major, etc.
+// All positions J2000.0 from HYG v4.1. Sorted roughly by magnitude.
+export const BRIGHT_STARS = [
+  // The 10 brightest (not already listed)
+  { id: 'sirius',       name: 'Sirius',        raH:  6.7525, decD: -16.7161, mag: -1.46 },
+  { id: 'canopus',      name: 'Canopus',       raH:  6.3992, decD: -52.6957, mag: -0.74 },
+  { id: 'rigil_kent',   name: 'Rigil Kent.',   raH: 14.6601, decD: -60.8339, mag: -0.27 },
+  { id: 'arcturus',     name: 'Arcturus',      raH: 14.2611, decD:  19.1822, mag: -0.05 },
+  { id: 'vega',         name: 'Vega',          raH: 18.6156, decD:  38.7836, mag:  0.03 },
+  { id: 'capella',      name: 'Capella',       raH:  5.2782, decD:  45.9980, mag:  0.08 },
+  { id: 'rigel',        name: 'Rigel',         raH:  5.2423, decD:  -8.2016, mag:  0.12 },
+  { id: 'procyon',      name: 'Procyon',       raH:  7.6550, decD:   5.2250, mag:  0.38 },
+  { id: 'achernar',     name: 'Achernar',      raH:  1.6286, decD: -57.2367, mag:  0.46 },
+  { id: 'betelgeuse',   name: 'Betelgeuse',    raH:  5.9195, decD:   7.4071, mag:  0.50 },
+  // Southern hemisphere reference
+  { id: 'hadar',        name: 'Hadar',         raH: 14.0637, decD: -60.3731, mag:  0.61 },
+  { id: 'acrux',        name: 'Acrux',         raH: 12.4433, decD: -63.0990, mag:  0.87 },
+  { id: 'mimosa',       name: 'Mimosa',        raH: 12.7954, decD: -59.6886, mag:  1.25 },
+  { id: 'gacrux',       name: 'Gacrux',        raH: 12.5194, decD: -57.1132, mag:  1.59 },
+  { id: 'miaplacidus',  name: 'Miaplacidus',   raH:  9.2200, decD: -69.7172, mag:  1.68 },
+  { id: 'avior',        name: 'Avior',         raH:  8.3752, decD: -59.5094, mag:  1.86 },
+  { id: 'atria',        name: 'Atria',         raH: 16.8111, decD: -69.0278, mag:  1.92 },
+  { id: 'peacock',      name: 'Peacock',       raH: 20.4275, decD: -56.7350, mag:  1.94 },
+  // Northern navigation stars
+  { id: 'polaris',      name: 'Polaris',       raH:  2.5303, decD:  89.2642, mag:  1.97 },
+  { id: 'deneb',        name: 'Deneb',         raH: 20.6905, decD:  45.2803, mag:  1.25 },
+  { id: 'altair',       name: 'Altair',        raH: 19.8464, decD:   8.8683, mag:  0.77 },
+  { id: 'mirfak',       name: 'Mirfak',        raH:  3.4054, decD:  49.8611, mag:  1.79 },
+  { id: 'menkalinan',   name: 'Menkalinan',    raH:  5.9921, decD:  44.9475, mag:  1.90 },
+  // Ursa Major (Big Dipper)
+  { id: 'alioth',       name: 'Alioth',        raH: 12.9005, decD:  55.9597, mag:  1.77 },
+  { id: 'dubhe',        name: 'Dubhe',         raH: 11.0621, decD:  61.7508, mag:  1.79 },
+  { id: 'alkaid',       name: 'Alkaid',        raH: 13.7923, decD:  49.3133, mag:  1.86 },
+  // Orion
+  { id: 'bellatrix',    name: 'Bellatrix',     raH:  5.4189, decD:   6.3497, mag:  1.64 },
+  { id: 'alnilam',      name: 'Alnilam',       raH:  5.6035, decD:  -1.2019, mag:  1.70 },
+  { id: 'alnitak',      name: 'Alnitak',       raH:  5.6793, decD:  -1.9431, mag:  1.74 },
+  { id: 'mintaka',      name: 'Mintaka',       raH:  5.5334, decD:  -0.2992, mag:  2.23 },
+  // Taurus / Auriga
+  { id: 'elnath',       name: 'Elnath',        raH:  5.4382, decD:  28.6075, mag:  1.65 },
+  // Canis Major / Minor
+  { id: 'adhara',       name: 'Adhara',        raH:  6.9771, decD: -28.9722, mag:  1.50 },
+  { id: 'wezen',        name: 'Wezen',         raH:  7.1399, decD: -26.3933, mag:  1.83 },
+  { id: 'mirzam',       name: 'Mirzam',        raH:  6.3783, decD: -17.9561, mag:  1.98 },
+  // Gemini
+  { id: 'alhena',       name: 'Alhena',        raH:  6.6285, decD:  16.3994, mag:  1.93 },
+  // Scorpius extra
+  { id: 'shaula',       name: 'Shaula',        raH: 17.5601, decD: -37.1039, mag:  1.63 },
+  { id: 'sargas',       name: 'Sargas',        raH: 17.6220, decD: -42.9978, mag:  1.87 },
+  // Hydra / Cetus / Perseus
+  { id: 'alphard',      name: 'Alphard',       raH:  9.4598, decD:  -8.6586, mag:  1.98 },
+  { id: 'diphda',       name: 'Diphda',        raH:  0.7265, decD: -17.9867, mag:  2.04 },
+  // Leo extra
+  { id: 'algieba',      name: 'Algieba',       raH: 10.3329, decD:  19.8414, mag:  2.01 },
 ];
