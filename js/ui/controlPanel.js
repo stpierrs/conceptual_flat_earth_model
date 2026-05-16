@@ -683,6 +683,8 @@ const FIELD_GROUPS = [
     tab: 'Tracker', groups: [
       { title: 'Ephemeris', rows: [
         { key: 'BodySource', label: 'Source', select: [
+          { value: 'epicycle',     label: "Epicycle-1 (pure-circle, DE405-calibrated)" },
+          { value: 'epicycle2',    label: "Epicycle-2 (two-circle Ibn al-Shatir)" },
           { value: 'ptolemy',      label: "Ptolemy (Almagest deferent + epicycle)" },
         ]},
         { key: 'StarApplyPrecession', label: 'Precession',  bool: true },
@@ -1665,6 +1667,8 @@ export function buildControlPanel(host, model, demos) {
   const fmtLon = (v) => `Lon ${v >= 0 ? '+' : ''}${v.toFixed(4)}°`;
   const fmtSignedDeg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}°`;
   const EPHEM_NAMES = {
+    epicycle:     'Epicycle-1',
+    epicycle2:    'Epicycle-2',
     ptolemy:      'Ptolemy',
   };
   const refreshInfoBar = () => {

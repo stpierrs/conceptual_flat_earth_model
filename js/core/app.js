@@ -311,11 +311,10 @@ function defaultState() {
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav' — starfield style.
     StarfieldType: 'random',
 
-    // Position source — Ptolemy's deferent + epicycle, the only runtime
-    // ephemeris exposed by the model. (Astropixels / DE405 daily lookup
-    // is reserved for the eclipse-demo refiner and isn't user-selectable
-    // here.)
-    BodySource: 'ptolemy',
+    // Position source — Epicycle-1 by default (DE405-calibrated, covers
+    // Sun–Neptune for any date). Falls back to Ptolemy if a body isn't covered.
+    // Astropixels / DE405 is reserved for the eclipse-demo refiner only.
+    BodySource: 'epicycle',
 
     // StarTrepidation master switch — forces all three corrections on when true.
     StarApplyPrecession: false,
@@ -591,7 +590,7 @@ export class FeModel extends EventTarget {
     this._timeLast = s.Time;
 
     const utcDate = dateTimeToDate(s.DateTime);
-    const bodySource = s.BodySource || 'ptolemy';
+    const bodySource = s.BodySource || 'epicycle';
     // Position cache: sun/moon/planet (ra, dec) depend only on date
     // and the selected source — observer pan and camera drag don't move
     // the cache key, so we reuse the previous frame's readings. Right?

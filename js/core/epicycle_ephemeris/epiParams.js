@@ -1,0 +1,285 @@
+// epiParams.js — orbital parameters for the custom epicycle ephemeris.
+//
+// Epoch: J2000.0 (JD 2451545.0 = noon 1 Jan 2000 UTC).
+// All angles in degrees.  All rates in degrees per Julian day.
+// All eccentricities and epicycle radii dimensionless (deferent = 1).
+//
+// ── Parameter sources ────────────────────────────────────────────
+//
+// Mean motion rates derived from IAU/JPL sidereal periods and
+// synodic periods (USNO / Meeus "Astronomical Algorithms" 2nd ed.).
+// Eccentricities and apogee positions from Meeus Table 33.a (J2000
+// orbital elements) and cross-checked against JPL Horizons.
+// Epicycle radii are the geocentric-equivalent of the heliocentric
+// semi-major axis ratio as seen from Earth — they govern the
+// amplitude of the retrograde arc and are set to match observed
+// retrograde arc widths rather than derived from distance.
+// Mean longitudes at J2000 from Meeus Table 31.a (L₀ values).
+//
+// Inner-planet mean motions on the DEFERENT follow the Sun's mean
+// motion exactly (as Ptolemy observed) because Venus and Mercury
+// orbit interior to Earth — their deferent centre tracks the Sun.
+// Their own motion around the epicycle carries the fast anomaly.
+//
+// ── Accuracy expectation ─────────────────────────────────────────
+//
+// Single deferent + single epicycle:
+//   Sun      ~3'–10'   (equation of time not applied)
+//   Moon     ~30'–1°   (no evection or variation)
+//   Mercury  ~1°–4°    (no crank mechanism)
+//   Venus    ~0.3°–1°
+//   Mars     ~0.5°–2°
+//   Jupiter  ~0.2°–0.5°
+//   Saturn   ~0.2°–0.5°
+//   Uranus   ~0.5°–1.5°
+//   Neptune  ~0.3°–0.8°
+//
+// Two-epicycle stack adds roughly one order of magnitude of
+// improvement — see epiParams2.js for the second-epicycle deltas.
+
+// ── Sun ──────────────────────────────────────────────────────────
+// The Sun has only an eccentric deferent (no epicycle needed for
+// a single-anomaly body).  We model it as a degenerate epicycle
+// with r = 0, so the same outerBody() function handles it.
+//
+// Tropical year = 365.25636 days → nlong = 360 / 365.25636
+// Apogee (perihelion of Earth's orbit from geocentric view):
+//   longitude ~102.9372° at J2000, advancing ~1.72°/century.
+// Eccentricity of Earth's orbit: e = 0.016709 at J2000.
+export const SUN = {
+  nlong:          0.9856474,    // mean longitude rate °/day (tropical)
+  nanom:          0.9856003,    // mean anomaly rate °/day (anomalistic)
+  L0:           280.46646,      // mean longitude at J2000.0 °
+  M0:           357.52911,      // mean anomaly at J2000.0 °
+  apogee0:      102.9372,       // longitude of apogee at J2000 °
+  ecc:            0.016709,     // eccentricity (deferent offset)
+  epi:            0.0,          // no epicycle
+  inc:            0.0,          // ecliptic latitude always 0
+  node:           0.0,
+};
+
+// ── Moon ─────────────────────────────────────────────────────────
+// The Moon is the most complex body: eccentric deferent + epicycle.
+// We use a simplified model without the Ptolemaic crank (evection).
+// Adding evection is a future second-epicycle improvement.
+//
+// Sidereal period: 27.321661 days → nlong = 360 / 27.321661
+// Anomalistic period: 27.554550 days → nanom = 360 / 27.554550
+// Mean values from Meeus ch.47.
+export const MOON = {
+  nlong:         13.1763966,   // mean longitude rate °/day
+  nanom:         13.0649929,   // mean anomaly (epicycle) rate °/day
+  nnode:          0.0529539,   // ascending node regression rate °/day
+  L0:           218.3165,      // mean longitude at J2000 °
+  M0:           134.9634,      // mean anomaly at J2000 °
+  N0:           125.0443,      // ascending node at J2000 ° (regressing)
+  ecc:            0.054900,    // deferent eccentricity
+  epi:            0.054900,    // epicycle radius ≈ ecc for Moon
+  inc:            5.1454,      // orbital inclination to ecliptic °
+};
+
+// ── Mars ─────────────────────────────────────────────────────────
+// Sidereal period: 686.971 days
+// Synodic period:  779.94 days
+// Epicycle radius from retrograde arc width: ~41.5° → r ≈ 0.656
+export const MARS = {
+  nlong:          0.5240207,
+  nanom:          0.5240207,
+  nsyn:           0.4615195,
+  L0:           359.4830,    // DE405-fitted    // empirically corrected at J2000
+  M0:           319.7274,
+  apogee0:       336.0602,
+  apogeeRate:     0.0001817,
+  a:              1.52366231,
+  ecc:            0.093405,
+  epi:            0.656000,
+  inc:            1.8497,
+  node:          49.5574,
+  nodeRate:      -0.0000295,
+};
+
+// ── Jupiter ───────────────────────────────────────────────────────
+// Sidereal period: 4332.59 days (11.862 yr)
+// Synodic period:  398.88 days
+// Retrograde arc ~10° → r ≈ 0.192
+export const JUPITER = {
+  nlong:          0.0830853,
+  nanom:          0.0830853,
+  nsyn:           0.9025862,
+  L0:           33.6615,    // DE405-fitted    // empirically corrected at J2000
+  M0:            20.9240,
+  apogee0:        14.3312,
+  apogeeRate:     0.0000830,
+  a:              5.20336301,
+  ecc:            0.048775,
+  epi:            0.192000,
+  inc:            1.3053,
+  node:          100.4542,
+  nodeRate:       0.0000135,
+};
+
+// ── Saturn ────────────────────────────────────────────────────────
+// Sidereal period: 10759.22 days (29.46 yr)
+// Synodic period:  378.09 days
+// Retrograde arc ~6.5° → r ≈ 0.108
+export const SATURN = {
+  nlong:          0.0334597,   // °/day (360 / 10759.22)
+  nanom:          0.0334597,
+  nsyn:           0.9517044,   // °/day (360 / 378.09)
+  L0:           48.4574,    // DE405-fitted    // empirically corrected at J2000
+  M0:            317.0207,     // °
+  apogee0:        93.0572,     // °
+  apogeeRate:     0.0000319,
+  a:              9.53707032,
+  ecc:            0.055723,
+  epi:            0.108000,    // retrograde arc ~6.5° ✓
+  inc:            2.4886,
+  node:          113.6634,
+  nodeRate:       0.0000839,
+};
+
+// ── Uranus ────────────────────────────────────────────────────────
+// Sidereal period: 30688.5 days (84.01 yr)
+// Synodic period:  369.66 days
+// Retrograde arc ~4° → r ≈ 0.072
+export const URANUS = {
+  nlong:          0.0117307,   // °/day
+  nanom:          0.0117307,
+  nsyn:           0.9741635,   // °/day
+  L0:           310.0550,    // empirically corrected at J2000      // °  (Meeus J2000 mean long)
+  M0:           142.2386,      // °
+  apogee0:       173.0053,     // °
+  apogeeRate:     0.0000097,
+  a:             19.19126393,
+  ecc:            0.047318,
+  epi:            0.072000,    // retrograde arc ~4° ✓
+  inc:            0.7733,
+  node:          74.0005,
+  nodeRate:       0.0000749,
+};
+
+// ── Neptune ───────────────────────────────────────────────────────
+// Sidereal period: 60195 days (164.8 yr)
+// Synodic period:  367.49 days
+// Retrograde arc ~1.2° → r ≈ 0.035
+export const NEPTUNE = {
+  nlong:          0.0059802,   // °/day
+  nanom:          0.0059802,
+  nsyn:           0.9797636,   // °/day
+  L0:           306.3487,    // empirically corrected at J2000      // °
+  M0:           256.2284,      // °
+  apogee0:        48.1202,     // °
+  apogeeRate:     0.0000048,
+  a:             30.06896348,
+  ecc:            0.008606,
+  epi:            0.035000,    // retrograde arc ~1.2° ✓
+  inc:            1.7700,
+  node:          131.7841,
+  nodeRate:       0.0000118,
+};
+
+// ── Venus ─────────────────────────────────────────────────────────
+// Synodic period: 583.92 days → nanom = 360 / 583.92
+// Venus's deferent tracks the Sun (nlong = Sun's nlong).
+// Epicycle radius from max elongation: ~46° → r ≈ tan(46°) = 0.716
+export const VENUS = {
+  nlong:          0.9856474,   // deferent = Sun's mean motion
+  nanom:          1.6021291,   // heliocentric mean anomaly rate °/day (360/224.701)
+  L0:           191.7198,    // DE405-fitted    // empirically corrected at J2000      // mean longitude at J2000 °
+  M0:           134.9200,    // DE405-fitted mean anomaly at J2000
+  apogee0:        46.1008,     // apogee of deferent °
+  apogeeRate:     0.0001636,
+  a:              0.72333199,
+  ecc:            0.006773,    // very small eccentricity
+  epi:            0.716000,    // max elongation ~46° ✓
+  inc:            3.3947,
+  node:          76.6799,
+  nodeRate:       0.0002465,
+};
+
+// ── Mercury ───────────────────────────────────────────────────────
+// Synodic period: 115.88 days → nanom = 360 / 115.88
+// Deferent tracks Sun.  Max elongation ~23° → r ≈ tan(23°) ≈ 0.424
+// (Mercury is trickier because its eccentricity is large — 0.206)
+export const MERCURY = {
+  nlong:          0.9856474,   // deferent = Sun
+  nanom:          4.0923507,   // heliocentric mean anomaly rate °/day (360/87.969)
+  L0:           251.9104,    // DE405-fitted      // °
+  M0:           171.2900,    // DE405-fitted mean anomaly at J2000
+  apogee0:        77.4561,     // °
+  apogeeRate:     0.0004592,
+  a:              0.38709893,
+  ecc:            0.205635,    // large — needs crank for best accuracy
+  epi:            0.380000,    // adjusted for large ecc
+  inc:            7.0047,
+  node:          48.3313,
+  nodeRate:       0.0003246,
+};
+
+// ── Zodiac constellation marker stars ────────────────────────────
+//
+// One bright reference star per zodiac constellation, chosen for
+// visibility and historical significance.  Positions J2000.0 from
+// the HYG v4.1 database.  Fixed stars have no epicycle — their
+// ra/dec come straight from the catalogue.
+//
+// Format: { id, name, constellation, raH, decD, mag }
+//   raH  — right ascension in decimal hours
+//   decD — declination in decimal degrees
+export const ZODIAC_STARS = [
+  // Aries — Hamal (α Ari)
+  { id: 'hamal',       name: 'Hamal',       constellation: 'Aries',       raH:  2.1196, decD:  23.4625, mag: 2.00 },
+  // Taurus — Aldebaran (α Tau)
+  { id: 'aldebaran',   name: 'Aldebaran',   constellation: 'Taurus',      raH:  4.5987, decD:  16.5093, mag: 0.85 },
+  // Gemini — Pollux (β Gem) + Castor (α Gem)
+  { id: 'pollux',      name: 'Pollux',      constellation: 'Gemini',      raH:  7.7553, decD:  28.0262, mag: 1.14 },
+  { id: 'castor',      name: 'Castor',      constellation: 'Gemini',      raH:  7.5767, decD:  31.8883, mag: 1.58 },
+  // Cancer — Acubens (α Cnc) — faint but traditional
+  { id: 'acubens',     name: 'Acubens',     constellation: 'Cancer',      raH:  8.9748, decD:  11.8577, mag: 4.26 },
+  // Leo — Regulus (α Leo)
+  { id: 'regulus',     name: 'Regulus',     constellation: 'Leo',         raH: 10.1395, decD:  11.9672, mag: 1.35 },
+  // Leo — Denebola (β Leo)
+  { id: 'denebola',    name: 'Denebola',    constellation: 'Leo',         raH: 11.8177, decD:  14.5720, mag: 2.13 },
+  // Virgo — Spica (α Vir)
+  { id: 'spica',       name: 'Spica',       constellation: 'Virgo',       raH: 13.4199, decD: -11.1613, mag: 1.04 },
+  // Libra — Zubenelgenubi (α Lib)
+  { id: 'zubenelgenubi', name: "Zuben'ubi", constellation: 'Libra',       raH: 14.8479, decD: -16.0418, mag: 2.75 },
+  // Libra — Zubeneschamali (β Lib)
+  { id: 'zubeneschamali', name: "Zuben'esch", constellation: 'Libra',     raH: 15.2839, decD:  -9.3832, mag: 2.61 },
+  // Scorpius — Antares (α Sco)
+  { id: 'antares',     name: 'Antares',     constellation: 'Scorpius',    raH: 16.4901, decD: -26.4320, mag: 1.09 },
+  // Ophiuchus (traditional 13th zodiac sign) — Rasalhague (α Oph)
+  { id: 'rasalhague',  name: 'Rasalhague',  constellation: 'Ophiuchus',   raH: 17.5823, decD:  12.5601, mag: 2.08 },
+  // Sagittarius — Kaus Australis (ε Sgr)
+  { id: 'kausaust',    name: 'Kaus Aust.',  constellation: 'Sagittarius', raH: 18.4029, decD: -34.3846, mag: 1.85 },
+  // Capricornus — Deneb Algedi (δ Cap)
+  { id: 'deneb_algedi', name: 'Deneb Algedi', constellation: 'Capricornus', raH: 21.7870, decD: -16.1274, mag: 2.85 },
+  // Aquarius — Sadalsuud (β Aqr)
+  { id: 'sadalsuud',   name: 'Sadalsuud',   constellation: 'Aquarius',    raH: 21.5258, decD:  -5.5711, mag: 2.91 },
+  // Pisces — Eta Piscium (η Psc) — brightest in Pisces
+  { id: 'eta_psc',     name: 'η Piscium',   constellation: 'Pisces',      raH:  1.5249, decD:  15.3457, mag: 3.62 },
+];
+
+// ── Extra observable stars: planets' traditional reference stars ──
+//
+// These are the Behenian stars and other historically significant
+// naked-eye stars that appear near the ecliptic and are useful
+// reference points for tracking planetary positions.
+export const ECLIPTIC_GUIDE_STARS = [
+  // Pleiades cluster representative (η Tau / Alcyone)
+  { id: 'alcyone',     name: 'Alcyone',     raH:  3.7913, decD:  24.1053, mag: 2.87 },
+  // Hyades cluster centre (θ¹ Tau / near Aldebaran)
+  { id: 'ain',         name: 'Ain (ε Tau)', raH:  4.4769, decD:  19.1807, mag: 3.53 },
+  // Praesepe (M44) vicinity — δ Cnc (Asellus Australis)
+  { id: 'asellus_aus', name: 'Asellus Aus.', raH:  8.7449, decD:  18.1540, mag: 3.94 },
+  // Vindemiatrix (ε Vir) — traditional zodiac reference
+  { id: 'vindemiatrix', name: 'Vindemiatrix', raH: 13.0362, decD:  10.9592, mag: 2.83 },
+  // Graffias (β Sco) — at Scorpius head
+  { id: 'graffias',    name: 'Graffias',    raH: 16.0906, decD: -19.8054, mag: 2.62 },
+  // Nunki (σ Sgr) — Sagittarius
+  { id: 'nunki',       name: 'Nunki',       raH: 18.9211, decD: -26.2967, mag: 2.02 },
+  // Fomalhaut — southern reference
+  { id: 'fomalhaut',   name: 'Fomalhaut',   raH: 22.9609, decD: -29.6222, mag: 1.16 },
+  // Markab (α Peg) — near ecliptic in Pisces sector
+  { id: 'markab',      name: 'Markab',      raH: 23.0793, decD:  15.2053, mag: 2.49 },
+];
