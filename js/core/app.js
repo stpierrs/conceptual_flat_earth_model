@@ -1252,7 +1252,6 @@ export class FeModel extends EventTarget {
       c.CelTheoStars = [];
     }
 
-    c.Satellites = [];
 
     // GP path overlay: per-category sub-point traces. Flat map from
     // a unique id → { pts, color } so the renderer doesn't need category

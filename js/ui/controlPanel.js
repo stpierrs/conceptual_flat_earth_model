@@ -683,7 +683,7 @@ const FIELD_GROUPS = [
     tab: 'Tracker', groups: [
       { title: 'Ephemeris', rows: [
         { key: 'BodySource', label: 'Source', select: [
-          { value: 'epicycle',     label: "Epicycle-1 (pure-circle, DE405-calibrated)" },
+          { value: 'epicycle',     label: "Epicycle-1 (pure-circle geocentric)" },
           { value: 'epicycle2',    label: "Epicycle-2 (two-circle Ibn al-Shatir)" },
           { value: 'ptolemy',      label: "Ptolemy (Almagest deferent + epicycle)" },
         ]},
