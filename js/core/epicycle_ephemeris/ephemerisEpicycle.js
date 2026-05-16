@@ -121,52 +121,50 @@ function moonEquatorial(t) {
 //
 // Steps:
 //   1. Mean longitude λ̄ + mean anomaly M from J2000.
-//   2. Equation of centre → true heliocentric longitude.
-//   3. True heliocentric distance r from eccentricity.
-//   4. Heliocentric 2D vector (r cos λ, r sin λ).
-//   5. Earth heliocentric vector from Sun position.
-//   6. Geocentric vector = planet − Earth.
-//   7. Geocentric longitude = atan2 of that vector.
-//   8. Latitude from inclination and ascending node.
+//   2. Equation of centre → true orbital longitude.
+//   3. Orbital radius rho = a(1−e²)/(1+e cos ν)  [observer orbit = 1].
+//   4. Planet orbital vector (rho cos λ, rho sin λ).
+//   5. Observer orbital vector from anti-Sun reference direction.
+//   6. Geocentric direction: angular offset of planet from observer.
+//   7. Latitude from inclination and ascending node.
 //
 // This is the exact geocentric formula, not the epicycle approximation.
-// The "epicycle" here IS the Earth's orbit — the vector subtraction is
+// The "epicycle" here IS the observer's orbit — the vector subtraction is
 // geometrically identical to the Ptolemaic deferent+epicycle with
-// Earth-orbit radius as the epicycle size.
-// lonCorr: optional heliocentric longitude correction in degrees (for perturbations).
+// observer-orbit radius as the epicycle size.
+// lonCorr: optional orbital longitude correction in degrees (for perturbations).
 function outerBody(t, p, lonCorr = 0) {
-  const lambda  = degmod(p.L0 + t * p.nlong);
+  const T      = t / 36525;
+  const lambda  = degmod(p.L0 + t * p.nlong + (p.nlong2 || 0) * T * T);
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
   const eqc     = eqCenterMeeus(M, p.ecc);
   const nu      = degmod(M + eqc);
 
-  // Apply perturbation correction to heliocentric longitude before geocentric conversion
-  const lon_h   = degmod(lambda + eqc + lonCorr);
+  // Apply perturbation correction to orbital longitude before geocentric conversion
+  const lon_orb = degmod(lambda + eqc + lonCorr);
 
-  // Heliocentric distance r = a(1 − e²) / (1 + e cos ν)
-  const r       = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
+  // Planet orbital vector (orbit ratio a, proportional coordinates)
+  const rho     = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
+  const xP = rho * cosd(lon_orb);
+  const yP = rho * sind(lon_orb);
 
-  // Heliocentric ecliptic cartesian (2D — latitude handled separately)
-  const xP = r * cosd(lon_h);
-  const yP = r * sind(lon_h);
-
-  // Earth heliocentric position (Sun is opposite)
+  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);
-  const r_earth = 1.0 - 0.016709 * cosd(Msun);
-  const xE = r_earth * cosd(lon_sun + 180);
-  const yE = r_earth * sind(lon_sun + 180);
+  const r_obs   = 1.0 - 0.016709 * cosd(Msun);
+  const xO = r_obs * cosd(lon_sun + 180);
+  const yO = r_obs * sind(lon_sun + 180);
 
-  // Geocentric ecliptic longitude
-  const dx = xP - xE;
-  const dy = yP - yE;
+  // Geocentric direction: angular offset of planet from observer
+  const dx = xP - xO;
+  const dy = yP - yO;
   const tlong = degmod(atand2(dy, dx));
 
   // Ecliptic latitude from inclination and ascending node
-  const latArg = degmod(lon_h - nodeNow);
+  const latArg = degmod(lon_orb - nodeNow);
   const beta   = p.inc * sind(latArg);
 
   return eclipticToEquatorial(tlong, beta);
@@ -174,47 +172,74 @@ function outerBody(t, p, lonCorr = 0) {
 
 // Inner planets (Venus, Mercury) use full vector geocentric approach.
 // The deferent tracks the Sun's mean longitude (Ptolemy's constraint).
-// Their heliocentric semi-major axis a < 1 Earth orbit, so after
-// subtracting the Earth vector we get the geocentric direction.
+// Their orbital radius ratio a < 1 observer orbit, so after
+// subtracting the observer vector we get the geocentric direction.
 function innerBody(t, p) {
-  // Planet's mean anomaly around the Sun (heliocentric)
+  // Planet's mean anomaly in its orbit
   const M     = degmod(p.M0 + t * p.nanom);
   const eqc   = eqCenterMeeus(M, p.ecc);
   const nu    = degmod(M + eqc);
 
-  // Planet heliocentric longitude = longitude of perihelion + true anomaly
-  const w     = degmod(p.apogee0 + t * (p.apogeeRate || 0));
-  const lon_h = degmod(nu + w);
+  // Planet orbital vector (orbit ratio a, proportional coordinates)
+  const w      = degmod(p.apogee0 + t * (p.apogeeRate || 0));
+  const lon_orb = degmod(nu + w);
 
-  // Heliocentric distance
-  const r     = p.a * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
+  // Planet orbital vector (orbit ratio a, proportional coordinates)
+  const rho    = p.a * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
+  const xP = rho * cosd(lon_orb);
+  const yP = rho * sind(lon_orb);
 
-  // Heliocentric Cartesian
-  const xP = r * cosd(lon_h);
-  const yP = r * sind(lon_h);
-
-  // Earth position (same as outer body)
+  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);
-  const r_earth = 1.0 - 0.016709 * cosd(Msun);
-  const xE = r_earth * cosd(lon_sun + 180);
-  const yE = r_earth * sind(lon_sun + 180);
+  const r_obs   = 1.0 - 0.016709 * cosd(Msun);
+  const xO = r_obs * cosd(lon_sun + 180);
+  const yO = r_obs * sind(lon_sun + 180);
 
-  // Geocentric ecliptic longitude
-  const tlong = degmod(atand2(yP - yE, xP - xE));
+  // Geocentric direction: angular offset of planet from observer
+  const tlong = degmod(atand2(yP - yO, xP - xO));
 
   // Ecliptic latitude
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
-  const latArg  = degmod(lon_h - nodeNow);
+  const latArg  = degmod(lon_orb - nodeNow);
   const beta    = p.inc * sind(latArg);
 
   return eclipticToEquatorial(tlong, beta);
 }
 
+// ── Uranus perturbation corrections ───────────────────────────────
+// Primary terms: Saturn-Uranus synodic (~45.4 yr) and Jupiter-Uranus
+// Amplitudes calibrated to approximate DE405; phases need phase3Calibrate.mjs
+function uranusLonCorr(t) {
+  const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
+  const lS = degmod(SATURN.L0  + t * SATURN.nlong);
+  const lU = degmod(URANUS.L0  + t * URANUS.nlong);
+  return (
+    + 0.8100 * sind(lS - lU + 139.0)
+    + 0.3500 * sind(lJ - lU +  84.5)
+    - 0.1900 * sind(2*lS - lU + 40.8)
+    + 0.1300 * sind(lJ + lS - 2*lU + 92.3)
+  );
+}
+
+// ── Neptune perturbation corrections ──────────────────────────────
+// Primary terms: Uranus-Neptune synodic (~172 yr) and Saturn-Neptune (~36 yr)
+// Phases are approximate — calibrate with phase3Calibrate.mjs vs DE405
+function neptuneLonCorr(t) {
+  const lS = degmod(SATURN.L0  + t * SATURN.nlong);
+  const lU = degmod(URANUS.L0  + t * URANUS.nlong);
+  const lN = degmod(NEPTUNE.L0 + t * NEPTUNE.nlong);
+  return (
+    + 0.4200 * sind(lU - lN + 168.2)
+    + 0.2800 * sind(lS - lN +  73.6)
+    - 0.1400 * sind(2*lU - lN +  95.1)
+  );
+}
+
 // ── Mars perturbation correction from Jupiter ─────────────────────
 //
-// Six-term resonance series applied as a heliocentric longitude
+// Six-term resonance series applied as a orbital longitude
 // correction before geocentric conversion.  Phases approximate —
 // run phase3Calibrate.mjs for DE405-fitted values.
 function marsLonCorr(t) {
@@ -269,8 +294,8 @@ export function bodyGeocentric(name, date) {
                       - 5 * degmod(SATURN.L0  + t * SATURN.nlong));
       return outerBody(t, SATURN, -0.870 * sind(gi + 148.0));
     }
-    case 'uranus':  return outerBody(t, URANUS);
-    case 'neptune': return outerBody(t, NEPTUNE);
+    case 'uranus':  return outerBody(t, URANUS, uranusLonCorr(t));
+    case 'neptune': return outerBody(t, NEPTUNE, neptuneLonCorr(t));
     case 'pluto':   return outerBody(t, PLUTO);
     case 'ceres':   return outerBody(t, CERES);
     case 'pallas':  return outerBody(t, PALLAS);

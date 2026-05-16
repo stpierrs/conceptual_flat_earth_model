@@ -10,10 +10,9 @@
 // synodic periods (USNO / Meeus "Astronomical Algorithms" 2nd ed.).
 // Eccentricities and apogee positions from Meeus Table 33.a (J2000
 // orbital elements) and cross-checked against JPL Horizons.
-// Epicycle radii are the geocentric-equivalent of the heliocentric
-// semi-major axis ratio as seen from Earth — they govern the
-// amplitude of the retrograde arc and are set to match observed
-// retrograde arc widths rather than derived from distance.
+// Orbital size ratios (field `a`) express each body's mean orbital radius
+// as a multiple of the observer's (Earth's) mean orbital radius = 1.0.
+// All motion is purely angular — no physical distance scale is assumed.
 // Mean longitudes at J2000 from Meeus Table 31.a (L₀ values).
 //
 // Inner-planet mean motions on the DEFERENT follow the Sun's mean
@@ -85,6 +84,7 @@ export const MOON = {
 export const MARS = {
   nlong:          0.5240207,
   nanom:          0.5240207,
+  nlong2:         0.000311,    // secular T² coefficient °/century² (Meeus)
   nsyn:           0.4615195,
   L0:           359.4830,    // DE405-fitted    // empirically corrected at J2000
   M0:           319.7274,
@@ -105,6 +105,7 @@ export const MARS = {
 export const JUPITER = {
   nlong:          0.0830853,
   nanom:          0.0830853,
+  nlong2:         0.000223,    // secular T² coefficient °/century² (Meeus)
   nsyn:           0.9025862,
   L0:           33.6615,    // DE405-fitted    // empirically corrected at J2000
   M0:            20.9240,
@@ -125,6 +126,7 @@ export const JUPITER = {
 export const SATURN = {
   nlong:          0.0334597,   // °/day (360 / 10759.22)
   nanom:          0.0334597,
+  nlong2:         0.000519,    // secular T² coefficient °/century² (Meeus)
   nsyn:           0.9517044,   // °/day (360 / 378.09)
   L0:           48.4574,    // DE405-fitted    // empirically corrected at J2000
   M0:            317.0207,     // °
@@ -145,6 +147,7 @@ export const SATURN = {
 export const URANUS = {
   nlong:          0.0117307,   // °/day
   nanom:          0.0117307,
+  nlong2:         0.000304,    // secular T² coefficient °/century² (Meeus)
   nsyn:           0.9741635,   // °/day
   L0:           310.0550,    // empirically corrected at J2000      // °  (Meeus J2000 mean long)
   M0:           142.2386,      // °
@@ -165,6 +168,7 @@ export const URANUS = {
 export const NEPTUNE = {
   nlong:          0.0059802,   // °/day
   nanom:          0.0059802,
+  nlong2:         0.000309,    // secular T² coefficient °/century² (Meeus)
   nsyn:           0.9797636,   // °/day
   L0:           306.3487,    // empirically corrected at J2000      // °
   M0:           256.2284,      // °
@@ -184,7 +188,7 @@ export const NEPTUNE = {
 // Epicycle radius from max elongation: ~46° → r ≈ tan(46°) = 0.716
 export const VENUS = {
   nlong:          0.9856474,   // deferent = Sun's mean motion
-  nanom:          1.6021291,   // heliocentric mean anomaly rate °/day (360/224.701)
+  nanom:          1.6021291,   // orbital anomaly rate °/day (360/224.701 days)
   L0:           191.7198,    // DE405-fitted    // empirically corrected at J2000      // mean longitude at J2000 °
   M0:           134.9200,    // DE405-fitted mean anomaly at J2000
   apogee0:        46.1008,     // apogee of deferent °
@@ -203,7 +207,7 @@ export const VENUS = {
 // (Mercury is trickier because its eccentricity is large — 0.206)
 export const MERCURY = {
   nlong:          0.9856474,   // deferent = Sun
-  nanom:          4.0923507,   // heliocentric mean anomaly rate °/day (360/87.969)
+  nanom:          4.0923507,   // orbital anomaly rate °/day (360/87.969 days)
   L0:           251.9104,    // DE405-fitted      // °
   M0:           171.2900,    // DE405-fitted mean anomaly at J2000
   apogee0:        77.4561,     // °
