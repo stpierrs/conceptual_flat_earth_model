@@ -13,7 +13,7 @@ import { dateTimeToDate } from './time.js';
 import {
   sunEquatorial, moonEquatorial, greenwichSiderealDeg, equatorialToCelestCoord,
   planetEquatorial, PLANET_NAMES, bodyRADec, BODY_NAMES,
-  bodyGeocentric, ptol as ephPtol, apix as ephApix,
+  bodyGeocentric, ptol as ephPtol,
 } from './ephemeris.js';
 import { apparentStarPosition } from './ephemerisCommon.js';
 import { CEL_NAV_STARS, celNavStarById } from './celnavStars.js';
@@ -311,9 +311,8 @@ function defaultState() {
     // 'random' | 'chart-dark' | 'chart-light' | 'celnav' — starfield style.
     StarfieldType: 'random',
 
-    // Position source — Epicycle-1 by default (sky-reference-calibrated, covers
-    // Sun–Neptune for any date). Falls back to Ptolemy if a body isn't covered.
-    // Astropixels / sky-reference is reserved for the eclipse-demo refiner only.
+    // Position source — Epicycle-1 by default (covers Sun–Neptune for any date).
+    // Ptolemy is the fallback / eclipse-demo refiner.
     BodySource: 'epicycle',
 
     // StarTrepidation master switch — forces all three corrections on when true.
@@ -1367,7 +1366,7 @@ export class FeModel extends EventTarget {
     // FollowTarget), so the disc doesn't fill up with every star circle
     // when you just want to see a handful of paths. Right?
     if (s.ShowGPPath) {
-      const activeEph = bodySource === 'sky-observations' ? ephApix : ephPtol;
+      const activeEph = ephPtol;
       const trackerTargetArr = Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [];
       const gpSet = new Set(trackerTargetArr);
       if (s.FollowTarget) gpSet.add(s.FollowTarget);

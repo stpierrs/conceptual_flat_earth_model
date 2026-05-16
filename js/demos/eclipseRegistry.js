@@ -24,24 +24,17 @@ import {
   greenwichSiderealDeg,
   refineEclipseByMinSeparation,
 } from '../core/ephemerisCommon.js';
-import { ptol, apix } from '../core/ephemeris.js';
+import { bodyGeocentric } from '../core/ephemeris.js';
 
 // Pick (sunFn, moonFn) pair for a given BodySource value. Both the
 // finder (`refineEclipseByMinSeparation`) and the sky render use the
 // same pair — keeping the demo internally consistent with whatever
 // pipeline is active.
 function ephemerisPair(bodySource) {
-  if (bodySource === 'sky-observations') {
-    return {
-      sunFn: (d) => apix.bodyGeocentric('sun', d),
-      moonFn: (d) => apix.bodyGeocentric('moon', d),
-      label: 'sky-reference',
-    };
-  }
   return {
-    sunFn: (d) => ptol.bodyGeocentric('sun', d),
-    moonFn: (d) => ptol.bodyGeocentric('moon', d),
-    label: 'Ptolemy',
+    sunFn: (d) => bodyGeocentric('sun', d),
+    moonFn: (d) => bodyGeocentric('moon', d),
+    label: 'Epicycle',
   };
 }
 

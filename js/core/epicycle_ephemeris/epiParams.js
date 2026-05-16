@@ -86,7 +86,7 @@ export const MARS = {
   nanom:          0.5240207,
   nlong2:         0.000311,    // secular T² coefficient °/century² (observed-series)
   nsyn:           0.4615195,
-  L0:           359.4830,    // sky-reference-fitted    // empirically corrected at J2000
+  L0:           359.4830,    // calibrated    // empirically corrected at J2000
   M0:           319.7274,
   apogee0:       336.0602,
   apogeeRate:     0.0001817,
@@ -107,7 +107,7 @@ export const JUPITER = {
   nanom:          0.0830853,
   nlong2:         0.000223,    // secular T² coefficient °/century² (observed-series)
   nsyn:           0.9025862,
-  L0:           33.6615,    // sky-reference-fitted    // empirically corrected at J2000
+  L0:           33.6615,    // calibrated    // empirically corrected at J2000
   M0:            20.9240,
   apogee0:        14.3312,
   apogeeRate:     0.0000830,
@@ -128,7 +128,7 @@ export const SATURN = {
   nanom:          0.0334597,
   nlong2:         0.000519,    // secular T² coefficient °/century² (observed-series)
   nsyn:           0.9517044,   // °/day (360 / 378.09)
-  L0:           48.4574,    // sky-reference-fitted    // empirically corrected at J2000
+  L0:           48.4574,    // calibrated    // empirically corrected at J2000
   M0:            317.0207,     // °
   apogee0:        93.0572,     // °
   apogeeRate:     0.0000319,
@@ -189,8 +189,8 @@ export const NEPTUNE = {
 export const VENUS = {
   nlong:          0.9856474,   // deferent = Sun's mean motion
   nanom:          1.6021291,   // orbital anomaly rate °/day (360/224.701 days)
-  L0:           191.7198,    // sky-reference-fitted    // empirically corrected at J2000      // mean longitude at J2000 °
-  M0:           134.9200,    // sky-reference-fitted mean anomaly at J2000
+  L0:           191.7198,    // calibrated    // empirically corrected at J2000      // mean longitude at J2000 °
+  M0:           134.9200,    // calibrated mean anomaly at J2000
   apogee0:        46.1008,     // apogee of deferent °
   apogeeRate:     0.0001636,
   a:              0.72333199,
@@ -208,8 +208,8 @@ export const VENUS = {
 export const MERCURY = {
   nlong:          0.9856474,   // deferent = Sun
   nanom:          4.0923507,   // orbital anomaly rate °/day (360/87.969 days)
-  L0:           251.9104,    // sky-reference-fitted      // °
-  M0:           171.2900,    // sky-reference-fitted mean anomaly at J2000
+  L0:           251.9104,    // calibrated      // °
+  M0:           171.2900,    // calibrated mean anomaly at J2000
   apogee0:        77.4561,     // °
   apogeeRate:     0.0004592,
   a:              0.38709893,
@@ -419,4 +419,123 @@ export const BRIGHT_STARS = [
   { id: 'diphda',       name: 'Diphda',        raH:  0.7265, decD: -17.9867, mag:  2.04 },
   // Leo extra
   { id: 'algieba',      name: 'Algieba',       raH: 10.3329, decD:  19.8414, mag:  2.01 },
+
+  // ── Completing the 57 navigational stars ─────────────────────────
+  { id: 'acamar',      name: 'Acamar',      raH:  2.9710, decD: -40.305, mag: 3.24 }, // θ Eri
+  { id: 'alnair',      name: 'Al Na\'ir',   raH: 22.1372, decD: -46.961, mag: 1.74 }, // α Gru
+  { id: 'alphecca',    name: 'Alphecca',    raH: 15.5781, decD: +26.714, mag: 2.23 }, // α CrB
+  { id: 'alpheratz',   name: 'Alpheratz',   raH:  0.1398, decD: +29.091, mag: 2.06 }, // α And
+  { id: 'ankaa',       name: 'Ankaa',       raH:  0.4381, decD: -42.306, mag: 2.40 }, // α Phe
+  { id: 'eltanin',     name: 'Eltanin',     raH: 17.9434, decD: +51.489, mag: 2.24 }, // γ Dra
+  { id: 'enif',        name: 'Enif',        raH: 21.7364, decD:  +9.875, mag: 2.38 }, // ε Peg
+  { id: 'gienah',      name: 'Gienah',      raH: 12.2634, decD: -17.542, mag: 2.58 }, // γ Crv
+  { id: 'kochab',      name: 'Kochab',      raH: 14.8451, decD: +74.156, mag: 2.08 }, // β UMi
+  { id: 'menkar',      name: 'Menkar',      raH:  3.0380, decD:  +4.090, mag: 2.54 }, // α Cet
+  { id: 'menkent',     name: 'Menkent',     raH: 14.1114, decD: -36.370, mag: 2.06 }, // θ Cen
+  { id: 'sabik',       name: 'Sabik',       raH: 17.1730, decD: -15.725, mag: 2.43 }, // η Oph
+  { id: 'schedar',     name: 'Schedar',     raH:  0.6751, decD: +56.537, mag: 2.24 }, // α Cas
+  { id: 'suhail',      name: 'Suhail',      raH:  9.1333, decD: -43.432, mag: 2.23 }, // λ Vel
+
+  // ── Ursa Major (Big Dipper) ───────────────────────────────────────
+  { id: 'merak',       name: 'Merak',       raH: 11.0307, decD: +56.382, mag: 2.37 }, // β UMa
+  { id: 'phecda',      name: 'Phecda',      raH: 11.8972, decD: +53.694, mag: 2.44 }, // γ UMa
+  { id: 'megrez',      name: 'Megrez',      raH: 12.2571, decD: +57.029, mag: 3.31 }, // δ UMa
+  { id: 'mizar',       name: 'Mizar',       raH: 13.3988, decD: +54.925, mag: 2.23 }, // ζ UMa
+
+  // ── Cassiopeia ────────────────────────────────────────────────────
+  { id: 'caph',        name: 'Caph',        raH:  0.1530, decD: +59.150, mag: 2.28 }, // β Cas
+  { id: 'navi',        name: 'Navi',        raH:  0.9451, decD: +60.717, mag: 2.47 }, // γ Cas
+  { id: 'ruchbah',     name: 'Ruchbah',     raH:  1.4303, decD: +60.236, mag: 2.68 }, // δ Cas
+
+  // ── Perseus ───────────────────────────────────────────────────────
+  { id: 'algol',       name: 'Algol',       raH:  3.1361, decD: +40.956, mag: 2.12 }, // β Per
+
+  // ── Cygnus ────────────────────────────────────────────────────────
+  { id: 'sadr',        name: 'Sadr',        raH: 20.3704, decD: +40.257, mag: 2.23 }, // γ Cyg
+  { id: 'albireo',     name: 'Albireo',     raH: 19.5120, decD: +27.960, mag: 3.08 }, // β Cyg
+
+  // ── Lyra ──────────────────────────────────────────────────────────
+  { id: 'sulafat',     name: 'Sulafat',     raH: 18.9824, decD: +32.690, mag: 3.25 }, // γ Lyr
+
+  // ── Aquila ────────────────────────────────────────────────────────
+  { id: 'tarazed',     name: 'Tarazed',     raH: 19.7710, decD: +10.613, mag: 2.72 }, // γ Aql
+
+  // ── Hercules ──────────────────────────────────────────────────────
+  { id: 'kornephoros', name: 'Kornephoros', raH: 16.5037, decD: +21.490, mag: 2.78 }, // β Her
+  { id: 'rasalgethi',  name: 'Rasalgethi',  raH: 17.2441, decD: +14.390, mag: 3.35 }, // α Her
+
+  // ── Boötes ────────────────────────────────────────────────────────
+  { id: 'izar',        name: 'Izar',        raH: 14.7498, decD: +27.074, mag: 2.37 }, // ε Boo
+  { id: 'muphrid',     name: 'Muphrid',     raH: 13.9114, decD: +18.397, mag: 2.68 }, // η Boo
+
+  // ── Draco ─────────────────────────────────────────────────────────
+  { id: 'rastaban',    name: 'Rastaban',    raH: 17.5072, decD: +52.301, mag: 2.79 }, // β Dra
+  { id: 'thuban',      name: 'Thuban',      raH: 14.0731, decD: +64.376, mag: 3.67 }, // α Dra (former pole star)
+
+  // ── Serpens / Ophiuchus ───────────────────────────────────────────
+  { id: 'unukalhai',   name: 'Unukalhai',   raH: 15.7378, decD:  +6.426, mag: 2.65 }, // α Ser
+  { id: 'yed_prior',   name: 'Yed Prior',   raH: 16.2391, decD:  -3.694, mag: 2.74 }, // δ Oph
+
+  // ── Andromeda ─────────────────────────────────────────────────────
+  { id: 'mirach',      name: 'Mirach',      raH:  1.1622, decD: +35.621, mag: 2.07 }, // β And
+  { id: 'almach',      name: 'Almach',      raH:  2.0650, decD: +42.330, mag: 2.26 }, // γ And
+
+  // ── Pegasus ───────────────────────────────────────────────────────
+  { id: 'scheat',      name: 'Scheat',      raH: 23.0629, decD: +28.083, mag: 2.44 }, // β Peg
+  { id: 'algenib',     name: 'Algenib',     raH:  0.2206, decD: +15.184, mag: 2.83 }, // γ Peg
+
+  // ── Aries ─────────────────────────────────────────────────────────
+  { id: 'sheratan',    name: 'Sheratan',    raH:  1.9107, decD: +20.808, mag: 2.64 }, // β Ari
+
+  // ── Gemini ────────────────────────────────────────────────────────
+  { id: 'mebsuta',     name: 'Mebsuta',     raH:  6.7322, decD: +25.131, mag: 2.98 }, // ε Gem
+  { id: 'tejat',       name: 'Tejat',       raH:  6.3827, decD: +22.514, mag: 2.87 }, // μ Gem
+
+  // ── Leo ───────────────────────────────────────────────────────────
+  { id: 'zosma',       name: 'Zosma',       raH: 11.2352, decD: +20.524, mag: 2.56 }, // δ Leo
+
+  // ── Virgo ─────────────────────────────────────────────────────────
+  { id: 'porrima',     name: 'Porrima',     raH: 12.6943, decD:  -1.449, mag: 2.74 }, // γ Vir
+
+  // ── Scorpius ──────────────────────────────────────────────────────
+  { id: 'dschubba',    name: 'Dschubba',    raH: 16.0056, decD: -22.622, mag: 2.29 }, // δ Sco
+  { id: 'lesath',      name: 'Lesath',      raH: 17.5127, decD: -37.296, mag: 2.69 }, // υ Sco
+
+  // ── Sagittarius ───────────────────────────────────────────────────
+  { id: 'ascella',     name: 'Ascella',     raH: 19.0435, decD: -29.880, mag: 2.60 }, // ζ Sgr
+
+  // ── Canis Major ───────────────────────────────────────────────────
+  { id: 'aludra',      name: 'Aludra',      raH:  7.4016, decD: -29.303, mag: 2.45 }, // η CMa
+
+  // ── Puppis / Carina / Vela ────────────────────────────────────────
+  { id: 'naos',        name: 'Naos',        raH:  8.0598, decD: -40.003, mag: 2.25 }, // ζ Pup
+  { id: 'aspidiske',   name: 'Aspidiske',   raH:  9.2848, decD: -59.275, mag: 2.25 }, // ι Car
+  { id: 'regor',       name: 'Regor',       raH:  8.1588, decD: -47.337, mag: 1.78 }, // γ Vel
+  { id: 'alsephina',   name: 'Alsephina',   raH:  8.7451, decD: -54.709, mag: 1.93 }, // δ Vel
+
+  // ── Canis Minor / Columba / Lepus ─────────────────────────────────
+  { id: 'gomeisa',     name: 'Gomeisa',     raH:  7.4525, decD:  +8.290, mag: 2.90 }, // β CMi
+  { id: 'phact',       name: 'Phact',       raH:  5.6608, decD: -34.074, mag: 2.65 }, // α Col
+  { id: 'arneb',       name: 'Arneb',       raH:  5.5455, decD: -17.822, mag: 2.58 }, // α Lep
+  { id: 'nihal',       name: 'Nihal',       raH:  5.4706, decD: -20.759, mag: 2.84 }, // β Lep
+
+  // ── Orion (additional) ────────────────────────────────────────────
+  { id: 'saiph',       name: 'Saiph',       raH:  5.7960, decD:  -9.670, mag: 2.07 }, // κ Ori
+
+  // ── Aquarius / Capricornus ────────────────────────────────────────
+  { id: 'sadalmelik',  name: 'Sadalmelik',  raH: 22.0964, decD:  -0.320, mag: 2.96 }, // α Aqr
+  { id: 'dabih',       name: 'Dabih',       raH: 20.3502, decD: -14.782, mag: 3.05 }, // β Cap
+
+  // ── Cepheus ───────────────────────────────────────────────────────
+  { id: 'alderamin',   name: 'Alderamin',   raH: 21.3097, decD: +62.586, mag: 2.45 }, // α Cep
+
+  // ── Southern Cross (additional) ───────────────────────────────────
+  { id: 'imai',        name: 'Imai',        raH: 12.2524, decD: -58.749, mag: 2.79 }, // δ Cru
+
+  // ── Pleiades (individual members) ────────────────────────────────
+  { id: 'atlas',       name: 'Atlas',       raH:  3.8194, decD: +24.053, mag: 3.63 }, // 27 Tau
+  { id: 'electra',     name: 'Electra',     raH:  3.7480, decD: +24.113, mag: 3.70 }, // 17 Tau
+  { id: 'maia',        name: 'Maia',        raH:  3.7638, decD: +24.368, mag: 3.87 }, // 20 Tau
+  { id: 'merope',      name: 'Merope',      raH:  3.7722, decD: +23.948, mag: 4.14 }, // 23 Tau
+  { id: 'taygeta',     name: 'Taygeta',     raH:  3.7534, decD: +24.468, mag: 4.30 }, // 19 Tau
 ];

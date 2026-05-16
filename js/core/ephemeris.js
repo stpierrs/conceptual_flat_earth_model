@@ -1,12 +1,10 @@
 // Position router — ask for a planet, get back (RA, Dec).
 //
-// Primary pipelines: Epicycle-1 and Epicycle-2 (custom pure-circle,
-// sky-reference-calibrated, covers Sun–Neptune for any date).
+// Primary pipelines: Epicycle-1 and Epicycle-2 (custom pure-circle geometric
+// model, covers Sun–Neptune for any date).
 // Ptolemy is kept as fallback of last resort and for eclipse-demo refining.
-// Astropixels (sky-reference daily table) is retained for eclipse demos only.
 
 import * as ptol  from './ephemerisPtolemy.js';
-import * as apix  from './ephemerisAstropixels.js';
 import * as epi1  from './epicycle_ephemeris/ephemerisEpicycle.js';
 import * as epi2  from './epicycle_ephemeris/ephemerisEpicycle2.js';
 
@@ -20,7 +18,7 @@ export {
 } from './ephemerisCommon.js';
 
 // Pipeline namespaces, exported for callers that need several readings at once.
-export { ptol, apix };
+export { ptol };
 
 // User-selectable pipelines. Astropixels is eclipse-demo only (not listed here).
 export const EPHEMERIS_SOURCES = ['epicycle', 'epicycle2', 'ptolemy'];
@@ -29,10 +27,8 @@ export const EPHEMERIS_SOURCES = ['epicycle', 'epicycle2', 'ptolemy'];
 export const PLANET_NAMES = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
 export const BODY_NAMES   = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
 
-// Pipeline registry. Astropixels stays wired so eclipse demos that set
-// BodySource: 'sky-observations' still resolve — it just isn't user-selectable.
+// Pipeline registry.
 const PIPES = {
-  sky-observations:  { ns: apix,  cb: (n) => apix.coversBody(n),  cd: (d) => apix.coversDate(d) },
   ptolemy:      { ns: ptol,  cb: (n) => ptol.coversBody(n),  cd: (d) => ptol.coversDate(d) },
   epicycle:     { ns: epi1,  cb: (n) => epi1.coversBody(n),  cd: (d) => epi1.coversDate(d) },
   epicycle2:    { ns: epi2,  cb: (n) => epi2.coversBody(n),  cd: (d) => epi2.coversDate(d) },
@@ -95,19 +91,16 @@ export function bodyRADecRoute(name, date, source = 'epicycle') {
 
 // Direct per-pipeline access for callers that know exactly what they want.
 export function planetEquatorial(name, date, source = 'epicycle') {
-  if (source === 'sky-observations') return apix.planetEquatorial(name, date);
   if (source === 'ptolemy')     return ptol.planetEquatorial(name, date);
   return bodyRADec(name, date, source);
 }
 
-// Sun and Moon — epicycle by default, sky-observations only for eclipse demos.
+// Sun and Moon — epicycle by default.
 export function sunEquatorial(date, source = 'epicycle') {
-  if (source === 'sky-observations') return apix.sunEquatorial(date);
   if (source === 'ptolemy')     return ptol.sunEquatorial(date);
   return bodyRADec('sun', date, source);
 }
 export function moonEquatorial(date, source = 'epicycle') {
-  if (source === 'sky-observations') return apix.moonEquatorial(date);
   if (source === 'ptolemy')     return ptol.moonEquatorial(date);
   return bodyRADec('moon', date, source);
 }
