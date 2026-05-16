@@ -5267,7 +5267,6 @@ export class TrackedGroundPoints {
       blackhole:  'GPOverrideBlackHoles',
       quasar:     'GPOverrideQuasars',
       galaxy:     'GPOverrideGalaxies',
-      satellite:  'GPOverrideSatellites',
     };
     const categoryOverride = (info) => {
       if (!info) return false;

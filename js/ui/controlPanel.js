@@ -11,14 +11,12 @@ import { BLACK_HOLES } from '../core/blackHoles.js';
 import { QUASARS }     from '../core/quasars.js';
 import { GALAXIES }    from '../core/galaxies.js';
 import { CEL_THEO_STARS, CEL_THEO_OWN } from '../core/celTheoStars.js';
-import { SATELLITES }  from '../core/satellites.js';
 import { NAMED_STARS_HYG }    from '../core/_namedStarsHyg.js';
 import { NAMED_STARS_HYG_EXTRA } from '../core/_namedStarsHygExtra.js';
 import { GALAXIES_EXTRA }     from '../core/galaxiesExtra.js';
 import { GALAXIES_EXTRA2 }    from '../core/galaxiesExtra2.js';
 import { QUASARS_EXTRA }      from '../core/quasarsExtra.js';
 import { QUASARS_EXTRA2 }     from '../core/quasarsExtra2.js';
-import { SATELLITES_EXTRA }   from '../core/satellitesExtra.js';
 import { JUPITER_MOON_DEFS, GALILEAN_MOON_IDS, JUPITER_MOON_COLORS } from '../core/jupiterMoons.js';
 import { listProjections, listGeneratedProjections, listHqMaps, listGeMaps, PROJECTIONS } from '../core/projections.js';
 import { Autoplay } from './autoplay.js';
@@ -58,14 +56,12 @@ const BODY_SEARCH_INDEX = (() => {
   for (const q of QUASARS)           out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const g of GALAXIES)          out.push({ id: `star:${g.id}`, name: g.name, color: '#ff80c0' });
   for (const s of CEL_THEO_OWN)      out.push({ id: `star:${s.id}`, name: s.name, color: '#ff8c00' });
-  for (const s of SATELLITES)        out.push({ id: `star:${s.id}`, name: s.name, color: '#66ff88' });
   for (const s of NAMED_STARS_HYG)        out.push({ id: `star:${s.id}`, name: s.name, color: '#fff5d8' });
   for (const s of NAMED_STARS_HYG_EXTRA)  out.push({ id: `star:${s.id}`, name: s.name, color: '#fff5d8' });
   for (const g of GALAXIES_EXTRA)         out.push({ id: `star:${g.id}`, name: g.name, color: '#ff80c0' });
   for (const g of GALAXIES_EXTRA2)        out.push({ id: `star:${g.id}`, name: g.name, color: '#ff80c0' });
   for (const q of QUASARS_EXTRA)          out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const q of QUASARS_EXTRA2)         out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
-  for (const s of SATELLITES_EXTRA)       out.push({ id: `star:${s.id}`, name: s.name, color: '#66ff88' });
   out.push({ id: 'star:pluto',  name: 'Pluto',  color: '#a07c66' });
   out.push({ id: 'star:ceres',  name: 'Ceres',  color: '#b0a898' });
   out.push({ id: 'star:pallas', name: 'Pallas', color: '#a8a0b0' });
@@ -381,7 +377,7 @@ function resolveTrackName(targetId) {
   if (PLANET_NAMES[targetId]) return PLANET_NAMES[targetId];
   if (targetId.startsWith('star:')) {
     const id = targetId.slice(5);
-    for (const arr of [CEL_NAV_STARS, CATALOGUED_STARS, BLACK_HOLES, QUASARS, GALAXIES, SATELLITES]) {
+    for (const arr of [CEL_NAV_STARS, CATALOGUED_STARS, BLACK_HOLES, QUASARS, GALAXIES]) {
       const hit = arr.find((e) => e.id === id);
       if (hit) return hit.name;
     }
@@ -730,11 +726,9 @@ const FIELD_GROUPS = [
                 ...BLACK_HOLES.map((x) => `star:${x.id}`),
                 ...QUASARS.map((x) => `star:${x.id}`),
                 ...GALAXIES.map((x) => `star:${x.id}`),
-                ...SATELLITES.map((x) => `star:${x.id}`),
               ],
               ShowCelNav: true, ShowBlackHoles: true,
               ShowQuasars: true, ShowGalaxies: true,
-              ShowSatellites: true,
             }) },
           { buttonLabel: 'Clear Trace',
             onClick: (m) => m.setState({ ClearTraceCount: (m.state.ClearTraceCount | 0) + 1 }) },
@@ -1064,30 +1058,6 @@ const FIELD_GROUPS = [
             label: s.name,
             color: celTheoMenuColor(s),
           })),
-        },
-      ]},
-      { title: 'Satellites', rows: [
-        { key: 'GPOverrideSatellites', label: 'GP Override', bool: true },
-        { label: '', buttonLabel: 'Enable All',
-          onClick: (m) => m.setState({
-            TrackerTargets: [
-              ...new Set([
-                ...(Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : []),
-                ...SATELLITES.map((x) => `star:${x.id}`),
-              ]),
-            ],
-            ShowSatellites: true,
-          }) },
-        { label: '', buttonLabel: 'Disable All',
-          onClick: (m) => {
-            const ids = new Set(SATELLITES.map((x) => `star:${x.id}`));
-            const cur = Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : [];
-            m.setState({ TrackerTargets: cur.filter((t) => !ids.has(t)) });
-          } },
-        { key: 'TrackerTargets', label: '', buttonGrid:
-          [...SATELLITES]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((x) => ({ value: `star:${x.id}`, label: x.name, color: '#66ff88' })),
         },
       ]},
     ],
@@ -1767,7 +1737,6 @@ export function buildControlPanel(host, model, demos) {
       ShowCelestialBodies: false,
       ShowCelNav: false, ShowConstellations: false, ShowConstellationLines: false,
       ShowBlackHoles: false, ShowQuasars: false, ShowGalaxies: false,
-      ShowSatellites: false,
       ShowStars: false,
       ShowSunAnalemma: false, ShowMoonAnalemma: false,
       ShowGPPath: false, ShowDomeCaustic: false,
@@ -1784,7 +1753,6 @@ export function buildControlPanel(host, model, demos) {
     const allBlackHoles    = BLACK_HOLES.map(x => `star:${x.id}`);
     const allQuasars       = QUASARS.map(x => `star:${x.id}`);
     const allGalaxies      = GALAXIES.map(x => `star:${x.id}`);
-    const allSatellites    = SATELLITES.map(x => `star:${x.id}`);
     model.setState({
       ObserverFigure: 'nikki',
       ObserverLat: 45.0, ObserverLong: -100.0,
@@ -1832,12 +1800,11 @@ export function buildControlPanel(host, model, demos) {
       ShowBlackHoles: true, GPOverrideBlackHoles: false,
       ShowQuasars: true, GPOverrideQuasars: false,
       ShowGalaxies: true, GPOverrideGalaxies: false,
-      ShowSatellites: true, GPOverrideSatellites: false,
       TrackerTargets: [
         ...PLANETS,
         ...allCelNav, ...allConstellation,
         ...allBlackHoles, ...allQuasars,
-        ...allGalaxies, ...allSatellites,
+        ...allGalaxies,
       ],
     });
   };

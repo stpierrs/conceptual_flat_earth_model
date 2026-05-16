@@ -22,12 +22,10 @@ import { BLACK_HOLES, blackHoleById } from './blackHoles.js';
 import { QUASARS,      quasarById }    from './quasars.js';
 import { GALAXIES,     galaxyById }    from './galaxies.js';
 import { CEL_THEO_STARS, CEL_THEO_OWN } from './celTheoStars.js';
-import { SATELLITES,   satelliteById, satelliteSubPoint } from './satellites.js';
 import {
   JUPITER_MOON_DEFS, GALILEAN_MOON_IDS, jupiterMoonRADec,
 } from './jupiterMoons.js';
 import { venusPhaseAngle } from './ephemerisPtolemy.js';
-import { SATELLITES_EXTRA } from './satellitesExtra.js';
 import {
   compTransMatCelestToGlobe, compTransMatLocalFeToGlobalFe, compTransMatVaultToFe,
   celestCoordToLocalGlobeCoord, coordToLatLong, localGlobeCoordToAngles,
@@ -200,7 +198,6 @@ function defaultState() {
     DarkBackground:          true,
     ShowLiveEphemeris:       false,
     MoonPhaseExpanded:       false,
-    ShowSatellites:          true,
     ShowAxisLine:            false,
     LastObserverLat:         null,
     LastObserverLong:        null,
@@ -276,7 +273,6 @@ function defaultState() {
     GPOverrideBlackHoles:      false,
     GPOverrideQuasars:         false,
     GPOverrideGalaxies:        false,
-    GPOverrideSatellites:      false,
 
     InsideVault: false,
 
@@ -375,7 +371,6 @@ function defaultState() {
       // via CEL_NAV_STARS / CATALOGUED_STARS / NAMED_STARS_HYG, so
       // duplicating them would just stack extra HUD rows on the same id.
       ...CEL_THEO_OWN.map((x) => `star:${x.id}`),
-      ...SATELLITES.map((x) => `star:${x.id}`),
     ],
 
     ShowEphemerisReadings: false,
@@ -1237,14 +1232,10 @@ export class FeModel extends EventTarget {
         anglesGlobe,
       };
     };
-    // Skip the per-frame catalogue projection when stars are hidden
-    // and nothing in the tracker / follow target references a catalogue
-    // star. Satellite ids (`star:sat_*`) are handled by the satellite
-    // block below, so they're not a reason to project here.
     const _trackerHasStar = (Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [])
-      .some((t) => typeof t === 'string' && t.startsWith('star:') && !t.startsWith('star:sat_'));
+      .some((t) => typeof t === 'string' && t.startsWith('star:'));
     const _followIsStar = typeof s.FollowTarget === 'string'
-      && s.FollowTarget.startsWith('star:') && !s.FollowTarget.startsWith('star:sat_');
+      && s.FollowTarget.startsWith('star:');
     if (s.ShowStars !== false || _trackerHasStar || _followIsStar) {
       c.CelNavStars     = CEL_NAV_STARS.map(projectStar);
       c.CataloguedStars = CATALOGUED_STARS.map(projectStar);
@@ -1261,55 +1252,7 @@ export class FeModel extends EventTarget {
       c.CelTheoStars = [];
     }
 
-    // Satellites: sub-point (lat, lon) computed per-frame from
-    // two-body Kepler and projected through the same vault /
-    // local-globe / optical-vault machinery as stars. Built when
-    // ShowSatellites is on OR when any `star:sat_*` id is in the
-    // tracker — so clicking a chip alone is enough to make it render
-    // without flipping the master toggle.
-    const SAT_VAULT_HEIGHT = 0.15;
-    const _trackerHasSat = (Array.isArray(s.TrackerTargets) ? s.TrackerTargets : [])
-      .some((t) => typeof t === 'string' && t.startsWith('star:sat_'));
-    const _followIsSat = typeof s.FollowTarget === 'string' && s.FollowTarget.startsWith('star:sat_');
-    if (s.ShowSatellites || _trackerHasSat || _followIsSat) {
-      const projectSatellite = (sat) => {
-        const sub = satelliteSubPoint(sat, utcDate);
-        const decRad = sub.lat * Math.PI / 180;
-        const raRad  = (sub.lon + c.SkyRotAngle) * Math.PI / 180;
-        const celestCoord   = equatorialToCelestCoord({ ra: raRad, dec: decRad });
-        const celestLatLong = coordToLatLong(celestCoord);
-        const vaultCoord    = _bodyVault(celestLatLong.lat, celestLatLong.lng, SAT_VAULT_HEIGHT);
-        const globeVaultCoord = _globeVaultAt(celestLatLong.lat, sub.lon);
-        const localGlobe  = celestCoordToLocalGlobeCoord(celestCoord, c.TransMatCelestToGlobe);
-        const anglesGlobe = localGlobeCoordToAngles(localGlobe);
-        const { lgTrue, lgApp } = _opticalPair(localGlobe);
-        const opticalVaultCoordTrue = localGlobeCoordToGlobalFeCoord(
-          opticalVaultProject(lgTrue, c.OpticalVaultRadius, c.OpticalVaultHeightEffective),
-          c.TransMatLocalFeToGlobalFe,
-        );
-        const globeOpticalVaultCoordTrue = _globeOpticalProject(lgTrue);
-        const opticalVaultCoord = lgApp === lgTrue
-          ? opticalVaultCoordTrue
-          : localGlobeCoordToGlobalFeCoord(
-              opticalVaultProject(lgApp, c.OpticalVaultRadius, c.OpticalVaultHeightEffective),
-              c.TransMatLocalFeToGlobalFe,
-            );
-        const globeOpticalVaultCoord = lgApp === lgTrue
-          ? globeOpticalVaultCoordTrue
-          : _globeOpticalProject(lgApp);
-        return {
-          id: sat.id, name: sat.name,
-          ra: raRad, dec: decRad,
-          celestCoord, celestLatLong, globeVaultCoord,
-          vaultCoord, opticalVaultCoord, globeOpticalVaultCoord,
-          opticalVaultCoordTrue, globeOpticalVaultCoordTrue,
-          anglesGlobe,
-        };
-      };
-      c.Satellites = [...SATELLITES, ...SATELLITES_EXTRA].map(projectSatellite);
-    } else {
-      c.Satellites = [];
-    }
+    c.Satellites = [];
 
     // GP path overlay: per-category sub-point traces. Flat map from
     // a unique id → { pts, color } so the renderer doesn't need category
@@ -1419,13 +1362,6 @@ export class FeModel extends EventTarget {
         }
       }
 
-      for (const sat of [...SATELLITES, ...SATELLITES_EXTRA]) {
-        if (!gpSet.has(`star:${sat.id}`)) continue;
-        const sampled = sampleFromSubPointFn((d) => satelliteSubPoint(sat, d));
-        c.GPPaths[`sat:${sat.id}`] = {
-          pts: sampled.pts, latLon: sampled.latLon, color: 0x66ff88,
-        };
-      }
     }
 
     c.TrackerInfos = [];
@@ -1571,11 +1507,6 @@ export class FeModel extends EventTarget {
           def   = entry ? { name: entry.name, mag: entry.mag } : null;
           if (entry) cat = 'celtheo';
         }
-        if (!entry) {
-          entry = c.Satellites.find((x) => x.id === starId);
-          def   = satelliteById(starId) || (entry ? { name: entry.name, mag: -1.5 } : null);
-          if (entry) cat = 'satellite';
-        }
         if (entry && def) {
           // Star RA/Dec is pipeline-independent — all five readings share the same catalog value.
           const gpColorByCat = {
@@ -1584,7 +1515,6 @@ export class FeModel extends EventTarget {
             blackhole:  0x9966ff,  // purple
             quasar:     0x40e0d0,  // cyan
             galaxy:     0xff80c0,  // pink
-            satellite:  0x66ff88,  // lime green
             celtheo:    0xff8c00,  // orange
           };
           // Stars carry a single catalog RA / Dec — no pipeline
