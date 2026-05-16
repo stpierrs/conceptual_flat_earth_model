@@ -25,6 +25,7 @@ import {
   j2000Day,
   eclipticToEquatorial,
   eqCenter,
+  eqCenterMeeus,
   eqAnomaly,
   eqAnomaly2,
 } from './epiCore.js';
@@ -114,7 +115,7 @@ function outerBody2(t, p, epi2, lonCorr = 0) {
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
-  const eqc  = eqCenter(M, p.ecc);
+  const eqc  = eqCenterMeeus(M, p.ecc);
   const nu   = degmod(M + eqc);
   const lon_h = degmod(lambda + eqc + lonCorr);
   const r    = (p.a || 1) * (1 - p.ecc * p.ecc) / (1 + p.ecc * cosd(nu));
@@ -146,7 +147,7 @@ function outerBody2(t, p, epi2, lonCorr = 0) {
 // ── Two-epicycle inner body ───────────────────────────────────────
 function innerBody2(t, p, epi2) {
   const M     = degmod(p.M0 + t * p.nanom);
-  const eqc   = eqCenter(M, p.ecc);
+  const eqc   = eqCenterMeeus(M, p.ecc);
   const nu    = degmod(M + eqc);
   const w     = degmod(p.apogee0 + t * (p.apogeeRate || 0));
   const lon_h = degmod(nu + w);
@@ -175,6 +176,20 @@ function innerBody2(t, p, epi2) {
   return eclipticToEquatorial(tlong, beta);
 }
 
+// ── Mars perturbation correction from Jupiter ─────────────────────
+function marsLonCorr(t) {
+  const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
+  const lM = degmod(MARS.L0    + t * MARS.nlong);
+  return (
+    + 0.2726 * sind(5*lJ - 2*lM -   2.83)
+    + 0.1614 * sind(2*lJ -   lM + 162.30)
+    + 0.1020 * sind(  lJ - 2*lM +  81.40)
+    + 0.0897 * sind(3*lJ - 2*lM + 182.20)
+    - 0.0654 * sind(2*lJ - 3*lM + 103.60)
+    + 0.0473 * sind(4*lJ - 3*lM +  56.90)
+  );
+}
+
 // ── Fixed-star lookup (same as single-epi version) ───────────────
 const FIXED_STAR_MAP = new Map();
 for (const s of [...ZODIAC_STARS, ...ECLIPTIC_GUIDE_STARS, ...BRIGHT_STARS]) {
@@ -198,7 +213,7 @@ export function bodyGeocentric(name, date) {
     case 'moon':    return moonEquatorial(t);
     case 'mercury': return innerBody2(t, MERCURY, EPI2.mercury);
     case 'venus':   return innerBody2(t, VENUS,   EPI2.venus);
-    case 'mars':    return outerBody2(t, MARS,    EPI2.mars);
+    case 'mars':    return outerBody2(t, MARS,    EPI2.mars, marsLonCorr(t));
     case 'jupiter': {
       const gi = degmod(2 * degmod(JUPITER.L0 + t * JUPITER.nlong)
                       - 5 * degmod(SATURN.L0  + t * SATURN.nlong));

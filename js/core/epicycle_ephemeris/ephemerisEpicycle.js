@@ -39,6 +39,7 @@ import {
   j2000Day,
   eclipticToEquatorial,
   eqCenter,
+  eqCenterMeeus,
   eqAnomaly,
 } from './epiCore.js';
 
@@ -138,7 +139,7 @@ function outerBody(t, p, lonCorr = 0) {
   const M       = degmod(p.M0 + t * p.nanom);
   const nodeNow = degmod(p.node + t * (p.nodeRate || 0));
 
-  const eqc     = eqCenter(M, p.ecc);
+  const eqc     = eqCenterMeeus(M, p.ecc);
   const nu      = degmod(M + eqc);
 
   // Apply perturbation correction to heliocentric longitude before geocentric conversion
@@ -178,7 +179,7 @@ function outerBody(t, p, lonCorr = 0) {
 function innerBody(t, p) {
   // Planet's mean anomaly around the Sun (heliocentric)
   const M     = degmod(p.M0 + t * p.nanom);
-  const eqc   = eqCenter(M, p.ecc);
+  const eqc   = eqCenterMeeus(M, p.ecc);
   const nu    = degmod(M + eqc);
 
   // Planet heliocentric longitude = longitude of perihelion + true anomaly
@@ -211,6 +212,24 @@ function innerBody(t, p) {
   return eclipticToEquatorial(tlong, beta);
 }
 
+// ── Mars perturbation correction from Jupiter ─────────────────────
+//
+// Six-term resonance series applied as a heliocentric longitude
+// correction before geocentric conversion.  Phases approximate —
+// run phase3Calibrate.mjs for DE405-fitted values.
+function marsLonCorr(t) {
+  const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
+  const lM = degmod(MARS.L0    + t * MARS.nlong);
+  return (
+    + 0.2726 * sind(5*lJ - 2*lM -   2.83)
+    + 0.1614 * sind(2*lJ -   lM + 162.30)
+    + 0.1020 * sind(  lJ - 2*lM +  81.40)
+    + 0.0897 * sind(3*lJ - 2*lM + 182.20)
+    - 0.0654 * sind(2*lJ - 3*lM + 103.60)
+    + 0.0473 * sind(4*lJ - 3*lM +  56.90)
+  );
+}
+
 // ── Fixed-star lookup (zodiac + ecliptic guide stars) ────────────
 //
 // Fixed stars have no epicycle.  Their RA/Dec are J2000 catalogue
@@ -239,7 +258,7 @@ export function bodyGeocentric(name, date) {
     case 'moon':    return moonEquatorial(t);
     case 'mercury': return innerBody(t, MERCURY);
     case 'venus':   return innerBody(t, VENUS);
-    case 'mars':    return outerBody(t, MARS);
+    case 'mars':    return outerBody(t, MARS, marsLonCorr(t));
     case 'jupiter': { // Great inequality: Jupiter-Saturn 2:5 near-resonance (~759 yr period)
       const gi = degmod(2 * degmod(JUPITER.L0 + t * JUPITER.nlong)
                       - 5 * degmod(SATURN.L0  + t * SATURN.nlong));

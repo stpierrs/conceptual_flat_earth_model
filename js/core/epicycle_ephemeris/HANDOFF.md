@@ -111,7 +111,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 | Jupiter | 1.96° | 1.96° | Systematic offset |
 | Mercury | 2.54° | 2.54° | Large eccentricity |
 | Moon | ~15–20' | ~15–20' | Evection + variation + annual eq + 2nd anomaly |
-| Mars | 6.59° | **4.18°** | Epi-2 helps; Jupiter perturbation limits |
+| Mars | ~1–2°* | ~0.5–1°* | *Chunk 3: eqCenterMeeus + Jupiter terms; post-fix estimate |
 | Uranus | ~2–3° | ~2–3° | Uncalibrated |
 | Neptune | ~1–2° | ~1–2° | Uncalibrated |
 | Pluto | ~3–5° | ~3–5° | Uncalibrated, high ecc |
@@ -131,6 +131,10 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
    - Mars: +7.65°, Jupiter: −7.69°, Saturn: −5.12°, Venus: −4.26°, Mercury: −0.34°
 
 4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (not Meeus Table 31.a values)
+
+5. **`eqCenter()` is NOT used for planets** — only for Moon (×2 kludge). All planets use
+   `eqCenterMeeus()` (Chunk 3). The arctan formula gives ~half the Keplerian equation of
+   center; switching to Meeus series gives the correct 2e sinM + ... expansion.
 
 ---
 
@@ -163,7 +167,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 - Total star catalogue: 64 fixed stars
 - Pushed to master, live at stpierrs.github.io
 
-### Session 3 (2026-05-16) — Chunk 2: Moon perturbations + Jupiter-Saturn great inequality
+### Session 3 (2026-05-16) — Chunk 2 + Chunk 3
 - **Moon (both epi1 and epi2):** Added 4 classical perturbation terms to `moonEquatorial()`:
   - Evection `+1.274° sin(2D − M)` — Ptolemy's prosneusis (largest term)
   - Variation `+0.658° sin(2D)` — Tycho Brahe
@@ -177,6 +181,22 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
   - Applied as `lonCorr` in `outerBody()` / `outerBody2()`
 - **epi2:** Added `lonCorr = 0` parameter to `outerBody2()`, plumbed through Jupiter/Saturn cases
 
+**Chunk 3 — eqCenterMeeus + Mars perturbation series (both pipelines)**
+- **Root cause found:** `eqCenter()` (arctan approximation) gives ~half the Keplerian equation
+  of center. For Mars (e=0.093) this was a ~5.3° peak error, explaining the 6.59° RMS.
+  The arctan formula is Ptolemaic epicycle geometry; the Keplerian formula is `2e sinM + ...`
+- **Fix:** Added `eqCenterMeeus(M, e)` to `epiCore.js` — three-term Meeus series:
+  `((2e - e³/4) sinM + (5e²/4) sin2M + (13e³/12) sin3M) × DEG`
+- **Applied** `eqCenterMeeus` in `outerBody()`, `innerBody()` (epi1) and `outerBody2()`,
+  `innerBody2()` (epi2). Moon still uses `eqCenter × 2` (equivalent, kept as-is).
+- **Mars-Jupiter perturbation:** Added 6-term resonance series `marsLonCorr(t)`:
+  main term 0.2726° at (5λ_J − 2λ_M − 2.83°) + 5 additional terms.
+  Applied as `lonCorr` in `outerBody()` / `outerBody2()` for Mars.
+- Expected accuracy after fix: Mars epi1 ~1–2°, Mars epi2 ~0.5–1° (vs. prior 6.59°/4.18°)
+  Jupiter/Saturn should also improve significantly (same eqCenter bug affected them)
+- **Calibration note:** Mars perturbation phases (terms 2–6) are approximate; run
+  `phase3Calibrate.mjs` against DE405 to optimise them.
+
 ---
 
 ## Planned Future Work (Priority Order)
@@ -184,7 +204,9 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 ### ~~Chunk 2~~ — DONE (Session 3)
 Moon perturbations + Jupiter-Saturn great inequality — both pipelines updated.
 
-### Chunk 3 — Accuracy: Mars perturbation series
+### ~~Chunk 3~~ — DONE (Session 3, continued)
+
+### Chunk 4 — Accuracy: Mars perturbation series
 - Jupiter perturbation on Mars (~2° amplitude):
   `+0.273° sin(5λ_J − 2λ_M − 2.828°)` + several more terms
 - Target: Mars from 6.6° → ~1° (matching Meeus Ch.33)
