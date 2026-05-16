@@ -91,18 +91,28 @@ function moonEquatorial(t) {
   const Ms = degmod(SUN.M0 + t * SUN.nanom);
   const Ls = degmod(SUN.L0 + t * SUN.nlong);
   const D  = degmod(Lm - Ls);
+  const F  = degmod(Lm - Nm);   // argument of latitude (mean)
 
   const eqc = eqCenter(Mm, MOON.ecc) * 2;
 
-  const evection   = +1.2740 * sind(2 * D - Mm);
-  const variation  = +0.6583 * sind(2 * D);
-  const annualEq   = -0.1858 * sind(Ms);
-  const secondAnom = +0.2136 * sind(2 * Mm);
+  const tlong = degmod(Lm + eqc
+    + 1.2740 * sind(2*D - Mm)
+    + 0.6583 * sind(2*D)
+    - 0.1858 * sind(Ms)
+    + 0.2136 * sind(2*Mm)
+    - 0.1140 * sind(2*F)
+    + 0.0588 * sind(2*D - 2*Mm)
+    - 0.0572 * sind(2*D - Ms - Mm)
+    + 0.0533 * sind(2*D + Mm)
+    + 0.0459 * sind(2*D - Ms)
+    + 0.0410 * sind(Mm - Ms)
+    - 0.0348 * sind(D)
+    - 0.0306 * sind(Ms + Mm)
+    + 0.0267 * sind(2*D + Ms - Mm)
+  );
 
-  const tlong = degmod(Lm + eqc + evection + variation + annualEq + secondAnom);
-
-  const F    = degmod(tlong - Nm);
-  const beta = MOON.inc * sind(F);
+  const Fact = degmod(tlong - Nm);
+  const beta = MOON.inc * sind(Fact);
   return eclipticToEquatorial(tlong, beta);
 }
 

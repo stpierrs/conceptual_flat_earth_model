@@ -82,12 +82,12 @@ function sunEquatorial(t) {
 
 // ── Moon ─────────────────────────────────────────────────────────
 //
-// Eccentric deferent + four classical perturbation terms:
-//   Evection (1.274°) — Ptolemy's prosneusis, largest Moon perturbation
-//   Variation (0.658°) — discovered by Tycho Brahe
-//   Annual equation (0.186°) — Kepler
-//   Second anomaly (0.214°) — Ptolemy's second epicycle
-// Together these bring accuracy from ~1° to ~15–20 arcmin.
+// Eccentric deferent + thirteen perturbation terms (Meeus Ch.22/47).
+// Terms 1–4 were the original set; terms 5–13 added here bring
+// accuracy from ~15–20' to ~0.1° (6').
+//
+// F = mean argument of latitude = mean longitude − ascending node.
+// D = mean elongation from Sun.
 function moonEquatorial(t) {
   const Lm = degmod(MOON.L0 + t * MOON.nlong);
   const Mm = degmod(MOON.M0 + t * MOON.nanom);
@@ -97,19 +97,30 @@ function moonEquatorial(t) {
   const Ms = degmod(SUN.M0 + t * SUN.nanom);
   const Ls = degmod(SUN.L0 + t * SUN.nlong);
   const D  = degmod(Lm - Ls);   // Moon's mean elongation from Sun
+  const F  = degmod(Lm - Nm);   // argument of latitude (mean)
 
   // Equation of centre (eccentric deferent, ×2 for Ptolemaic amplification)
   const eqc = eqCenter(Mm, MOON.ecc) * 2;
 
-  // Four perturbation terms (amplitudes from Meeus Ch.47)
-  const evection   = +1.2740 * sind(2 * D - Mm);  // Ptolemy's prosneusis
-  const variation  = +0.6583 * sind(2 * D);
-  const annualEq   = -0.1858 * sind(Ms);
-  const secondAnom = +0.2136 * sind(2 * Mm);
+  // Thirteen perturbation terms (amplitudes from Meeus Ch.47 simplified)
+  const tlong = degmod(Lm + eqc
+    + 1.2740 * sind(2*D - Mm)         // evection — Ptolemy's prosneusis
+    + 0.6583 * sind(2*D)               // variation — Tycho Brahe
+    - 0.1858 * sind(Ms)                // annual equation — Kepler
+    + 0.2136 * sind(2*Mm)              // second anomaly
+    - 0.1140 * sind(2*F)               // argument-of-latitude term
+    + 0.0588 * sind(2*D - 2*Mm)
+    - 0.0572 * sind(2*D - Ms - Mm)
+    + 0.0533 * sind(2*D + Mm)
+    + 0.0459 * sind(2*D - Ms)
+    + 0.0410 * sind(Mm - Ms)
+    - 0.0348 * sind(D)                 // parallactic inequality
+    - 0.0306 * sind(Ms + Mm)
+    + 0.0267 * sind(2*D + Ms - Mm)
+  );
 
-  const tlong = degmod(Lm + eqc + evection + variation + annualEq + secondAnom);
-
-  const F    = degmod(tlong - Nm);
+  const Fact = degmod(tlong - Nm);
+  const beta = MOON.inc * sind(Fact);
   const beta = MOON.inc * sind(F);
 
   return eclipticToEquatorial(tlong, beta);
