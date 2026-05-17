@@ -365,8 +365,6 @@ export function buildEpicycleOverlay(viewEl, model) {
   viewEl.appendChild(wrap);
 
   const ctx = canvas.getContext('2d');
-  let lastBodyName = null;
-  let prevDateTime = null;   // for pause detection
 
   function syncCanvas() {
     const W = wrap.clientWidth;
