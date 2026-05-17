@@ -232,85 +232,85 @@ function drawDiagram(ctx, geom, W, H, bodyName) {
 }
 
 // ── Galilean moon telescope strip ─────────────────────────────────────────────
+// Classic Galileo-notebook style: Jupiter disc at centre, four labelled dots
+// strung horizontally at their current projected positions.
 function drawMoons(ctx, date, W, yTop) {
-  const H = 110;
-  const jd   = date.getTime() / 86400000 + 2440587.5;
-  const t    = jd - J2000_JD;                   // days since J2000
-  const cx   = W / 2;
-  const jy   = yTop + H / 2 - 12;              // Jupiter y centre
-  const maxR = cx - 16;                          // Callisto at maxR
-  const scale = maxR / GALILEAN[3].rRel;         // px per rRel unit
+  const H     = 110;
+  const jd    = date.getTime() / 86400000 + 2440587.5;
+  const t     = jd - J2000_JD;
+  const cx    = W / 2;
+  // Layout: header row (label) 14px, orbital track row, legend row 14px
+  const trackY = yTop + 14 + (H - 28) / 2;   // vertical centre of track band
+  const maxX   = cx - 18;                      // Callisto max swing in px
+  const scale  = maxX / GALILEAN[3].rRel;
 
-  // Section divider
-  glow(ctx, DIVIDER, 4, () => {
-    ctx.strokeStyle = DIVIDER; ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(8, yTop); ctx.lineTo(W - 8, yTop); ctx.stroke();
-    ctx.setLineDash([]);
-  });
+  // Divider line
+  ctx.strokeStyle = DIVIDER; ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(10, yTop); ctx.lineTo(W - 10, yTop); ctx.stroke();
+  ctx.setLineDash([]);
 
-  // Section label
-  ctx.fillStyle = LABEL_COL; ctx.font = '9px ui-monospace,monospace';
+  // Header
+  ctx.fillStyle = 'rgba(160,140,220,0.7)'; ctx.font = 'bold 9px ui-monospace,monospace';
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
   ctx.fillText('Galilean Moons — Telescope View', cx, yTop + 3);
 
-  // Orbital radius rings (faint ellipses — nearly edge-on)
+  // Single faint reference line along the ecliptic plane
+  ctx.strokeStyle = 'rgba(100,80,180,0.25)'; ctx.lineWidth = 1;
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(10, trackY); ctx.lineTo(W - 10, trackY); ctx.stroke();
+
+  // Faint orbit arcs for each moon (flat ellipse, edge-on)
   for (const m of GALILEAN) {
-    const r = m.rRel * scale;
-    glow(ctx, m.glow, 3, () => {
-      ctx.strokeStyle = m.col.replace(')', ',0.18)').replace('#', 'rgba(') || 'rgba(200,200,100,0.15)';
-      // Just draw a horizontal line showing the max swing
-      ctx.lineWidth = 0.6;
-      ctx.beginPath();
-      ctx.moveTo(cx - r, jy); ctx.lineTo(cx + r, jy);
-      ctx.stroke();
-      // End ticks
-      ctx.beginPath();
-      ctx.moveTo(cx - r, jy - 3); ctx.lineTo(cx - r, jy + 3);
-      ctx.moveTo(cx + r, jy - 3); ctx.lineTo(cx + r, jy + 3);
-      ctx.stroke();
-    });
+    const rx = m.rRel * scale;
+    const ry = rx * 0.07; // very flat
+    ctx.strokeStyle = m.col + '28'; // ~15% opacity hex suffix
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.ellipse(cx, trackY, rx, Math.max(ry, 1.5), 0, 0, 2 * Math.PI);
+    ctx.stroke();
   }
 
-  // Jupiter
-  const jR = 10;
-  const jHalo = ctx.createRadialGradient(cx, jy, jR, cx, jy, jR * 2.5);
-  jHalo.addColorStop(0, 'rgba(216,152,88,0.5)'); jHalo.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.beginPath(); ctx.arc(cx, jy, jR * 2.5, 0, 2 * Math.PI);
-  ctx.fillStyle = jHalo; ctx.fill();
-  glowCircle(ctx, cx, jy, jR, '#d89858', 'rgba(216,152,88,0.7)', 12,
-             'rgba(255,200,100,0.3)', 1);
-  ctx.fillStyle = '#d89858'; ctx.font = 'bold 9px ui-monospace,monospace';
+  // Jupiter — small clean disc
+  const jR = 7;
+  glowCircle(ctx, cx, trackY, jR, '#c8883a', 'rgba(216,152,88,0.6)', 10,
+             'rgba(255,210,130,0.35)', 1.5);
+  ctx.fillStyle = 'rgba(200,160,80,0.9)'; ctx.font = 'bold 10px serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText('♃', cx, jy + jR + 2);
+  ctx.fillText('♃', cx, trackY + jR + 1);
 
-  // Each moon
-  for (const m of GALILEAN) {
+  // Compute moon positions; track y-offsets to avoid label collisions
+  const positions = GALILEAN.map((m) => {
     const angle = ((m.L0 + m.rate * t) % 360 + 360) % 360;
     const x     = cx + m.rRel * scale * Math.sin(angle * RAD);
-    const yInc  = -m.rRel * scale * 0.06 * Math.cos(angle * RAD); // slight inclination
-    const my    = jy + yInc;
-    const mr    = Math.max(3, 5 - GALILEAN.indexOf(m) * 0.3);
+    const depth = Math.cos(angle * RAD); // -1 behind, +1 in front
+    const ry    = m.rRel * scale * 0.07;
+    const y     = trackY + ry * Math.sin(angle * RAD); // tiny vertical offset
+    return { m, x, y, depth };
+  });
 
-    // Halo
-    const mHalo = ctx.createRadialGradient(x, my, mr, x, my, mr * 3);
-    mHalo.addColorStop(0, m.glow); mHalo.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath(); ctx.arc(x, my, mr * 3, 0, 2 * Math.PI);
-    ctx.fillStyle = mHalo; ctx.fill();
+  // Draw moons back-to-front (depth sort)
+  positions.sort((a, b) => a.depth - b.depth);
+  for (const { m, x, y, depth } of positions) {
+    const mr      = 3.5;
+    const opacity = depth >= 0 ? 1.0 : 0.45; // dimmer when behind Jupiter
+    ctx.globalAlpha = opacity;
+    glowCircle(ctx, x, y, mr, m.col, m.glow, 7);
+    ctx.globalAlpha = 1;
 
-    glowCircle(ctx, x, my, mr, m.col, m.glow, 8);
-
-    // Label below
-    ctx.fillStyle = m.col; ctx.font = '8px ui-monospace,monospace';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText(m.name, x, my + mr + 2);
+    // Label: above if top half of orbit, below otherwise
+    const labelAbove = y <= trackY;
+    ctx.fillStyle = m.col; ctx.font = 'bold 8px ui-monospace,monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = labelAbove ? 'bottom' : 'top';
+    ctx.fillText(m.name[0], x, labelAbove ? y - mr - 1 : y + mr + 1);
   }
 
-  // Period labels
-  ctx.fillStyle = STATS_COL; ctx.font = '8px ui-monospace,monospace';
-  ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-  ctx.fillText('Io 1.77d · Europa 3.55d · Ganymede 7.15d · Callisto 16.7d',
-    6, yTop + H - 2);
+  // Legend row at bottom
+  ctx.fillStyle = STATS_COL; ctx.font = '7.5px ui-monospace,monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Io 1.77d  ·  Europa 3.55d  ·  Ganymede 7.15d  ·  Callisto 16.7d',
+    cx, yTop + H - 2);
 }
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
