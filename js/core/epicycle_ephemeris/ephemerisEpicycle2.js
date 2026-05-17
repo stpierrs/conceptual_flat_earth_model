@@ -3,7 +3,7 @@
 // Same API as ephemerisEpicycle.js but applies a second epicycle to
 // each planet, absorbing the residual errors that the single-circle
 // model leaves behind.  This is the Ibn al-Shatir approach (c. 1350):
-// two compounded uniform circular motions, no heliocentric stage,
+// two compounded uniform circular motions,
 // no gravitational constants.
 //
 // The second-epicycle parameters (r2, A2_offset) were determined by

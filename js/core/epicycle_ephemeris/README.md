@@ -2,8 +2,7 @@
 
 Custom pure-epicycle ephemeris pipeline for the FE Conceptual Model.
 
-Drop-in addition alongside the existing pipelines (epicycle-model,
-GeoC, HelioC, Ptolemy). Same API contract. No globe parameters, no AU,
+Same API contract as the Ptolemy pipeline. No globe parameters, no AU,
 no gravitational constants. Everything is angular accumulation from a
 J2000.0 epoch plus geometric vector subtraction — which is exactly
 what an epicycle is.
@@ -18,7 +17,6 @@ what an epicycle is.
 | `epiParams.js` | Orbital constants for all 9 bodies + zodiac/guide star catalogues |
 | `ephemerisEpicycle.js` | **Phase 1** — single deferent + single epicycle per body |
 | `ephemerisEpicycle2.js` | **Phase 2** — two-epicycle stack (Ibn al-Shatir method) |
-| `ephemeris_integration_patch.js` | Step-by-step wiring instructions for `ephemeris.js` |
 | `epiTest.mjs` | Smoke test: prints all bodies + zodiac stars for one date |
 | `epiValidate.mjs` | Error comparison vs reference positions over 10 years |
 
@@ -44,17 +42,9 @@ ecliptic reference stars.
 
 ### The core idea
 
-Every outer planet's apparent motion from Earth is the vector difference
-between the planet's heliocentric position and Earth's heliocentric
-position. This is *geometrically identical* to the Ptolemaic model:
-
-- The planet's heliocentric orbit = the **deferent** (large circle)
-- Earth's orbit = the **epicycle** (small circle whose centre rides the deferent)
-
-No heliocentric coordinate system is needed. No AU. The calculation only
-uses angles (mean longitudes, anomalies) and dimensionless ratios (the
-semi-major axis ratio a/1 AU, which is just a number). The Sun's position
-enters only as a direction angle, never as a distance.
+Angular accumulation from a J2000.0 epoch. The calculation only
+uses angles (mean longitudes, anomalies) and dimensionless ratios.
+The Sun's position enters only as a direction angle.
 
 ### Outer planets (Mars, Jupiter, Saturn, Uranus, Neptune)
 
@@ -63,10 +53,10 @@ enters only as a direction angle, never as a distance.
 2. Mean anomaly    M   = M₀ + t × nanom
 3. Equation of centre  eqc = arctan(e sin M / (1 + e cos M))
 4. True anomaly        ν   = M + eqc
-5. True heliocentric longitude  λ_h = λ̄ + eqc
-6. Heliocentric distance        r   = a(1 − e²) / (1 + e cos ν)
-7. Heliocentric Cartesian       (r cos λ_h, r sin λ_h)
-8. Subtract Earth heliocentric vector (from Sun position + eqc_sun)
+5. True longitude  λ_h = λ̄ + eqc
+6. Orbital distance  r = a(1 − e²) / (1 + e cos ν)
+7. Orbital vector  (r cos λ_h, r sin λ_h)
+8. Subtract Earth orbital vector (from Sun position + eqc_sun)
 9. Geocentric ecliptic longitude = atan2 of that vector
 10. Ecliptic latitude from inclination × sin(argument of latitude)
 11. eclipticToEquatorial(λ_geo, β) → { ra, dec } in radians
@@ -76,7 +66,7 @@ enters only as a direction angle, never as a distance.
 
 Same as outer planets — full vector geocentric subtraction. The deferent
 constraint (inner planets track the Sun angularly) arises naturally
-because their heliocentric semi-major axes are < 1 AU, so the vector
+because their semi-major axes are < 1 AU, so the vector
 subtraction always produces the correct elongation-bounded behaviour.
 
 ### Sun
@@ -110,7 +100,7 @@ Expected accuracy for simplified elements:
 
 This is the same accuracy class as any simple Keplerian element set
 without a perturbation series. It is **working correctly** — the errors
-are the price of not implementing epicycle-model's ~200 periodic correction terms.
+are inherent in the single-term equation of centre.
 
 For the FE model context: this is stronger than the existing Ptolemy
 pipeline (which reaches ~5–10° for modern dates) and adds Uranus and
@@ -122,7 +112,7 @@ Neptune which no current pipeline covers for arbitrary dates.
 
 `ephemerisEpicycle2.js` adds a second epicycle per body. This is the
 Ibn al-Shatir method (c. 1350 CE): two compounded uniform circular
-motions, no heliocentric stage. The second circle absorbs the residual
+motions. The second circle absorbs the residual
 from the first, improving accuracy ~2×–3× for most bodies.
 
 The second-epicycle radii (`r2`) and phase offsets were set to match
@@ -131,25 +121,6 @@ optimisation — that is Phase 3 work.
 
 ---
 
-## How to wire into the model
-
-See `ephemeris_integration_patch.js` for step-by-step instructions.
-Short version:
-
-```js
-// In ephemeris.js, add:
-import * as epi  from './epicycle_ephemeris/ephemerisEpicycle.js';
-import * as epi2 from './epicycle_ephemeris/ephemerisEpicycle2.js';
-
-// Add to SOURCES map:
-epicycle:  epi,
-epicycle2: epi2,
-
-// Add to FALLBACK_ORDER (after vsop87, before ptolemy):
-'epicycle2', 'epicycle',
-```
-
----
 
 ## Running the tests
 
@@ -163,16 +134,14 @@ node epiValidate.mjs   # error comparison vs reference positions, 2000–2010
 
 ## What this is NOT
 
-- Not a full epicycle-model implementation (that's already in the model)
-- Not a table-lookup ephemeris (see ephemerisAstropixels.js)
+- Not a table-lookup ephemeris
 - Not claiming arc-minute accuracy
 
 What it IS: a self-contained, fully geometric, pure-circular-motion
 prediction engine that covers every observable naked-eye planet plus
 Uranus and Neptune, using nothing but angle accumulation and geometric
 vector subtraction. No globe radius, no AU (the semi-major axis ratios
-are dimensionless), no gravitational constant, no heliocentric
-coordinate system as a required frame.
+are dimensionless), no gravitational constant.
 
 ---
 

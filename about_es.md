@@ -221,7 +221,7 @@ Navegador de animaciones programadas. Controles arriba: **Detener**, **Pausar / 
 - **Sol 24 h (4)** — demos de sol polar (Alert NU, Antártida Occidental, sol de medianoche N/S).
 - **General (6)** — equinoccio en el ecuador, solsticios de verano / invierno a 45°N, ciclo lunar de un mes, viaje del observador, 78°N 24 horas de luz diurna.
 - **Analema Solar / Analema Lunar / Analema Solar + Lunar** — 5 variantes de latitud (90°N, 45°N, 0°, 45°S, 90°S). Observador fijo; tiempo fijo a 12:00 UTC; un paso diario por cada 30/365 s. Mantén al final para que puedas estudiar la curva.
-- **Eclipses Solares (44 entradas, 2021–2040)** — uno por cada eclipse solar real (Espenak). La demo refina el tiempo de sicigia usando el Sol + Luna del pipeline activo y planta al observador en el punto subsolar de ese pipeline.
+- **Eclipses Solares (44 entradas, 2021–2040)** — uno por cada eclipse solar real  La demo refina el tiempo de sicigia usando el Sol + Luna del pipeline activo y planta al observador en el punto subsolar de ese pipeline.
 - **Eclipses Lunares (67 entradas, 2021–2040)** — misma estructura, incluyendo 22 penumbrales.
 - **Predicciones de Eclipse FE** — marcador de posición para un futuro predictor armónico Saros.
 
@@ -278,7 +278,6 @@ Cada campo de estado vive en el hash de la URL para que un setup del sim se pued
 
 # Créditos
 
-- **Fred Espenak** (NASA GSFC retirado, AstroPixels) — catálogos de eclipses utilizados por el refinador de demos de eclipses.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, fuente para el port de Ptolomeo.
 - **Shane St. Pierre** — encuadre conceptual y el empuje para realmente construir una demostración interactiva funcional.
 - **Walter Bislin** — inspiración visual y de diseño para el modelo interactivo.
