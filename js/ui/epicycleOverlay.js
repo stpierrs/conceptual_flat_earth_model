@@ -231,86 +231,118 @@ function drawDiagram(ctx, geom, W, H, bodyName) {
     6, H - 3);
 }
 
-// ── Galilean moon telescope strip ─────────────────────────────────────────────
-// Classic Galileo-notebook style: Jupiter disc at centre, four labelled dots
-// strung horizontally at their current projected positions.
+// ── Galilean moon position graph ──────────────────────────────────────────────
+// One row per moon (Io→Callisto), Jupiter column in the centre.
+// Moon dot shows east/west elongation; dimmed when behind Jupiter.
+const MOON_H = 130;
 function drawMoons(ctx, date, W, yTop) {
-  const H     = 110;
-  const jd    = date.getTime() / 86400000 + 2440587.5;
-  const t     = jd - J2000_JD;
-  const cx    = W / 2;
-  // Layout: header row (label) 14px, orbital track row, legend row 14px
-  const trackY = yTop + 14 + (H - 28) / 2;   // vertical centre of track band
-  const maxX   = cx - 18;                      // Callisto max swing in px
-  const scale  = maxX / GALILEAN[3].rRel;
+  const jd = date.getTime() / 86400000 + 2440587.5;
+  const t  = jd - J2000_JD;
 
-  // Divider line
+  const LABEL_W = 54;   // px reserved for moon name on the left
+  const PAD_R   = 8;
+  const HEADER  = 16;
+  const FOOTER  = 14;
+  const rowsH   = MOON_H - HEADER - FOOTER;
+  const rowH    = rowsH / GALILEAN.length;  // ~25 px each
+  const trackX0 = LABEL_W;
+  const trackX1 = W - PAD_R;
+  const jx      = (trackX0 + trackX1) / 2; // Jupiter column x
+  const scale   = (trackX1 - jx) / GALILEAN[3].rRel; // px per rRel unit
+
+  // Divider
   ctx.strokeStyle = DIVIDER; ctx.lineWidth = 1;
   ctx.setLineDash([4, 4]);
   ctx.beginPath(); ctx.moveTo(10, yTop); ctx.lineTo(W - 10, yTop); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Header
-  ctx.fillStyle = 'rgba(160,140,220,0.7)'; ctx.font = 'bold 9px ui-monospace,monospace';
+  // Header label
+  ctx.fillStyle = 'rgba(160,140,220,0.75)'; ctx.font = 'bold 9px ui-monospace,monospace';
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText('Galilean Moons — Telescope View', cx, yTop + 3);
+  ctx.fillText('Galilean Moons  —  Orbital Position', W / 2, yTop + 3);
 
-  // Single faint reference line along the ecliptic plane
-  ctx.strokeStyle = 'rgba(100,80,180,0.25)'; ctx.lineWidth = 1;
-  ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(10, trackY); ctx.lineTo(W - 10, trackY); ctx.stroke();
+  const rowsTop = yTop + HEADER;
 
-  // Faint orbit arcs for each moon (flat ellipse, edge-on)
-  for (const m of GALILEAN) {
-    const rx = m.rRel * scale;
-    const ry = rx * 0.07; // very flat
-    ctx.strokeStyle = m.col + '28'; // ~15% opacity hex suffix
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.ellipse(cx, trackY, rx, Math.max(ry, 1.5), 0, 0, 2 * Math.PI);
-    ctx.stroke();
-  }
+  // W / E corner labels
+  ctx.fillStyle = 'rgba(130,110,200,0.45)'; ctx.font = '7px ui-monospace,monospace';
+  ctx.textAlign = 'left';  ctx.textBaseline = 'top';
+  ctx.fillText('W', trackX0 + 2, rowsTop + 1);
+  ctx.textAlign = 'right'; ctx.fillText('E', trackX1 - 2, rowsTop + 1);
 
-  // Jupiter — small clean disc
-  const jR = 7;
-  glowCircle(ctx, cx, trackY, jR, '#c8883a', 'rgba(216,152,88,0.6)', 10,
-             'rgba(255,210,130,0.35)', 1.5);
-  ctx.fillStyle = 'rgba(200,160,80,0.9)'; ctx.font = 'bold 10px serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText('♃', cx, trackY + jR + 1);
+  // Jupiter vertical band (faint amber glow behind all rows)
+  const jBand = ctx.createLinearGradient(jx - 16, 0, jx + 16, 0);
+  jBand.addColorStop(0,   'rgba(216,152,88,0)');
+  jBand.addColorStop(0.5, 'rgba(216,152,88,0.10)');
+  jBand.addColorStop(1,   'rgba(216,152,88,0)');
+  ctx.fillStyle = jBand;
+  ctx.fillRect(jx - 16, rowsTop, 32, rowsH);
 
-  // Compute moon positions; track y-offsets to avoid label collisions
-  const positions = GALILEAN.map((m) => {
+  // Jupiter disc pinned at top of the column
+  glowCircle(ctx, jx, rowsTop + 8, 6, '#c8883a', 'rgba(216,152,88,0.65)', 9,
+             'rgba(255,210,130,0.3)', 1.2);
+  ctx.fillStyle = 'rgba(200,160,80,0.95)'; ctx.font = '9px serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('♃', jx, rowsTop + 8);
+
+  // Per-moon rows
+  for (let i = 0; i < GALILEAN.length; i++) {
+    const m     = GALILEAN[i];
+    const ry    = rowsTop + i * rowH + rowH / 2;
     const angle = ((m.L0 + m.rate * t) % 360 + 360) % 360;
-    const x     = cx + m.rRel * scale * Math.sin(angle * RAD);
-    const depth = Math.cos(angle * RAD); // -1 behind, +1 in front
-    const ry    = m.rRel * scale * 0.07;
-    const y     = trackY + ry * Math.sin(angle * RAD); // tiny vertical offset
-    return { m, x, y, depth };
-  });
+    const mx    = jx + m.rRel * scale * Math.sin(angle * RAD);
+    const depth = Math.cos(angle * RAD); // > 0 = in front of Jupiter
 
-  // Draw moons back-to-front (depth sort)
-  positions.sort((a, b) => a.depth - b.depth);
-  for (const { m, x, y, depth } of positions) {
-    const mr      = 3.5;
-    const opacity = depth >= 0 ? 1.0 : 0.45; // dimmer when behind Jupiter
-    ctx.globalAlpha = opacity;
-    glowCircle(ctx, x, y, mr, m.col, m.glow, 7);
+    // Row separator
+    if (i > 0) {
+      ctx.strokeStyle = 'rgba(80,60,140,0.25)'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(trackX0, rowsTop + i * rowH);
+      ctx.lineTo(trackX1, rowsTop + i * rowH); ctx.stroke();
+    }
+
+    // Dashed track line
+    ctx.strokeStyle = m.col + '30';
+    ctx.lineWidth = 0.8; ctx.setLineDash([3, 5]);
+    ctx.beginPath(); ctx.moveTo(trackX0 + 2, ry); ctx.lineTo(trackX1 - 2, ry); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Max elongation tick marks
+    const maxMx = jx + m.rRel * scale;
+    const minMx = jx - m.rRel * scale;
+    ctx.strokeStyle = m.col + '50'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(maxMx, ry - 3); ctx.lineTo(maxMx, ry + 3);
+    ctx.moveTo(minMx, ry - 3); ctx.lineTo(minMx, ry + 3);
+    ctx.stroke();
+
+    // Moon name
+    ctx.fillStyle = m.col; ctx.font = 'bold 8px ui-monospace,monospace';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(m.name, LABEL_W - 6, ry);
+
+    // Moon dot — dimmed when behind Jupiter
+    ctx.globalAlpha = depth >= 0 ? 1.0 : 0.30;
+    glowCircle(ctx, mx, ry, 4, m.col, m.glow, 9);
     ctx.globalAlpha = 1;
 
-    // Label: above if top half of orbit, below otherwise
-    const labelAbove = y <= trackY;
-    ctx.fillStyle = m.col; ctx.font = 'bold 8px ui-monospace,monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = labelAbove ? 'bottom' : 'top';
-    ctx.fillText(m.name[0], x, labelAbove ? y - mr - 1 : y + mr + 1);
+    // E/W side indicator (tiny)
+    const side = Math.sin(angle * RAD) >= 0 ? 'E' : 'W';
+    ctx.fillStyle = m.col + 'aa';
+    ctx.font = '6px ui-monospace,monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(side, mx, ry - 5);
   }
 
-  // Legend row at bottom
+  // Jupiter vertical centre line (drawn on top of rows)
+  ctx.strokeStyle = 'rgba(216,152,88,0.20)'; ctx.lineWidth = 1;
+  ctx.setLineDash([2, 3]);
+  ctx.beginPath(); ctx.moveTo(jx, rowsTop + 16); ctx.lineTo(jx, rowsTop + rowsH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Footer: periods
   ctx.fillStyle = STATS_COL; ctx.font = '7.5px ui-monospace,monospace';
   ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
   ctx.fillText('Io 1.77d  ·  Europa 3.55d  ·  Ganymede 7.15d  ·  Callisto 16.7d',
-    cx, yTop + H - 2);
+    W / 2, yTop + MOON_H - 2);
 }
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
@@ -409,7 +441,7 @@ export function buildEpicycleOverlay(viewEl, model) {
 
   function canvasH(bodyName, W) {
     const base = Math.max(160, W * 0.80);
-    return bodyName === 'jupiter' ? base + 110 : base;
+    return bodyName === 'jupiter' ? base + MOON_H : base;
   }
 
   function syncCanvas(bodyName) {
@@ -515,7 +547,7 @@ export function buildEpicycleOverlay(viewEl, model) {
     canvas.style.opacity = paused ? '0.6' : '1';
 
     const W = canvas.width;
-    const diagH = canvasH(bodyName, W) - (bodyName === 'jupiter' ? 110 : 0);
+    const diagH = canvasH(bodyName, W) - (bodyName === 'jupiter' ? MOON_H : 0);
     drawDiagram(ctx, geom, W, diagH, bodyName);
     if (bodyName === 'jupiter') drawMoons(ctx, date, W, diagH);
   }
