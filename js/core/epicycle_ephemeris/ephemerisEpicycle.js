@@ -34,7 +34,7 @@
 
 import {
   DEG, RAD,
-  sind, cosd, atand2, degmod,
+  sind, cosd, atand2, degmod, degmod180,
   j2000Day,
   eclipticToEquatorial,
   eqCenter,
@@ -60,12 +60,29 @@ function sunMeanAnomaly(t) {
   return degmod(SUN.M0 + t * SUN.nanom);
 }
 
+// ── Nutation + secular obliquity ──────────────────────────────────
+//
+// IAU 1980 four-term nutation model.
+// dPsi = nutation in longitude (°), applied to ecliptic longitude.
+// obl  = true obliquity (°) = secular drift + nutation in obliquity,
+//        passed to eclipticToEquatorial() in place of the J2000 constant.
+function nutationAndObliquity(t) {
+  const T   = t / 36525;
+  const Nm  = degmod(MOON.N0 - t * MOON.nnode);   // Moon's ascending node
+  const Ls2 = degmod(2 * (SUN.L0  + t * SUN.nlong));
+  const Lm2 = degmod(2 * (MOON.L0 + t * MOON.nlong));
+  const dPsi = (-17.20 * sind(Nm)  - 1.32 * sind(Ls2)
+               -  0.23 * sind(Lm2) +  0.21 * sind(2*Nm)) / 3600;
+  const dEps = (  9.20 * cosd(Nm)  + 0.57 * cosd(Ls2)
+               +  0.10 * cosd(Lm2) -  0.09 * cosd(2*Nm)) / 3600;
+  const obl  = 23.4392911 - 0.013004 * T + dEps;
+  return { dPsi, obl };
+}
+
 // ── Sun ──────────────────────────────────────────────────────────
 //
-// Single eccentric deferent.  The Sun moves on the ecliptic (β = 0).
-// True longitude = mean longitude − equation of centre.
-// Standard three-term perturbation series (light terms only —
-// no nutation, no aberration) accurate to ~3'.
+// Single eccentric deferent.  True longitude = mean longitude + equation
+// of centre + nutation in longitude.  Obliquity is secular-corrected.
 function sunEquatorial(t) {
   const L = sunMeanLongitude(t);
   const M = sunMeanAnomaly(t);
@@ -75,15 +92,17 @@ function sunEquatorial(t) {
            + 0.019993 * sind(2 * M)
            + 0.000290 * sind(3 * M);
 
-  const tlong = degmod(L + C);
-  return eclipticToEquatorial(tlong, 0);
+  const { dPsi, obl } = nutationAndObliquity(t);
+  const tlong = degmod(L + C + dPsi);
+  return eclipticToEquatorial(tlong, 0, obl);
 }
 
 // ── Moon ─────────────────────────────────────────────────────────
 //
-// Eccentric deferent + thirteen perturbation terms (classical lunar theory).
-// Terms 1–4 were the original set; terms 5–13 added here bring
-// accuracy from ~15–20' to ~0.1° (6').
+// Exact Kepler equation of centre + twenty-five perturbation terms
+// (Meeus Ch. 47 truncated series) + six latitude terms.
+// Nutation in longitude applied to final ecliptic longitude;
+// secular obliquity used in ecliptic→equatorial conversion.
 //
 // F = mean argument of latitude = mean longitude − ascending node.
 // D = mean elongation from Sun.
@@ -98,11 +117,13 @@ function moonEquatorial(t) {
   const D  = degmod(Lm - Ls);   // Moon's mean elongation from Sun
   const F  = degmod(Lm - Nm);   // argument of latitude (mean)
 
-  // Equation of centre (eccentric deferent, ×2 for Ptolemaic amplification)
-  const eqc = eqCenter(Mm, MOON.ecc) * 2;
+  // Exact Kepler equation of centre (replaces arctan×2 approximation)
+  const E_deg = solveKepler(Mm, MOON.ecc);
+  const nu    = trueAnomaly(E_deg, MOON.ecc);
+  const eqc   = degmod180(nu - Mm);
 
-  // Thirteen perturbation terms (classical lunar theory, simplified)
-  const tlong = degmod(Lm + eqc
+  // Twenty-five perturbation terms (Meeus Ch. 47 truncated series)
+  const tlong_geo = degmod(Lm + eqc
     + 1.2740 * sind(2*D - Mm)         // evection — Ptolemy's prosneusis
     + 0.6583 * sind(2*D)               // variation — Tycho Brahe
     - 0.1858 * sind(Ms)                // annual equation — Kepler
@@ -118,14 +139,33 @@ function moonEquatorial(t) {
     + 0.0267 * sind(2*D + Ms - Mm)
     + 0.0117 * sind(4*D - Mm)
     - 0.0111 * sind(2*D - 2*Ms)
+    // Additional Meeus Table 47.A terms
+    + 0.0153 * sind(2*D - 2*F)
+    - 0.0125 * sind(Mm + 2*F)
+    + 0.0110 * sind(Mm - 2*F)
+    + 0.0100 * sind(3*Mm)
+    + 0.0086 * sind(4*D - 2*Mm)
+    - 0.0077 * sind(2*D + Ms)
+    - 0.0052 * sind(D - Mm)
+    + 0.0050 * sind(Ms + D)
+    + 0.0040 * sind(2*D + 2*Mm)
+    + 0.0039 * sind(4*D)
   );
 
+  // Nutation in longitude + secular obliquity
+  const { dPsi, obl } = nutationAndObliquity(t);
+  const tlong = degmod(tlong_geo + dPsi);
+
+  // Six latitude terms (Meeus Table 47.B)
   const Fact = degmod(tlong - Nm);
   const beta = MOON.inc * sind(Fact)
              - 0.2806 * sind(2*D - F)
-             - 0.2555 * sind(2*D + F);
+             - 0.2555 * sind(2*D + F)
+             + 0.0557 * sind(Mm + F)
+             - 0.0467 * sind(2*D - Mm - F)
+             + 0.0464 * sind(2*D + Mm - F);
 
-  return eclipticToEquatorial(tlong, beta);
+  return eclipticToEquatorial(tlong, beta, obl);
 }
 
 // ── Outer planet (single deferent + single epicycle) ─────────────
@@ -343,10 +383,9 @@ export function coversDate(_date) {
   return true;
 }
 
-// No modern corrections baked in — this is a pure geometric model.
 export const BUILTIN_CORRECTIONS = {
   precession: false,
-  nutation:   false,
+  nutation:   true,   // IAU 1980 4-term Δψ/Δε + secular obliquity
   aberration: false,
   fk5:        false,
 };

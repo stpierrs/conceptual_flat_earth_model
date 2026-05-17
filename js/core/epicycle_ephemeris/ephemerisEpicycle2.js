@@ -17,11 +17,13 @@
 //   Venus    ~0.8° → ~0.2°–0.3°
 //   Mercury  ~3°   → ~0.5°–1.0°  (large ecc still limits this)
 //
-// The Sun and Moon keep the same corrections as ephemerisEpicycle.js.
+// The Sun and Moon use the same improved corrections as ephemerisEpicycle.js:
+// IAU 1980 nutation (Δψ/Δε), secular obliquity, Kepler equation of centre
+// for the Moon, 25-term longitude series, and 6-term latitude series.
 
 import {
   DEG, RAD,
-  sind, cosd, atand2, degmod,
+  sind, cosd, atand2, degmod, degmod180,
   j2000Day,
   eclipticToEquatorial,
   eqCenter,
@@ -63,7 +65,7 @@ const EPI2 = {
   vesta:   { r2: 0.000, phase:   0.0 },
 };
 
-// ── Shared Sun helpers (identical to single-epi version) ─────────
+// ── Shared Sun/Moon helpers (identical to single-epi version) ─────
 
 function sunMeanLongitude(t) {
   return degmod(SUN.L0 + t * SUN.nlong);
@@ -73,14 +75,29 @@ function sunMeanAnomaly(t) {
   return degmod(SUN.M0 + t * SUN.nanom);
 }
 
+// IAU 1980 four-term nutation + secular obliquity (shared with Epi-1).
+function nutationAndObliquity(t) {
+  const T   = t / 36525;
+  const Nm  = degmod(MOON.N0 - t * MOON.nnode);
+  const Ls2 = degmod(2 * (SUN.L0  + t * SUN.nlong));
+  const Lm2 = degmod(2 * (MOON.L0 + t * MOON.nlong));
+  const dPsi = (-17.20 * sind(Nm)  - 1.32 * sind(Ls2)
+               -  0.23 * sind(Lm2) +  0.21 * sind(2*Nm)) / 3600;
+  const dEps = (  9.20 * cosd(Nm)  + 0.57 * cosd(Ls2)
+               +  0.10 * cosd(Lm2) -  0.09 * cosd(2*Nm)) / 3600;
+  const obl  = 23.4392911 - 0.013004 * T + dEps;
+  return { dPsi, obl };
+}
+
 function sunEquatorial(t) {
   const L = sunMeanLongitude(t);
   const M = sunMeanAnomaly(t);
   const C = (1.9146 - 0.004817 * t / 36525) * sind(M)
            + 0.019993 * sind(2 * M)
            + 0.000290 * sind(3 * M);
-  const tlong = degmod(L + C);
-  return eclipticToEquatorial(tlong, 0);
+  const { dPsi, obl } = nutationAndObliquity(t);
+  const tlong = degmod(L + C + dPsi);
+  return eclipticToEquatorial(tlong, 0, obl);
 }
 
 function moonEquatorial(t) {
@@ -91,11 +108,15 @@ function moonEquatorial(t) {
   const Ms = degmod(SUN.M0 + t * SUN.nanom);
   const Ls = degmod(SUN.L0 + t * SUN.nlong);
   const D  = degmod(Lm - Ls);
-  const F  = degmod(Lm - Nm);   // argument of latitude (mean)
+  const F  = degmod(Lm - Nm);
 
-  const eqc = eqCenter(Mm, MOON.ecc) * 2;
+  // Exact Kepler equation of centre
+  const E_deg = solveKepler(Mm, MOON.ecc);
+  const nu    = trueAnomaly(E_deg, MOON.ecc);
+  const eqc   = degmod180(nu - Mm);
 
-  const tlong = degmod(Lm + eqc
+  // Twenty-five perturbation terms (Meeus Ch. 47 truncated series)
+  const tlong_geo = degmod(Lm + eqc
     + 1.2740 * sind(2*D - Mm)
     + 0.6583 * sind(2*D)
     - 0.1858 * sind(Ms)
@@ -111,13 +132,32 @@ function moonEquatorial(t) {
     + 0.0267 * sind(2*D + Ms - Mm)
     + 0.0117 * sind(4*D - Mm)
     - 0.0111 * sind(2*D - 2*Ms)
+    // Additional Meeus Table 47.A terms
+    + 0.0153 * sind(2*D - 2*F)
+    - 0.0125 * sind(Mm + 2*F)
+    + 0.0110 * sind(Mm - 2*F)
+    + 0.0100 * sind(3*Mm)
+    + 0.0086 * sind(4*D - 2*Mm)
+    - 0.0077 * sind(2*D + Ms)
+    - 0.0052 * sind(D - Mm)
+    + 0.0050 * sind(Ms + D)
+    + 0.0040 * sind(2*D + 2*Mm)
+    + 0.0039 * sind(4*D)
   );
 
+  const { dPsi, obl } = nutationAndObliquity(t);
+  const tlong = degmod(tlong_geo + dPsi);
+
+  // Six latitude terms (Meeus Table 47.B)
   const Fact = degmod(tlong - Nm);
   const beta = MOON.inc * sind(Fact)
              - 0.2806 * sind(2*D - F)
-             - 0.2555 * sind(2*D + F);
-  return eclipticToEquatorial(tlong, beta);
+             - 0.2555 * sind(2*D + F)
+             + 0.0557 * sind(Mm + F)
+             - 0.0467 * sind(2*D - Mm - F)
+             + 0.0464 * sind(2*D + Mm - F);
+
+  return eclipticToEquatorial(tlong, beta, obl);
 }
 
 // ── Two-epicycle outer body ───────────────────────────────────────
@@ -307,7 +347,7 @@ export function coversDate(_date) { return true; }
 
 export const BUILTIN_CORRECTIONS = {
   precession: false,
-  nutation:   false,
+  nutation:   true,   // IAU 1980 4-term Δψ/Δε + secular obliquity
   aberration: false,
   fk5:        false,
 };
