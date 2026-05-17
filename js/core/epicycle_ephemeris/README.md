@@ -2,7 +2,7 @@
 
 Custom pure-epicycle ephemeris pipeline for the FE Conceptual Model.
 
-Drop-in addition alongside the existing five pipelines (DE405, VSOP87,
+Drop-in addition alongside the existing pipelines (VSOP87,
 GeoC, HelioC, Ptolemy). Same API contract. No globe parameters, no AU,
 no gravitational constants. Everything is angular accumulation from a
 J2000.0 epoch plus geometric vector subtraction — which is exactly
@@ -164,7 +164,7 @@ node epiValidate.mjs   # error comparison vs reference positions, 2000–2010
 ## What this is NOT
 
 - Not a full VSOP87 implementation (that's already in the model)
-- Not a table-lookup ephemeris (that's DE405/AstroPixels)
+- Not a table-lookup ephemeris (see ephemerisAstropixels.js)
 - Not claiming arc-minute accuracy
 
 What it IS: a self-contained, fully geometric, pure-circular-motion

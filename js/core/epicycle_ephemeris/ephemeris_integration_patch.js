@@ -6,7 +6,7 @@
 // The existing dispatcher lives in ephemeris.js (or galaxiesExtra.js
 // in the single-Ptolemy variant).  The steps below apply to the
 // version of the model that has the full five-pipeline system:
-//   DE405 → GeoC → VSOP87 → Ptolemy
+//   GeoC → VSOP87 → Ptolemy
 //
 // ── Step 1: Import the new module ────────────────────────────────
 //
@@ -64,7 +64,7 @@
 //
 // If the comparison panel iterates over pipeline keys, add
 // 'epicycle' and 'epicycle2' to that list.  The HUD will then
-// show Epi-1 and Epi-2 columns alongside DE405, VSOP87, and Ptolemy.
+// show Epi-1 and Epi-2 columns alongside VSOP87 and Ptolemy.
 //
 // ── Step 6: Add to app.js state defaults ─────────────────────────
 //

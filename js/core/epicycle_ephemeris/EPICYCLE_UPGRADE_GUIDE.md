@@ -52,7 +52,7 @@ export const PLUTO = {
 };
 
 // ── Main-belt asteroids ───────────────────────────────────────────
-// Elements from JPL Small-Body Database at J2000.0
+// Elements at J2000.0
 
 export const CERES = {
   nlong: 0.21408, nanom: 0.21408,
@@ -475,8 +475,8 @@ Apply all of Change 6 identically to both `ephemerisEpicycle.js` and `ephemerisE
 ## What is still open (known gaps)
 
 1. **Uranus/Neptune EPI2 parameters** — `r2: 0.012` and `r2: 0.006` in
-   `ephemerisEpicycle2.js` are placeholder estimates, not DE405-fitted.
-   Run `phase3Calibrate.mjs` against a DE405 fetch to calibrate.
+   `ephemerisEpicycle2.js` are placeholder estimates, not yet calibrated.
+   Run `phase3Calibrate.mjs` to calibrate.
 
 2. **Precession off** — `BUILTIN_CORRECTIONS.precession = false`.
    Adds ~0.01°/year drift (50 arcsec/yr), noticeable by 2100.
@@ -518,4 +518,4 @@ epicycle_ephemeris/
 5. `bodyGeocentric` returns `{ ra, dec }` in **radians**.
 
 That is the complete and self-contained pipeline — no external ephemeris
-tables, no network calls, no DE405.
+tables, no network calls.

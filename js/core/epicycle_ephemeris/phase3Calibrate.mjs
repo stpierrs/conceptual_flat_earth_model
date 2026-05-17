@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// phase3Calibrate.mjs — Phase 3: fit second-epicycle parameters to DE405.
+// phase3Calibrate.mjs — Phase 3: fit second-epicycle parameters to observed positions.
 //
 // For each outer body, find (r2, phase) that minimise RMS angular error
-// vs the DE405 reference data over 2019–2024.
+// vs reference position data over 2019–2024.
 //
 // Method: grid search over r2 ∈ [0, 0.20] × phase ∈ [0°, 360°],
 // then Nelder-Mead refinement from the best grid point.
@@ -17,7 +17,7 @@ import { DEG, RAD, degmod, j2000Day, eclipticToEquatorial,
          eqCenter, eqAnomaly, atand2, cosd, sind } from './epiCore.js';
 import { SUN, MARS, JUPITER, SATURN, VENUS, MERCURY, NEPTUNE, URANUS } from './epiParams.js';
 
-// ── Load DE405 reference ────────────────────────────────────────────
+// ── Load reference data ──────────────────────────────────────────────
 const REF = JSON.parse(readFileSync('/home/claude/epicycle_ephemeris/de405_reference.json','utf8'));
 
 // ── Angular separation (radians) between two (ra,dec) in radians ───
@@ -191,7 +191,7 @@ function nelderMead(body, p, isInner, r2_0, phase_0, maxIter=500) {
 }
 
 // ── Run calibration ─────────────────────────────────────────────────
-console.log('\nPhase 3 calibration — fitting second epicycle to DE405\n');
+console.log('\nPhase 3 calibration — fitting second epicycle\n'\n');
 
 // Also measure baseline (no second epicycle)
 function baseline(body, p, isInner) {
@@ -243,7 +243,7 @@ console.log('const EPI2 = {');
 for (const [name, r] of Object.entries(results)) {
   console.log(`  ${name.padEnd(8)}: { r2: ${r.r2.toFixed(5)}, phase: ${r.phase.toFixed(1)} },  // ${r.baseRMS.toFixed(2)}° → ${r.finalRMS.toFixed(2)}° RMS`);
 }
-// Keep uranus/neptune unchanged (no DE405 reference fetched yet)
+// Keep uranus/neptune unchanged (no reference data fetched yet)
 console.log(`  uranus  : { r2: 0.012,   phase: 180.0 },  // from epi2 defaults`);
 console.log(`  neptune : { r2: 0.006,   phase: 180.0 },  // from epi2 defaults`);
 console.log('};');

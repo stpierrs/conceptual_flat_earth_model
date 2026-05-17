@@ -7,9 +7,9 @@
 //   node epiValidate.mjs
 //
 // The "reference" positions used here are computed from the closed-form
-// Standard J2000 formulas (not DE405 tables), which are accurate to
+// Standard J2000 formulas, which are accurate to
 // ~1'–5' for planets and ~1" for the Sun over 2000–2050.
-// For a true DE405 comparison you would load astropixels.js from the
+
 // parent model directory.
 //
 // Output: one row per body showing mean angular error in degrees for
@@ -21,7 +21,7 @@ import { RAD, DEG, j2000Day, degmod } from './epiCore.js';
 
 // ── Reference positions: standard J2000 Sun + simplified planet formulas ──
 // Using standard J2000-based orbital elements.
-// These are NOT DE405, but accurate enough to score the pipeline error.
+// Accurate enough to score the pipeline error.
 
 function refSun(t) {
   // t in Julian days from J2000

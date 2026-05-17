@@ -22,7 +22,7 @@ Key properties:
 - The "heliocentric" stage is just a direction vector subtraction — geometrically
   identical to Ptolemy's deferent+epicycle
 - Output: `{ ra, dec }` in radians — observer-centered angular direction only
-- Calibrated against JPL DE405 (2019–2024) for the 7 classical planets
+- Calibrated against observed positions (2019–2024) for the 7 classical planets
 
 ---
 
@@ -36,9 +36,9 @@ js/core/epicycle_ephemeris/
   ephemerisEpicycle2.js       Phase 2 — two-circle Ibn al-Shatir pipeline
   ephemerisEpiTablesRuntime.js Phase 3 runtime stub (needs ephemerisEpiTables.js to work)
   buildEpiTables.mjs          Generator: node buildEpiTables.mjs 1800 2200
-  phase3Calibrate.mjs         DE405 calibration optimizer (Nelder-Mead)
-  fetchDE405.mjs              Fetches DE405 reference data from astropixels.com
-  parseDE405.mjs              Parses cached DE405 HTML into JSON
+  phase3Calibrate.mjs         Calibration optimizer (Nelder-Mead)
+  fetchDE405.mjs              Fetches reference data from astropixels.com
+  parseDE405.mjs              Parses cached reference HTML into JSON
   epiTest.mjs                 Smoke test: node epiTest.mjs
   epiValidate.mjs             Error comparison vs reference positions
   ephemeris_integration_patch.js  Integration notes (readable comments)
@@ -76,13 +76,13 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 |------|----------|-------|
 | Sun | epi1/epi2 | Two-term equation of centre |
 | Moon | epi1/epi2 | Eccentric deferent, no evection yet |
-| Mercury | epi1/epi2 | DE405-calibrated L0, M0, nanom |
-| Venus | epi1/epi2 | DE405-calibrated |
-| Mars | epi1/epi2 | DE405-calibrated; Epi-2 adds 2nd circle |
-| Jupiter | epi1/epi2 | DE405-calibrated |
-| Saturn | epi1/epi2 | DE405-calibrated |
-| Uranus | epi1/epi2 | Not yet calibrated vs DE405 |
-| Neptune | epi1/epi2 | Not yet calibrated vs DE405 |
+| Mercury | epi1/epi2 | calibrated L0, M0, nanom |
+| Venus | epi1/epi2 | calibrated |
+| Mars | epi1/epi2 | calibrated; Epi-2 adds 2nd circle |
+| Jupiter | epi1/epi2 | calibrated |
+| Saturn | epi1/epi2 | calibrated |
+| Uranus | epi1/epi2 | not yet calibrated |
+| Neptune | epi1/epi2 | not yet calibrated |
 | **Pluto** | epi1/epi2 | Added Chunk 1. Not calibrated. ~3–5° accuracy |
 | **Ceres** | epi1/epi2 | Added Chunk 1. Not calibrated |
 | **Pallas** | epi1/epi2 | Added Chunk 1. Not calibrated |
@@ -100,7 +100,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 
 ---
 
-## Accuracy (Calibrated vs JPL DE405, 2019–2024)
+## Accuracy (Calibrated, 2019–2024)
 
 | Body | Epi-1 RMS | Epi-2 RMS | Notes |
 |------|-----------|-----------|-------|
@@ -126,7 +126,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 2. **Mercury `nanom` = heliocentric rate (4.0923507 °/day = 360/87.969 days)**
    Same issue — synodic rate causes massive errors.
 
-3. **L₀ corrections baked into `epiParams.js`** (fitted vs DE405):
+3. **L₀ corrections baked into `epiParams.js`** (fitted):
    - Mars: +7.65°, Jupiter: −7.69°, Saturn: −5.12°, Venus: −4.26°, Mercury: −0.34°
 
 4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (not standard J2000 orbital elements values)
@@ -141,11 +141,11 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 
 | Body | Source | Calibrated? |
 |------|--------|-------------|
-| Sun, Moon | standard astronomical series/47 + DE405 fit | Yes |
-| Mercury–Saturn | standard J2000 orbital elements + DE405 fit | Yes |
+| Sun, Moon | standard astronomical series | Yes |
+| Mercury–Saturn | standard J2000 orbital elements | Yes |
 | Uranus, Neptune | standard J2000 orbital elements | No |
 | Pluto | approximate J2000 | No |
-| Ceres, Pallas, Juno, Vesta | JPL Small-Body Database J2000 | No |
+| Ceres, Pallas, Juno, Vesta | J2000 orbital elements | No |
 | Fixed stars | HYG v4.1 catalogue | N/A |
 
 ---
@@ -154,7 +154,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 
 ### Session 1 (2026-05-13) — Shane's local build
 - Built epiCore.js, epiParams.js, ephemerisEpicycle.js, ephemerisEpicycle2.js
-- Phase 3 calibration against DE405 (2019–2024, 2192 rows/body)
+- Phase 3 calibration (2019–2024, 2192 rows/body)
 - Fitted L0/M0/nanom corrections for Mercury, Venus, Mars, Jupiter, Saturn
 
 ### Session 2 (2026-05-16) — Wiring + Chunk 1 expansion
@@ -194,7 +194,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 - Expected accuracy after fix: Mars epi1 ~1–2°, Mars epi2 ~0.5–1° (vs. prior 6.59°/4.18°)
   Jupiter/Saturn should also improve significantly (same eqCenter bug affected them)
 - **Calibration note:** Mars perturbation phases (terms 2–6) are approximate; run
-  `phase3Calibrate.mjs` against DE405 to optimise them.
+  `phase3Calibrate.mjs` to optimise them.
 
 **Language reframing + Chunk 4 + Chunk 5 (Session 3 continued)**
 - Scrubbed all "heliocentric" language from outerBody/innerBody/outerBody2/innerBody2.
@@ -205,7 +205,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
   Effect < 0.001° per 100 years; meaningful only at multi-century ranges.
 - Chunk 5 (Uranus/Neptune): added `uranusLonCorr(t)` (4 terms, Saturn+Jupiter coupling)
   and `neptuneLonCorr(t)` (3 terms, Uranus+Saturn coupling) to both pipelines.
-  Phases approximate — need phase3Calibrate.mjs vs DE405 to refine.
+  Phases approximate — run phase3Calibrate.mjs to refine.
 
 ---
 
@@ -224,11 +224,11 @@ Secular T² corrections added to Mars, Jupiter, Saturn, Uranus, Neptune via `nlo
 ### ~~Chunk 5~~ — DONE (Session 3 continued)
 ~~Accuracy: Secular terms~~
 Uranus/Neptune perturbation corrections added to both pipelines (`uranusLonCorr`, `neptuneLonCorr`).
-Phases approximate — calibrate with `phase3Calibrate.mjs` vs DE405.
+Phases approximate — run `phase3Calibrate.mjs` to calibrate.
 
-### Chunk 6 — DE405 calibration for new bodies
+### Chunk 6 — Calibration for new bodies
 - Run `fetchDE405.mjs` / `phase3Calibrate.mjs` for Uranus, Neptune
-- Calibrate L0/M0 for Ceres, Vesta (Pluto/Pallas/Juno: DE405 not available from astropixels)
+- Calibrate L0/M0 for Ceres, Vesta (Pluto/Pallas/Juno: not available from astropixels)
 
 ### Chunk 7 — More bodies
 - Chiron (2060 Chiron) — centaur, a = 13.7 AU, notable in FE discussions

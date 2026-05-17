@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// fetchDE405.mjs — fetch live DE405 reference positions from astropixels.com
+// fetchDE405.mjs — fetch reference positions from astropixels.com
 // Parses same format as scrape_astropixels.mjs, stores as JSON for calibration.
 
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
