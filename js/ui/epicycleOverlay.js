@@ -497,10 +497,18 @@ export function buildEpicycleOverlay(viewEl, model) {
   makeResizer(handleL, (dx) => ({ dW: -dx, dX: 1 }));
 
   // RAF render loop.
-  // visualDT advances at VISUAL_RATE (days/second real time) so motion is always
-  // perceptible — even at slow model speeds where physical rates are < 0.1°/s.
+  // visualDT advances at a body-specific rate so each body completes roughly one
+  // full cycle in ~20 s of real time, regardless of its actual period.
   // The visual clock freezes when the model is paused, matching user expectation.
-  const VISUAL_RATE = 60; // visual days per real second
+  const VISUAL_RATE_BY_BODY = {
+    moon:    1.5,   // 29.5 d period → ~20 s per orbit
+    sun:     18,    // 365 d          → ~20 s per year
+    mercury: 4.5,   // 88 d           → ~20 s
+    venus:   11,    // 225 d          → ~20 s
+    mars:    34,    // 687 d          → ~20 s
+    jupiter: 220,   // 4333 d         → ~20 s
+    saturn:  540,   // 10759 d        → ~20 s
+  };
 
   let prevModelDT = null, lastBody = null;
   let visualDT    = null; // the time shown in the diagram
@@ -525,9 +533,9 @@ export function buildEpicycleOverlay(viewEl, model) {
     const paused = prevModelDT !== null && modelDT === prevModelDT;
 
     if (!paused) {
-      // Advance visual time at the fixed visual rate.
+      const rate    = VISUAL_RATE_BY_BODY[bodyName] ?? 60;
       const realSec = Math.min((nowMs - lastRealMs) / 1000, 0.1); // cap at 100 ms
-      visualDT += realSec * VISUAL_RATE;
+      visualDT += realSec * rate;
     }
     prevModelDT = modelDT;
     lastRealMs  = nowMs;
