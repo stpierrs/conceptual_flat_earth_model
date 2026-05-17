@@ -753,7 +753,6 @@ const MOON_24H_DEMOS = [
 
 // --- Planets & Epicycles demos -------------------------------------------
 // All three demos use only the Ptolemaic ephemeris (BodySource:'ptolemy').
-// No heliocentric constants, no AU — pure observed kinematics.
 //
 // DateTime reference: days since 2017-01-01 00:00 UTC.
 //   2862.875 ≈ 2024-11-03  Jupiter at opposition (moons well-separated)

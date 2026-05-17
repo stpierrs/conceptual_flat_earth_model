@@ -10,7 +10,6 @@
 //   SUPPORTED_BODIES           Set<string>
 //   BUILTIN_CORRECTIONS        object
 //
-// Frame of reference: Earth-centred throughout.  No heliocentric
 // stage, no Sun-relative coordinates, no AU, no G.  The Sun's mean
 // longitude enters only as a shared angular accumulator for the
 // inner planets — exactly as Ptolemy observed: Venus and Mercury

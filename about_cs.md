@@ -221,7 +221,7 @@ Prohlížeč skriptovaných animací. Ovládací prvky nahoře: **Stop**, **Pauz
 - **24 h Slunce (4)** — ukázky polárního slunce (Alert NU, Západní Antarktida, půlnoční slunce S/J).
 - **Obecné (6)** — rovnodennost na rovníku, letní / zimní slunovrat na 45°N, měsíc fází Měsíce, cestování pozorovatele, 78°N 24hodinové denní světlo.
 - **Sluneční Analemma / Měsíční Analemma / Sluneční + Měsíční Analemma** — 5 variant zeměpisné šířky (90°N, 45°N, 0°, 45°J, 90°J). Pozorovatel fixní; čas fixní na 12:00 UTC; jeden denní krok na 30/365 s. Drží na konci, abyste mohli studovat křivku.
-- **Zatmění Slunce (44 položek, 2021–2040)** — jedno na skutečné zatmění Slunce (Espenak). Demo zpřesňuje čas syzygy pomocí vlastního Slunce + Měsíce aktivního potrubí a umisťuje pozorovatele na subsolární bod tohoto potrubí.
+- **Zatmění Slunce (44 položek, 2021–2040)** — jedno na skutečné zatmění Slunce  Demo zpřesňuje čas syzygy pomocí vlastního Slunce + Měsíce aktivního potrubí a umisťuje pozorovatele na subsolární bod tohoto potrubí.
 - **Zatmění Měsíce (67 položek, 2021–2040)** — stejná struktura, včetně 22 polostínových.
 - **Předpovědi zatmění FE** — placeholder pro budoucí Saros-harmonický prediktor.
 
@@ -278,7 +278,6 @@ Každé pole stavu žije v hash URL, takže nastavení sim může být sdíleno 
 
 # Poděkování
 
-- **Fred Espenak** (NASA GSFC v důchodu, AstroPixels) — katalogy zatmění používané refinerem demo zatmění.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, zdroj pro Ptolemaiovský port.
 - **Shane St. Pierre** — koncepční rámcování a podnět skutečně vybudovat funkční interaktivní demonstraci.
 - **Walter Bislin** — vizuální styl a inspirace pro rozvržení interaktivního modelu.

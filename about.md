@@ -243,7 +243,7 @@ Sections:
 - **24 h Moon (2)** — 75°N (~2025-01-12, near max +declination) and 75°S (~2025-01-26, near max -declination). Watches one full sidereal day at lunar standstill; same cadence as the 24 h Sun demos.
 - **General (6)** — equinox at equator, summer / winter solstice at 45°N, moon-phase month, observer travel, 78°N 24-hour daylight.
 - **Sun Analemma / Moon Analemma / Sun + Moon Analemma** — 5 latitude variants each (90°N, 45°N, 0°, 45°S, 90°S). The trace and noon-position notches now render in **both FE and GE**, on the observer's local sky hemisphere. The body must be above the observer's horizon at noon to be captured, so polar latitudes naturally produce a partial figure (only the months when the sun / moon is physically observable). Mid-latitudes get the full figure-8.
-- **Solar Eclipses (44 entries, 2021–2040)** — one per real solar eclipse (Espenak). Demo refines syzygy time using the active pipeline's own sun + moon and plants the observer at that pipeline's subsolar point.
+- **Solar Eclipses (44 entries, 2021–2040)** — one per real observed solar eclipse. Demo refines syzygy time using the active pipeline's own sun + moon and plants the observer at that pipeline's subsolar point.
 - **Lunar Eclipses (67 entries, 2021–2040)** — same structure, including 22 penumbrals.
 - **FE Eclipse Predictions** — placeholder for a future Saros-harmonic predictor.
 - **Flight Routes — Southern Non-Stop** — flight-path demos drawn from Roohif's KMZ. Every demo opens with an outline-only line-art map (FE: black disc with white coastlines, GE: line-art globe), the Tropics / Polar / Sun-Moon-GP / Tracker-GP overlays cleared, shadows off, and the observer parked at the south-pole-facing camera angle. Per-route great-circle arcs sweep at constant angular speed; an orange plane silhouette flies the trace tip and rotates along the local arc tangent. The dashed complement line traces the rest of each great circle for context. Top-left HUD info boxes carry **Depart / Destination / Takeoff / Arrival / Central Angle / Air Time / Air Speed / Ground Speed / Traversed / Remaining / Elapsed** rows, with live-countdown rows updating per frame. Demos:
@@ -321,7 +321,6 @@ The sim ships a PWA `manifest.webmanifest`, `theme-color`, and the `mobile-web-a
 
 # Credits
 
-- **Fred Espenak** (NASA GSFC retired, AstroPixels) — eclipse catalogues used by the eclipse-demo refiner.
 - **R.H. van Gent** (Utrecht) — Almagest Ephemeris Calculator, source for the Ptolemy port.
 - **Shane St. Pierre** — conceptual framing and the push to actually build a working interactive demonstration.
 - **Walter Bislin** — visual style and layout inspiration for the interactive model.

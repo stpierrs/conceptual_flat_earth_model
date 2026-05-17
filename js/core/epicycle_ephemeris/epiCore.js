@@ -103,7 +103,6 @@ export function eqAnomaly(alpha, r) {
 // Returns total equation of anomaly in degrees.
 //
 // This is the Ibn al-Shatir approach: two compounded circles, no
-// heliocentric stage, accuracy comparable to Kepler for most bodies.
 export function eqAnomaly2(A1, r1, A2, r2) {
   const eq1   = eqAnomaly(A1, r1);
   const alpha2 = degmod(A2 - eq1);

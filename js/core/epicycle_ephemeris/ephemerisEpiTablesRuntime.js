@@ -1,8 +1,7 @@
 // ephemerisEpiTablesRuntime.js — table-lookup runtime for ephemerisEpiTables.js.
 //
-// Drop-in replacement for ephemerisAstropixels.js.
-// Same API: bodyGeocentric(name, date) → { ra, dec } in radians.
-// Same interpolation: linear between adjacent midnight values.
+// API: bodyGeocentric(name, date) → { ra, dec } in radians.
+// Interpolation: linear between adjacent midnight values.
 //
 // Coverage: whatever years were built into ephemerisEpiTables.js.
 // Default build: 1800–2200.  The analytic fallback (ephemerisEpicycle.js)
@@ -87,7 +86,7 @@ export function bodyGeocentric(name, date) {
   return interpolateYear(arr, doy, frac);
 }
 
-// Coverage checks — mirrors the interface from ephemerisAstropixels.js
+// Coverage checks
 export const SUPPORTED_BODIES = new Set(EPITABLES.meta.bodies);
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
 export function coversDate(date) {

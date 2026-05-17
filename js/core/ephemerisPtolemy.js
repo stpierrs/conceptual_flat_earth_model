@@ -429,7 +429,7 @@ export function planetEquatorial(name, date) {
   return { ra: NaN, dec: NaN };
 }
 
-// Venus phases — straight out of the epicycle geometry, no heliocentric
+// Venus phases — straight out of the epicycle geometry.
 // stage required.
 //
 // Venus rides an epicycle. When it's at the far end of that epicycle

@@ -1097,7 +1097,6 @@ export class FeModel extends EventTarget {
     // Jupiter's moons — Ptolemaic epicycles centred on Jupiter's position.
     // Each moon rides a circular orbit of apparent radius `maxElong` degrees,
     // computed from observational periods and elongations in jupiterMoons.js.
-    // No heliocentric constants, no AU — pure observed kinematics.
     c.JupiterMoons = [];
     const _jupPlanet = c.Planets['jupiter'];
     if (_jupPlanet) {

@@ -18,7 +18,7 @@ the Almagest around 150 CE.
 
 Every planet, moon, and star you see moving across the sky is driven by
 deferent circles carrying epicycles, with parameters measured directly from
-observation. No heliocentric constants. No gravitational constant. No AU.
+observation. No gravitational constant. No AU.
 Just the sky doing what the sky does, described the way Ptolemy described it.
 
 **What you can do:**

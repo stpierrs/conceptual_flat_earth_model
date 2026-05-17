@@ -41,12 +41,6 @@ pointed the way:
   build a working, interactive demonstration of the model.
 * **Walter Bislin** — for the visual style and layout inspiration that shaped
   the look and feel of this interactive model.
-* **Fred Espenak** — for the public eclipse catalogues and
-  observed-position tables on
-  [AstroPixels](https://www.astropixels.com/eclipses/), used by the
-  eclipse-demo refiner to pin the moment of each historical eclipse
-  to its observed time. See `js/core/ephemerisAstropixels.js` and
-  `js/data/astropixelsEclipses.js` for the runtime attribution.
 * **Roohif** — for the flight-path KMZ data behind the
   Flight Routes demo group. The `Southern Non-Stop` city / leg list
   and the QF27/28 actual-flight-track waypoints (lat / lon /
