@@ -5,7 +5,7 @@
 //   Fred Espenak, "Eclipses of the Sun / Moon"
 //     https://www.sky-observations/eclipses/solar.html
 //     https://www.sky-observations/eclipses/lunar.html
-//   Both tables cover 2021 – 2040 and are derived from JPL sky-reference.
+//   Both tables cover 2021 – 2040.
 //
 // Attribution baked into every consuming module; the runtime credits
 // Fred Espenak + AstroPixels. No permission was sought beyond honouring
@@ -115,7 +115,7 @@ async function main() {
 // Data source: Fred Espenak, "AstroPixels — Eclipses of the Sun / Moon"
 //   https://www.sky-observations/eclipses/solar.html
 //   https://www.sky-observations/eclipses/lunar.html
-// Both tables computed from JPL sky-reference and cover 2021 – 2040.
+// Both tables cover 2021 – 2040.
 //
 // Attribution: all credit for the underlying ephemeris + eclipse
 // canonicity belongs to Fred Espenak. This file is a parsed copy of
@@ -136,7 +136,7 @@ async function main() {
 export const ASTROPIXELS_ECLIPSES = {
   meta: {
     source: 'Fred Espenak (AstroPixels) — https://www.sky-observations/eclipses/',
-    note:   'Computed from JPL sky-reference. ΔT approximated as 69.2 s (constant across 2021-2040).',
+    note:   'ΔT approximated as 69.2 s (constant across 2021-2040).',
     generatedAt: '${new Date().toISOString()}',
   },
   solar: ${JSON.stringify(solar, null, 2)},

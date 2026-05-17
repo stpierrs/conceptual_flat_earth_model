@@ -6,11 +6,11 @@
 //
 // ── Parameter sources ────────────────────────────────────────────
 //
-// Mean motion rates derived from IAU/JPL sidereal periods and
+// Mean motion rates derived from IAU sidereal periods and
 // synodic periods (USNO Astronomical Almanac, cross-checked against
-// observed synodic periods and sky-reference).
+// observed synodic periods.
 // Eccentricities and apogee positions from standard J2000 orbital elements,
-// cross-checked against sky-reference.
+
 // Orbital size ratios (field `a`) express each body's mean orbital radius
 // as a multiple of the observer's (Earth's) mean orbital radius = 1.0.
 // All motion is purely angular — no physical distance scale is assumed.
@@ -227,7 +227,7 @@ export const MERCURY = {
 // ── Pluto ─────────────────────────────────────────────────────────
 // Orbital period: 247.94 yr = 90,518 days
 // High eccentricity (0.249) and inclination (17°) limit accuracy to ~3–5°
-// without perturbation series. Uncalibrated vs sky-reference.
+// without perturbation series.
 export const PLUTO = {
   nlong:          0.0039770,    // °/day (360 / 90518)
   nanom:          0.0039770,
@@ -241,9 +241,9 @@ export const PLUTO = {
 };
 
 // ── Main-belt asteroids ───────────────────────────────────────────
-// Elements from JPL Small-Body Database at J2000.0 epoch.
+// Elements at J2000.0 epoch.
 // All use outerBody() — same vector geocentric approach as outer planets.
-// L0 = M0 + long_peri (long_peri = Ω + ω). Uncalibrated vs sky-reference.
+// L0 = M0 + long_peri (long_peri = Ω + ω).
 
 // 1 Ceres — largest asteroid / dwarf planet, period 4.60 yr
 export const CERES = {

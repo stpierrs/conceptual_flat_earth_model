@@ -7,7 +7,7 @@
 // no gravitational constants.
 //
 // The second-epicycle parameters (r2, A2_offset) were determined by
-// minimising the RMS angular error against sky-reference over a 50-year
+// minimising the RMS angular error over a 50-year
 // window (2000–2050) using the calibration script epiCalibrate.mjs.
 //
 // Accuracy improvement over single-epicycle:
@@ -44,8 +44,8 @@ import {
 // A2 = first_epicycle_anomaly + phase_offset.
 //
 // These are the fitted residual correctors.
-// Phase 3 sky-reference-fitted parameters (2019-2024, 2192 rows per body)
-// Grid search + Nelder-Mead minimisation of RMS angular error vs JPL sky-reference.
+// Phase 3 calibrated parameters (2019-2024, 2192 rows per body)
+// Grid search + Nelder-Mead minimisation of RMS angular error.
 // After L0/M0 calibration, only Mars has a meaningful periodic residual.
 const EPI2 = {
   mercury: { r2: 0.000, phase:   0.0 },  // 2.54° — periodic residual negligible vs systematic
@@ -53,8 +53,8 @@ const EPI2 = {
   mars:    { r2: 0.132, phase: 281.5 },  // 6.59° → 4.18° — Jupiter perturbation residual
   jupiter: { r2: 0.000, phase:   0.0 },  // 1.96° — systematic offset, not periodic
   saturn:  { r2: 0.000, phase:   0.0 },  // 0.74° — already sub-degree
-  uranus:  { r2: 0.012, phase: 180.0 },  // uncalibrated — no sky-reference fetch yet
-  neptune: { r2: 0.006, phase: 180.0 },  // uncalibrated — no sky-reference fetch yet
+  uranus:  { r2: 0.012, phase: 180.0 },  // uncalibrated
+  neptune: { r2: 0.006, phase: 180.0 },  // uncalibrated
   // New bodies — no 2nd epicycle calibration yet
   pluto:   { r2: 0.000, phase:   0.0 },
   ceres:   { r2: 0.000, phase:   0.0 },
@@ -201,7 +201,7 @@ function innerBody2(t, p, epi2) {
 
 // ── Uranus perturbation corrections ───────────────────────────────
 // Primary terms: Saturn-Uranus synodic (~45.4 yr) and Jupiter-Uranus
-// Amplitudes calibrated to approximate sky-reference; phases need phase3Calibrate.mjs
+// Approximate amplitudes — tune phase3Calibrate.mjs to refine
 function uranusLonCorr(t) {
   const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
   const lS = degmod(SATURN.L0  + t * SATURN.nlong);
@@ -216,7 +216,7 @@ function uranusLonCorr(t) {
 
 // ── Neptune perturbation corrections ──────────────────────────────
 // Primary terms: Uranus-Neptune synodic (~172 yr) and Saturn-Neptune (~36 yr)
-// Phases are approximate — calibrate with phase3Calibrate.mjs vs sky-reference
+// Phases are approximate — tune with phase3Calibrate.mjs
 function neptuneLonCorr(t) {
   const lS = degmod(SATURN.L0  + t * SATURN.nlong);
   const lU = degmod(URANUS.L0  + t * URANUS.nlong);

@@ -13,7 +13,7 @@
 
 export const ANTARCTIC_SUN_SAMPLES = {
   meta: {
-    source: 'AstroPixels tabulated positions via js/core/ephemerisAstropixels.js + standard alt/az from RA/Dec/LST',
+    source: 'js/core/ephemerisAstropixels.js + standard alt/az from RA/Dec/LST',
     generatedAt: '2026-04-26T04:05:53.838Z',
     sampleCount: 864,
   },

@@ -224,7 +224,7 @@ function innerBody(t, p) {
 
 // ── Uranus perturbation corrections ───────────────────────────────
 // Primary terms: Saturn-Uranus synodic (~45.4 yr) and Jupiter-Uranus
-// Amplitudes calibrated to approximate sky-reference; phases need phase3Calibrate.mjs
+// Approximate amplitudes
 function uranusLonCorr(t) {
   const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
   const lS = degmod(SATURN.L0  + t * SATURN.nlong);
@@ -239,7 +239,7 @@ function uranusLonCorr(t) {
 
 // ── Neptune perturbation corrections ──────────────────────────────
 // Primary terms: Uranus-Neptune synodic (~172 yr) and Saturn-Neptune (~36 yr)
-// Phases are approximate — calibrate with phase3Calibrate.mjs vs sky-reference
+//
 function neptuneLonCorr(t) {
   const lS = degmod(SATURN.L0  + t * SATURN.nlong);
   const lU = degmod(URANUS.L0  + t * URANUS.nlong);
@@ -255,7 +255,7 @@ function neptuneLonCorr(t) {
 //
 // Six-term resonance series applied as a orbital longitude
 // correction before geocentric conversion.  Phases approximate —
-// run phase3Calibrate.mjs for sky-reference-fitted values.
+//
 function marsLonCorr(t) {
   const lJ = degmod(JUPITER.L0 + t * JUPITER.nlong);
   const lM = degmod(MARS.L0    + t * MARS.nlong);

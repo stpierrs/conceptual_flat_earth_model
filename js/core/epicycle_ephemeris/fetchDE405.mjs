@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// fetchsky-reference.mjs — fetch live sky-reference reference positions from sky-observations
+// fetchsky-reference.mjs — fetch reference positions from sky-observations
 // Parses same format as scrape_sky-observations.mjs, stores as JSON for calibration.
 
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';

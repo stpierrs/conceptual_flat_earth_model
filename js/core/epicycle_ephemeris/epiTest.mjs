@@ -3,7 +3,7 @@
 //
 // Tests every body at a known date and prints RA/Dec in degrees.
 // Cross-check the Sun and Mars positions manually against
-// any online ephemeris calculator (e.g. sky-reference, Stellarium).
+// any online ephemeris calculator (e.g. Stellarium)
 //
 // Run:  node epiTest.mjs
 //
