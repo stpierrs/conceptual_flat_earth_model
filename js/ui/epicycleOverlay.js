@@ -391,12 +391,12 @@ export function buildEpicycleOverlay(viewEl, model) {
     const h = document.createElement('div');
     Object.assign(h.style, {
       position: 'absolute', bottom: '0', [side]: '0',
-      width: '14px', height: '14px',
+      width: '22px', height: '22px',
       cursor: side === 'left' ? 'nesw-resize' : 'nwse-resize', zIndex: '30',
     });
-    const pts = side === 'left' ? '0,14 14,14 14,0' : '14,14 0,14 0,0';
-    h.innerHTML = `<svg width="14" height="14" style="display:block;opacity:0.4">
-      <polyline points="${pts}" fill="none" stroke="${BORDER_COL}" stroke-width="1.5"/>
+    const pts = side === 'left' ? '0,22 22,22 22,0' : '22,22 0,22 0,0';
+    h.innerHTML = `<svg width="22" height="22" style="display:block;opacity:0.75">
+      <polyline points="${pts}" fill="none" stroke="${BORDER_COL}" stroke-width="2.5"/>
     </svg>`;
     wrap.appendChild(h);
     return h;
@@ -464,8 +464,15 @@ export function buildEpicycleOverlay(viewEl, model) {
   makeResizer(handleR, (dx) => ({ dW:  dx, dX: 0 }));
   makeResizer(handleL, (dx) => ({ dW: -dx, dX: 1 }));
 
-  // RAF render loop
-  let prevDateTime = null, lastBody = null;
+  // RAF render loop.
+  // visualDT advances at VISUAL_RATE (days/second real time) so motion is always
+  // perceptible — even at slow model speeds where physical rates are < 0.1°/s.
+  // The visual clock freezes when the model is paused, matching user expectation.
+  const VISUAL_RATE = 60; // visual days per real second
+
+  let prevModelDT = null, lastBody = null;
+  let visualDT    = null; // the time shown in the diagram
+  let lastRealMs  = null;
 
   function frame() {
     requestAnimationFrame(frame);
@@ -473,24 +480,41 @@ export function buildEpicycleOverlay(viewEl, model) {
     const bodyName = pickBody(model);
     if (!bodyName) { wrap.style.display = 'none'; return; }
 
-    const dt   = model.state.DateTime;
-    const date = dateTimeToDate(dt);
+    const modelDT = model.state.DateTime;
+    const nowMs   = performance.now();
+
+    // First frame or body changed — seed visual time to model time.
+    if (visualDT === null || bodyName !== lastBody) {
+      visualDT   = modelDT;
+      lastRealMs = nowMs;
+      prevModelDT = modelDT;
+    }
+
+    const paused = prevModelDT !== null && modelDT === prevModelDT;
+
+    if (!paused) {
+      // Advance visual time at the fixed visual rate.
+      const realSec = Math.min((nowMs - lastRealMs) / 1000, 0.1); // cap at 100 ms
+      visualDT += realSec * VISUAL_RATE;
+    }
+    prevModelDT = modelDT;
+    lastRealMs  = nowMs;
+
+    const date = dateTimeToDate(visualDT);
     const geom = ptolemyGeometry(bodyName, date);
     if (!geom) { wrap.style.display = 'none'; return; }
 
     wrap.style.display = '';
 
-    const paused = prevDateTime !== null && dt === prevDateTime;
-    prevDateTime = dt;
-
     const bs = BODY_STYLE[bodyName] || { col: '#c0b0e8' };
-    titleEl.textContent  = geom.bodyName + (paused ? '  ⏸' : '');
-    titleEl.style.color  = bs.col;
+    titleEl.textContent = geom.bodyName + (paused ? '  ⏸' : '');
+    titleEl.style.color = bs.col;
 
-    if (canvas.width === 0 || bodyName !== lastBody) { syncCanvas(bodyName); lastBody = bodyName; }
+    if (canvas.width === 0 || bodyName !== lastBody) { syncCanvas(bodyName); }
+    lastBody = bodyName;
     canvas.style.opacity = paused ? '0.6' : '1';
 
-    const W = canvas.width, H = canvas.height;
+    const W = canvas.width;
     const diagH = canvasH(bodyName, W) - (bodyName === 'jupiter' ? 110 : 0);
     drawDiagram(ctx, geom, W, diagH, bodyName);
     if (bodyName === 'jupiter') drawMoons(ctx, date, W, diagH);
