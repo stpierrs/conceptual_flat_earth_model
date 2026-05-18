@@ -106,6 +106,123 @@ function drawArm(ctx, cx, cy, ang, rTip, rHub, lineCol, dotCol, dotGlow, dotR) {
   });
 }
 
+// ── Prague Astronomical Clock astrolabium inner disc ──────────────────────────
+//
+// Rotates once per 24 h (UTC).  Three colour zones visible in the reference images:
+//   Night sky  — dark navy cap at the top of the disc at midnight.
+//   Horizon zone — large amber/orange oval (the ±twilight zone around the local horizon).
+//   Zenith arc  — warm golden core where the Sun is when highest in the sky.
+// Latin labels (AURORA, CREPVSCVLVM, ORTVS, OCCASVS) rotate with the disc.
+function drawAstrolabiumDisc(ctx, cx, cy, Rdi, date) {
+  const hr    = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+  const angle = TAU * hr / 24;   // midnight ≡ 0: night cap at top; noon ≡ π: day at top
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // ── Contents — clipped to disc, rotated by hour ───────────────────────────
+  ctx.save();
+  ctx.beginPath(); ctx.arc(0, 0, Rdi, 0, TAU); ctx.clip();
+  ctx.rotate(angle);
+
+  // Night sky base (fills the whole disc before the coloured zones are painted)
+  ctx.beginPath(); ctx.arc(0, 0, Rdi, 0, TAU);
+  ctx.fillStyle = '#0b1338'; ctx.fill();
+
+  // Horizon zone — large amber ellipse shifted "southward" (positive y in disc coords).
+  // This is the dominant orange-gold band visible in the reference images.
+  const oy  = Rdi * 0.16;
+  const orx = Rdi * 0.90, ory = Rdi * 0.70;
+  ctx.beginPath(); ctx.ellipse(0, oy, orx, ory, 0, 0, TAU);
+  const hg = ctx.createRadialGradient(0, oy + ory * 0.08, ory * 0.08, 0, oy, ory);
+  hg.addColorStop(0,    '#dba030');
+  hg.addColorStop(0.40, '#c27018');
+  hg.addColorStop(0.80, '#9a4c0a');
+  hg.addColorStop(1,    '#6c3005');
+  ctx.fillStyle = hg; ctx.fill();
+
+  // Dawn glow highlight on the east (left) rim — AURORA side
+  const dg = ctx.createRadialGradient(-orx * 0.50, oy * 0.6, 0, -orx * 0.50, oy, ory * 0.66);
+  dg.addColorStop(0, 'rgba(255,195,65,0.52)');
+  dg.addColorStop(1, 'rgba(255,140,0,0)');
+  ctx.beginPath(); ctx.ellipse(0, oy, orx, ory, 0, 0, TAU);
+  ctx.fillStyle = dg; ctx.fill();
+
+  // Dusk glow highlight on the west (right) rim — CREPVSCVLVM side
+  const gd = ctx.createRadialGradient(orx * 0.50, oy * 0.6, 0, orx * 0.50, oy, ory * 0.66);
+  gd.addColorStop(0, 'rgba(255,160,35,0.50)');
+  gd.addColorStop(1, 'rgba(255,100,0,0)');
+  ctx.beginPath(); ctx.ellipse(0, oy, orx, ory, 0, 0, TAU);
+  ctx.fillStyle = gd; ctx.fill();
+
+  // Zenith arc — warm golden core, where the Sun is when high in the sky
+  const zy = Rdi * 0.30, zr = Rdi * 0.44;
+  ctx.beginPath(); ctx.arc(0, zy, zr, 0, TAU);
+  const zg = ctx.createRadialGradient(0, zy, 0, 0, zy, zr);
+  zg.addColorStop(0,    '#f2d060');
+  zg.addColorStop(0.55, '#d0a020');
+  zg.addColorStop(1,    'rgba(192,120,0,0)');
+  ctx.fillStyle = zg; ctx.fill();
+
+  // Horizon oval border line
+  ctx.beginPath(); ctx.ellipse(0, oy, orx, ory, 0, 0, TAU);
+  ctx.strokeStyle = 'rgba(120,70,10,0.55)'; ctx.lineWidth = 1; ctx.stroke();
+
+  // Stars in the night-sky zone (visible above the horizon ellipse)
+  const STARS = [
+    [-0.38,-0.60, 2.2], [ 0.20,-0.72, 1.6], [-0.60,-0.32, 1.5],
+    [ 0.55,-0.48, 1.4], [-0.18,-0.78, 1.3], [ 0.40,-0.24, 1.1],
+    [-0.50,-0.52, 1.2], [ 0.28,-0.56, 1.0], [ 0.08,-0.66, 0.9],
+  ];
+  for (const [sx, sy, sr] of STARS) {
+    ctx.beginPath(); ctx.arc(sx * Rdi, sy * Rdi, sr, 0, TAU);
+    ctx.fillStyle = `rgba(255,255,220,${Math.min(0.9, 0.42 + sr * 0.17)})`; ctx.fill();
+  }
+  // Prominent decorative ★ at ~10 o'clock in the night sky (as in the reference)
+  ctx.font = `${Math.round(Rdi * 0.14)}px serif`;
+  ctx.fillStyle = 'rgba(255,248,195,0.82)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('★', -Rdi * 0.42, -Rdi * 0.60);
+
+  // ── Latin labels (rotate with the disc) ─────────────────────────────────
+  const lsz = Math.round(Rdi * 0.090);
+
+  // AURORA — dawn, east (left) rim, rotated to read along the ellipse edge
+  ctx.save();
+  ctx.translate(-orx * 0.68, oy);
+  ctx.rotate(-Math.PI * 0.50);
+  ctx.font = `italic bold ${lsz}px serif`;
+  ctx.fillStyle = 'rgba(255,218,112,0.84)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('AURORA', 0, 0);
+  ctx.restore();
+
+  // CREPVSCVLVM — dusk, west (right) rim
+  ctx.save();
+  ctx.translate(orx * 0.68, oy);
+  ctx.rotate(Math.PI * 0.50);
+  ctx.font = `italic bold ${Math.round(lsz * 0.76)}px serif`;
+  ctx.fillStyle = 'rgba(255,205,95,0.82)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('CREPVSCVLVM', 0, 0);
+  ctx.restore();
+
+  // ORTVS (sunrise) and OCCASVS (sunset) — smaller labels near top of oval
+  ctx.font = `italic ${Math.round(lsz * 0.70)}px serif`;
+  ctx.fillStyle = 'rgba(255,235,152,0.62)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('ORTVS',   -orx * 0.32, oy - ory * 0.68);
+  ctx.fillText('OCCASVS',  orx * 0.32, oy - ory * 0.68);
+
+  ctx.restore();  // end clip + rotation
+
+  // Disc rim border (drawn after rotation is removed so it stays crisp)
+  ctx.beginPath(); ctx.arc(0, 0, Rdi, 0, TAU);
+  ctx.strokeStyle = 'rgba(200,168,75,0.45)'; ctx.lineWidth = 0.9; ctx.stroke();
+
+  ctx.restore();  // end translate
+}
+
 function drawAstro(ctx, date, W, CLOCK_H) {
   const t  = j2000Day(date);
   const cx = W / 2, cy = CLOCK_H / 2;
@@ -113,10 +230,9 @@ function drawAstro(ctx, date, W, CLOCK_H) {
   const Ro  = R,         Rzi = R * 0.830, Rdi = R * 0.750, Rec = R * 0.120;
   const gapMid = (Rdi + Rzi) / 2, gapW = (Rzi - Rdi) * 0.78;
 
-  // Sky background
-  const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Ro);
-  bg.addColorStop(0, '#1a2460'); bg.addColorStop(0.7, '#0c1230'); bg.addColorStop(1, '#060914');
-  ctx.beginPath(); ctx.arc(cx, cy, Ro, 0, TAU); ctx.fillStyle = bg; ctx.fill();
+  // Gap ring background (Rdi → Rzi), then rotating astrolabium disc
+  ctx.beginPath(); ctx.arc(cx, cy, Rzi, 0, TAU); ctx.fillStyle = '#08101e'; ctx.fill();
+  drawAstrolabiumDisc(ctx, cx, cy, Rdi, date);
 
   // Zodiac ring sectors
   for (let i = 0; i < 12; i++) {
@@ -238,9 +354,14 @@ function drawAstro(ctx, date, W, CLOCK_H) {
     ctx.fillText(lbl, cx + cr * Math.cos(ca), cy + cr * Math.sin(ca));
   }
 
-  // Data readout
-  const elon = degmod(mLon - sLon);
+  // Data readout — semi-transparent backing so text is legible over the rotating disc
+  const elon  = degmod(mLon - sLon);
   const readY = cy + R * 0.36;
+  const rdW   = R * 0.92, rdH = R * 0.20;
+  ctx.fillStyle = 'rgba(4,7,18,0.68)';
+  ctx.fillRect(cx - rdW / 2, readY - 3, rdW, rdH);
+  ctx.strokeStyle = 'rgba(200,168,75,0.18)'; ctx.lineWidth = 0.7;
+  ctx.strokeRect(cx - rdW / 2, readY - 3, rdW, rdH);
   ctx.fillStyle = A_TEXT; ctx.font = `${Math.round(R * 0.068)}px ui-monospace,monospace`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
   ctx.fillText(`☀ ${sLon.toFixed(1)}°  ☽ ${mLon.toFixed(1)}°`, cx, readY);
