@@ -870,6 +870,7 @@ export function buildEclipseOverlay(viewEl, model) {
 
   function frame() {
     requestAnimationFrame(frame);
+    if (wrap.style.display === 'none') return;
     const modelDT = model.state.DateTime;
     if (modelDT === lastModelDT && canvas.width === Math.max(wrap.clientWidth, 200)) return;
     lastModelDT = modelDT;
@@ -885,13 +886,12 @@ export function buildEclipseOverlay(viewEl, model) {
       drawAstro(ctx, date, W, W);
       drawList(ctx, eclipses, 0, W, W, ASTRO_LIST_H, date, false);
     } else {
-      // Digi mode: measure content height first by drawing to an offscreen canvas,
-      // then draw for real.  Simpler: draw, read y returned, resize if needed.
-      // We do a two-pass approach using a minimum height estimate first.
-      const estimatedH = 480 + DIGI_LIST_H;
-      if (canvas.width !== W || canvas.height < estimatedH) {
-        canvas.width = W; canvas.height = estimatedH;
-        canvas.style.height = estimatedH + 'px';
+      // Digi mode: two-pass approach — draw at current size to measure content
+      // height, then resize once if needed. Only reset height on width change to
+      // avoid bouncing between estimatedH and targetH every frame.
+      if (canvas.width !== W) {
+        canvas.width = W; canvas.height = 480 + DIGI_LIST_H;
+        canvas.style.height = canvas.height + 'px';
       }
       ctx.fillStyle = D_BG; ctx.fillRect(0, 0, W, canvas.height);
       const contentH = drawDigi(ctx, date, eclipses, W, canvas.height);
