@@ -54,7 +54,7 @@ const SYNODIC_MONTH = 29.53059;       // days — mean time between same-phase m
 // ── Internal helpers ──────────────────────────────────────────────
 
 // Sun's apparent ecliptic longitude (degrees), three-term equation of centre.
-function sunLon(t) {
+export function sunLon(t) {
   const L = degmod(SUN.L0 + t * SUN.nlong);
   const M = degmod(SUN.M0 + t * SUN.nanom);
   const C = (1.9146 - 0.004817 * t / 36525) * sind(M)
@@ -70,7 +70,7 @@ function elongationMean(t) {
 
 // Moon's full ecliptic longitude and latitude (degrees).
 // Uses the same 25-term longitude + 6-term latitude series as moonEquatorial.
-function moonEcliptic(t) {
+export function moonEcliptic(t) {
   const Lm = degmod(MOON.L0 + t * MOON.nlong);
   const Mm = degmod(MOON.M0 + t * MOON.nanom);
   const Nm = degmod(MOON.N0 - t * MOON.nnode);
