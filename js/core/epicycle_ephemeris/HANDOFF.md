@@ -120,16 +120,16 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 
 ## Key Calibration Facts (DO NOT REVERT)
 
-1. **Venus `nanom` = heliocentric rate (1.6021291 °/day = 360/224.701 days)**
+1. **Venus `nanom` = sidereal orbital rate (1.6021291 °/day = 360/224.701 days)**
    Using synodic rate causes ±100° error near inferior conjunction.
 
-2. **Mercury `nanom` = heliocentric rate (4.0923507 °/day = 360/87.969 days)**
+2. **Mercury `nanom` = sidereal orbital rate (4.0923507 °/day = 360/87.969 days)**
    Same issue — synodic rate causes massive errors.
 
 3. **L₀ corrections baked into `epiParams.js`** (fitted):
    - Mars: +7.65°, Jupiter: −7.69°, Saturn: −5.12°, Venus: −4.26°, Mercury: −0.34°
 
-4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (not standard J2000 orbital elements values)
+4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (empirically fitted, not raw epoch-2000.0 values)
 
 5. **`eqCenter()` is NOT used for planets** — only for Moon (×2 kludge). All planets use
    `eqCenterSeries()` (Chunk 3). The arctan formula gives ~half the Keplerian equation of
@@ -142,10 +142,10 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 | Body | Source | Calibrated? |
 |------|--------|-------------|
 | Sun, Moon | standard astronomical series | Yes |
-| Mercury–Saturn | standard J2000 orbital elements | Yes |
-| Uranus, Neptune | standard J2000 orbital elements | No |
-| Pluto | approximate J2000 | No |
-| Ceres, Pallas, Juno, Vesta | J2000 orbital elements | No |
+| Mercury–Saturn | epoch-2000.0 fitted elements | Yes |
+| Uranus, Neptune | epoch-2000.0 elements | No |
+| Pluto | approximate epoch-2000.0 | No |
+| Ceres, Pallas, Juno, Vesta | epoch-2000.0 elements | No |
 | Fixed stars | HYG v4.1 catalogue | N/A |
 
 ---

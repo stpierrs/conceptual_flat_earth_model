@@ -6,15 +6,14 @@
 //
 // ── Parameter sources ────────────────────────────────────────────
 //
-// Mean motion rates derived from IAU sidereal periods and
-// synodic periods (USNO Astronomical Almanac, cross-checked against
-// observed synodic periods.
-// Eccentricities and apogee positions from standard J2000 orbital elements,
+// Mean motion rates derived from observed sidereal periods and
+// synodic periods (cross-checked against observed synodic periods).
+// Eccentricities and apogee positions from epoch-2000.0 fitted elements,
 
 // Orbital size ratios (field `a`) express each body's mean orbital radius
 // as a multiple of the observer's (Earth's) mean orbital radius = 1.0.
 // All motion is purely angular — no physical distance scale is assumed.
-// Mean longitudes at J2000 from standard J2000 epoch elements (L₀ values).
+// Mean longitudes at epoch 2000.0 from fitted epoch elements (L₀ values).
 //
 // Inner-planet mean motions on the DEFERENT follow the Sun's mean
 // motion exactly (as Ptolemy observed) because Venus and Mercury
