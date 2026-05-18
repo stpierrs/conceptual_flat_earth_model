@@ -2,7 +2,7 @@
 //
 // Drop-in replacement / addition compatible with the existing
 // ephemeris dispatcher in ephemeris.js.  Exports the same API as
-// projections.js (ephemerisPtolemy), ephemerisGeo.js, etc.:
+// projections.js (ephemerisPtolemy), etc.:
 //
 //   bodyGeocentric(name, date) → { ra, dec }   (radians)
 //   coversBody(name)           → bool

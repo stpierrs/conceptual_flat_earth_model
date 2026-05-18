@@ -7,8 +7,7 @@
 // should be. Bennett's and Seidelman's formulas were curve-fit against
 // that observation, so we use them as-is. Right?
 //
-// We've got two formulas here — Bennett (1982) and Seidelman (from the
-// Explanatory Supplement to the Astronomical Almanac) — both take APPARENT
+// We've got two formulas here — Bennett (1982) and Seidelman (1992) — both take APPARENT
 // altitude in degrees and return the refraction lift above the true position
 // in arcminutes. We feed true altitude as the input; the difference between
 // true and apparent for the purpose of evaluating R is below each formula's
