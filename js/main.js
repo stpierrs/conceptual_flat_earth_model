@@ -27,7 +27,12 @@ if (trackerHudEl) buildTrackerHud(trackerHudEl, model);
 const trackingInfoEl = document.getElementById('tracking-info-popup');
 if (trackingInfoEl) buildTrackingInfoPopup(trackingInfoEl, model);
 if (viewEl_panel) buildEpicycleOverlay(viewEl_panel, model);
-const eclipseWrap = viewEl_panel ? buildEclipseOverlay(viewEl_panel, model) : null;
+let eclipseWrap = null;
+try {
+  eclipseWrap = viewEl_panel ? buildEclipseOverlay(viewEl_panel, model) : null;
+} catch (err) {
+  console.error('Eclipse overlay failed to initialise:', err);
+}
 const eclipseBtn  = document.getElementById('eclipse-predictor-btn');
 if (eclipseBtn && eclipseWrap) {
   eclipseBtn.addEventListener('click', (e) => {

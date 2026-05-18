@@ -908,7 +908,7 @@ export function buildEclipseOverlay(viewEl, model) {
   }
 
   syncCanvas();
-  frame();
+  requestAnimationFrame(frame);
 
   // Return the wrapper so callers can toggle visibility.
   return wrap;
