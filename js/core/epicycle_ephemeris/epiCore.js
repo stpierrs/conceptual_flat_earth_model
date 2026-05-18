@@ -59,7 +59,7 @@ export function j2000Day(date) {
 // Standard rotation through the obliquity of the ecliptic.
 // λ = ecliptic longitude (deg), β = ecliptic latitude (deg).
 // Returns { ra, dec } both in RADIANS to match the existing
-// ephemeris pipeline API (projections.js / ephemerisGeo.js).
+// ephemeris pipeline API (projections.js / ephemeris.js).
 export function eclipticToEquatorial(lambdaDeg, betaDeg, oblDeg = OBLIQUITY_J2000) {
   const x =  cosd(betaDeg) * cosd(lambdaDeg);
   const y =  cosd(betaDeg) * sind(lambdaDeg) * cosd(oblDeg)
