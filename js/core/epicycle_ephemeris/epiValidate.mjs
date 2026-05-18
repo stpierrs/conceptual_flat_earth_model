@@ -7,7 +7,7 @@
 //   node epiValidate.mjs
 //
 // The "reference" positions used here are computed from the closed-form
-// Standard J2000 formulas, which are accurate to
+// epoch-2000.0 formulas, which are accurate to
 // ~1'–5' for planets and ~1" for the Sun over 2000–2050.
 
 // parent model directory.
@@ -19,8 +19,8 @@ import { bodyGeocentric as epi1 }  from './ephemerisEpicycle.js';
 import { bodyGeocentric as epi2 }  from './ephemerisEpicycle2.js';
 import { RAD, DEG, j2000Day, degmod } from './epiCore.js';
 
-// ── Reference positions: standard J2000 Sun + simplified planet formulas ──
-// Using standard J2000-based orbital elements.
+// ── Reference positions: epoch-2000.0 Sun + simplified planet formulas ──
+// Using fitted epoch-2000.0 orbital elements.
 // Accurate enough to score the pipeline error.
 
 function refSun(t) {
@@ -47,7 +47,7 @@ function refSun(t) {
 // Returns { ra, dec } in degrees for a given body name and t (days from J2000).
 function refPlanet(name, t) {
   const T = t / 36525;
-  // Elements from standard J2000 orbital elements (degrees)
+  // Elements from epoch-2000.0 fitted orbital elements (degrees)
   const EL = {
     mercury: { L: 252.25084 + 149472.67411 * T, a: 0.38709893, e: 0.20563069, i: 7.00487,  Ω: 48.33167,  ω: 77.45645  },
     venus:   { L: 181.97909 +  58517.81538 * T, a: 0.72333199, e: 0.00677323, i: 3.39471,  Ω: 76.68069,  ω: 131.53298 },
@@ -71,19 +71,19 @@ function refPlanet(name, t) {
     Math.sqrt(1 - el.e) * Math.cos(E / 2)
   ) * DEG;
 
-  // Heliocentric ecliptic coordinates (for reference only — we just
-  // need the geocentric position, which requires the Sun's position too)
+  // Orbital ecliptic coordinates (for reference only — we just
+  // need the observer-centered position, which requires the Sun's position too)
   const r = el.a * (1 - el.e * Math.cos(E));
-  const lonH = degmod(nu + el.ω);                   // heliocentric longitude
+  const lonH = degmod(nu + el.ω);                   // orbital longitude
   const latH = Math.asin(Math.sin((lonH - el.Ω) * RAD) * Math.sin(el.i * RAD)) * DEG;
 
-  // Geocentric position (approximate: ignore Sun's ecliptic latitude)
+  // Observer-centered position (approximate: ignore Sun's ecliptic latitude)
   const sun = refSun(t);
   // Use vector difference in ecliptic plane
   const xs_h = r * Math.cos(latH * RAD) * Math.cos(lonH * RAD);
   const ys_h = r * Math.cos(latH * RAD) * Math.sin(lonH * RAD);
   const zs_h = r * Math.sin(latH * RAD);
-  // Sun heliocentric (approx: R☉ = 1 AU at longitude sun.ra + 180°)
+  // Sun offset vector (approx: R = 1 AU at longitude sun.ra + 180°)
   const sun_lon_ecl = degmod(sun.ra * DEG + (sun.dec > 0 ? 90 : -90));  // rough
   // Better: recompute sun ecliptic longitude directly
   const Mref = degmod(357.52911 + 35999.05029 * T);
