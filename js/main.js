@@ -27,7 +27,14 @@ if (trackerHudEl) buildTrackerHud(trackerHudEl, model);
 const trackingInfoEl = document.getElementById('tracking-info-popup');
 if (trackingInfoEl) buildTrackingInfoPopup(trackingInfoEl, model);
 if (viewEl_panel) buildEpicycleOverlay(viewEl_panel, model);
-if (viewEl_panel) buildEclipseOverlay(viewEl_panel, model);
+const eclipseWrap = viewEl_panel ? buildEclipseOverlay(viewEl_panel, model) : null;
+const eclipseBtn  = document.getElementById('eclipse-predictor-btn');
+if (eclipseBtn && eclipseWrap) {
+  eclipseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    eclipseWrap.style.display = eclipseWrap.style.display === 'none' ? '' : 'none';
+  });
+}
 
 // First load only — pick the browser's language if nothing is in the URL hash yet.
 const _hashHasLang = window.location.hash.includes('Language=');
