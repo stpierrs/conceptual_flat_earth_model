@@ -691,6 +691,7 @@ export function buildEclipseOverlay(viewEl, model) {
     userSelect:   'none',
     overflow:     'hidden',
     zoom:         'var(--ui-zoom, 1)',
+    display:      'none',   // hidden until the Eclipses button is clicked
   });
 
   // ── Header ─────────────────────────────────────────────────────────────────
@@ -749,9 +750,21 @@ export function buildEclipseOverlay(viewEl, model) {
   });
   subtitleEl.textContent = 'Saros · Draconic · Synodic';
 
+  // Close button
+  const closeBtn = document.createElement('button');
+  Object.assign(closeBtn.style, {
+    marginLeft: 'auto', padding: '0 6px', background: 'none',
+    border: 'none', color: 'rgba(220,190,120,0.55)', fontSize: '16px',
+    cursor: 'pointer', lineHeight: '1', fontFamily: 'inherit',
+  });
+  closeBtn.textContent = '×';
+  closeBtn.title = 'Close';
+  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); wrap.style.display = 'none'; });
+
   header.appendChild(titleEl);
   header.appendChild(modeBtn);
   header.appendChild(subtitleEl);
+  header.appendChild(closeBtn);
   wrap.appendChild(header);
 
   // ── Canvas ─────────────────────────────────────────────────────────────────
@@ -896,4 +909,7 @@ export function buildEclipseOverlay(viewEl, model) {
 
   syncCanvas();
   frame();
+
+  // Return the wrapper so callers can toggle visibility.
+  return wrap;
 }
