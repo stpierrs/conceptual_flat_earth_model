@@ -676,8 +676,9 @@ export function buildEclipseOverlay(viewEl, model) {
   wrap.id = 'eclipse-overlay';
   Object.assign(wrap.style, {
     position:     'absolute',
-    top:          '52px',
-    left:         '12px',         // always on-screen; user can drag it
+    top:          '60px',
+    left:         '50%',
+    transform:    'translateX(-50%)',
     width:        '310px',
     minWidth:     '200px',
     background:   'rgba(6,8,20,0.97)',
@@ -824,6 +825,7 @@ export function buildEclipseOverlay(viewEl, model) {
     if (e.button !== 0) return;
     dragging = true;
     const r = wrap.getBoundingClientRect(), vr = viewEl.getBoundingClientRect();
+    wrap.style.transform = 'none';
     wrap.style.right = 'auto';
     wrap.style.left  = (r.left - vr.left) + 'px';
     wrap.style.top   = (r.top  - vr.top)  + 'px';
