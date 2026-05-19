@@ -35,18 +35,19 @@ try {
 }
 const eclipseBtn  = document.getElementById('eclipse-predictor-btn');
 if (eclipseBtn) {
-  if (!eclipseWrap) {
-    // buildEclipseOverlay failed — mark button so it's obvious
-    eclipseBtn.style.background = '#c00';
-    eclipseBtn.title = 'Eclipse overlay failed to load — check console';
-  } else {
-    eclipseBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const showing = eclipseWrap.style.display !== 'none';
-      eclipseWrap.style.display = showing ? 'none' : '';
-      eclipseBtn.style.outline = showing ? '' : '3px solid orange';
-    });
-  }
+  eclipseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Look up by ID each time — robust even if eclipseWrap closure is stale
+    const panel = document.getElementById('eclipse-overlay');
+    if (!panel) {
+      eclipseBtn.style.background = '#c00';
+      eclipseBtn.textContent = '⚠ Eclipse load failed';
+      return;
+    }
+    const showing = panel.style.display !== 'none';
+    panel.style.display = showing ? 'none' : '';
+    eclipseBtn.style.outline = showing ? '' : '3px solid orange';
+  });
 }
 
 // First load only — pick the browser's language if nothing is in the URL hash yet.
