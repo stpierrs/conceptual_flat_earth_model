@@ -412,7 +412,7 @@ export function planetEquatorial(name, date) {
   return { ra: NaN, dec: NaN };
 }
 
-// Venus phases — straight out of the epicycle geometry, no heliocentric
+// Venus phases — straight out of the epicycle geometry.
 // stage required.
 //
 // Venus rides an epicycle. When it's at the far end of that epicycle
@@ -450,6 +450,83 @@ export function bodyGeocentric(name, date) {
 // Sun, Moon, and the five classical planets — that's what Ptolemy had.
 // No precession, nutation, or aberration corrections: those came later
 // and aren't part of the original Almagest model.
+
+// Returns geometric parameters for the Ptolemaic diagram overlay.
+// ecc and epi are fractional (deferent radius = 1).
+// meccanom, tepianom, pros are in degrees.
+export function ptolemyGeometry(name, date) {
+  const ddays = ptolemyDay(date);
+
+  if (name === 'sun') {
+    const mlongsu = degmod(mlongsun0 + ddays * nsunlong);
+    const manomsu = degmod(mlongsu - apogeesun);
+    const pros = -atand(eccsun * sind(manomsu) / (1 + eccsun * cosd(manomsu)));
+    return { bodyName: 'Sun', ecc: eccsun, epi: 0,
+             apogee: apogeesun, meccanom: manomsu, tepianom: 0, pros };
+  }
+
+  if (name === 'moon') {
+    const mlongmo  = degmod(mlongmoon0  + ddays * nlongmoon);
+    const anommo   = degmod(manommoon0  + ddays * nanommoon);
+    const melongmo = degmod(melongmoon0 + ddays * nelongmoon);
+    const esin = eccmoon * sind(2 * melongmo);
+    const ecos = eccmoon * cosd(2 * melongmo);
+    const oc   = ecos + Math.sqrt(1 - esin * esin);
+    const pros = atand(esin / (oc + ecos));
+    const tepianom = degmod(anommo + pros);
+    return { bodyName: 'Moon', ecc: eccmoon, epi: epimoon,
+             apogee: degmod(mlongmo - anommo), meccanom: degmod(2 * melongmo),
+             tepianom, pros };
+  }
+
+  const OUTER = {
+    saturn:  { label: 'Saturn',  apogee0: apogeesat0, nlong: nlongsat,  nepianom: nepianomsat,
+               mepi_epoch: mepisat_epoch,  mepianom_epoch: mepianomsat_epoch,  ecc: eccsat, epi: episat },
+    jupiter: { label: 'Jupiter', apogee0: apogeejup0, nlong: nlongjup,  nepianom: nepianomjup,
+               mepi_epoch: mepijup_epoch,  mepianom_epoch: mepianomjup_epoch,  ecc: eccjup, epi: epijup },
+    mars:    { label: 'Mars',    apogee0: apogeemar0, nlong: nlongmar,  nepianom: nepianommar,
+               mepi_epoch: mepimar_epoch,  mepianom_epoch: mepianommar_epoch,  ecc: eccmar, epi: epimar },
+  };
+
+  if (OUTER[name]) {
+    const p = OUTER[name];
+    const prectab  = ddays / 36525;
+    const apogee   = degmod(p.apogee0 + prectab);
+    const mepi     = degmod(p.mepi_epoch    + ddays * p.nlong);
+    const mepianom = degmod(p.mepianom_epoch + ddays * p.nepianom);
+    const meccanom = degmod(mepi - apogee);
+    const pros     = eqplan(1, p.ecc, p.epi, meccanom, mepianom);
+    const tepianom = degmod(mepianom - pros);
+    return { bodyName: p.label, ecc: p.ecc, epi: p.epi,
+             apogee, meccanom, tepianom, pros };
+  }
+
+  if (name === 'venus') {
+    const { mlongsu } = sunLongitude(ddays);
+    const prectab    = ddays / 36525;
+    const apogee     = degmod(apogeeven0 + prectab);
+    const meccanom   = degmod(mlongsu - apogee);
+    const mepianom   = degmod(mepianomven_epoch + ddays * nepianomven);
+    const pros       = eqplan(1, eccven, epiven, meccanom, mepianom);
+    const tepianom   = degmod(mepianom - pros);
+    return { bodyName: 'Venus', ecc: eccven, epi: epiven,
+             apogee, meccanom, tepianom, pros };
+  }
+
+  if (name === 'mercury') {
+    const { mlongsu } = sunLongitude(ddays);
+    const prectab    = ddays / 36525;
+    const apogee     = degmod(apogeemer0 + prectab);
+    const meccanom   = degmod(mlongsu - apogee);
+    const mepianom   = degmod(mepianommer_epoch + ddays * nepianommer);
+    const pros       = eqme(1, eccmer, epimer, meccanom, mepianom);
+    const tepianom   = degmod(mepianom - pros);
+    return { bodyName: 'Mercury', ecc: eccmer, epi: epimer,
+             apogee, meccanom, tepianom, pros };
+  }
+
+  return null;
+}
 export const SUPPORTED_BODIES = new Set(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn']);
 export function coversBody(name) { return SUPPORTED_BODIES.has(name); }
 export function coversDate(_date) { return true; }

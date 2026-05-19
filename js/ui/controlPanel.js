@@ -3,7 +3,6 @@
 
 import { dateTimeToString, dateTimeToDate } from '../core/time.js';
 import { TIME_ORIGIN } from '../core/constants.js';
-import { findNextEclipses } from '../core/ephemeris.js';
 import { raDecToAzEl } from '../core/transforms.js';
 import { CEL_NAV_SELECT_OPTIONS, CEL_NAV_STARS } from '../core/celnavStars.js';
 import { CATALOGUED_STARS, CONSTELLATIONS } from '../core/constellations.js';
@@ -11,14 +10,12 @@ import { BLACK_HOLES } from '../core/blackHoles.js';
 import { QUASARS }     from '../core/quasars.js';
 import { GALAXIES }    from '../core/galaxies.js';
 import { CEL_THEO_STARS, CEL_THEO_OWN } from '../core/celTheoStars.js';
-import { SATELLITES }  from '../core/satellites.js';
 import { NAMED_STARS_HYG }    from '../core/_namedStarsHyg.js';
 import { NAMED_STARS_HYG_EXTRA } from '../core/_namedStarsHygExtra.js';
 import { GALAXIES_EXTRA }     from '../core/galaxiesExtra.js';
 import { GALAXIES_EXTRA2 }    from '../core/galaxiesExtra2.js';
 import { QUASARS_EXTRA }      from '../core/quasarsExtra.js';
 import { QUASARS_EXTRA2 }     from '../core/quasarsExtra2.js';
-import { SATELLITES_EXTRA }   from '../core/satellitesExtra.js';
 import { JUPITER_MOON_DEFS, GALILEAN_MOON_IDS, JUPITER_MOON_COLORS } from '../core/jupiterMoons.js';
 import { listProjections, listGeneratedProjections, listHqMaps, listGeMaps, PROJECTIONS } from '../core/projections.js';
 import { Autoplay } from './autoplay.js';
@@ -58,15 +55,17 @@ const BODY_SEARCH_INDEX = (() => {
   for (const q of QUASARS)           out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const g of GALAXIES)          out.push({ id: `star:${g.id}`, name: g.name, color: '#ff80c0' });
   for (const s of CEL_THEO_OWN)      out.push({ id: `star:${s.id}`, name: s.name, color: '#ff8c00' });
-  for (const s of SATELLITES)        out.push({ id: `star:${s.id}`, name: s.name, color: '#66ff88' });
   for (const s of NAMED_STARS_HYG)        out.push({ id: `star:${s.id}`, name: s.name, color: '#fff5d8' });
   for (const s of NAMED_STARS_HYG_EXTRA)  out.push({ id: `star:${s.id}`, name: s.name, color: '#fff5d8' });
   for (const g of GALAXIES_EXTRA)         out.push({ id: `star:${g.id}`, name: g.name, color: '#ff80c0' });
   for (const g of GALAXIES_EXTRA2)        out.push({ id: `star:${g.id}`, name: g.name, color: '#ff80c0' });
   for (const q of QUASARS_EXTRA)          out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
   for (const q of QUASARS_EXTRA2)         out.push({ id: `star:${q.id}`, name: q.name, color: '#40e0d0' });
-  for (const s of SATELLITES_EXTRA)       out.push({ id: `star:${s.id}`, name: s.name, color: '#66ff88' });
-  out.push({ id: 'star:pluto', name: 'Pluto', color: '#a07c66' });
+  out.push({ id: 'star:pluto',  name: 'Pluto',  color: '#a07c66' });
+  out.push({ id: 'star:ceres',  name: 'Ceres',  color: '#b0a898' });
+  out.push({ id: 'star:pallas', name: 'Pallas', color: '#a8a0b0' });
+  out.push({ id: 'star:juno',   name: 'Juno',   color: '#b0a0a8' });
+  out.push({ id: 'star:vesta',  name: 'Vesta',  color: '#c0b89a' });
   for (const m of JUPITER_MOON_DEFS) {
     const hex = (JUPITER_MOON_COLORS[m.id] || 0x778899).toString(16).padStart(6, '0');
     out.push({ id: `jmoon:${m.id}`, name: m.name, color: `#${hex}` });
@@ -377,59 +376,13 @@ function resolveTrackName(targetId) {
   if (PLANET_NAMES[targetId]) return PLANET_NAMES[targetId];
   if (targetId.startsWith('star:')) {
     const id = targetId.slice(5);
-    for (const arr of [CEL_NAV_STARS, CATALOGUED_STARS, BLACK_HOLES, QUASARS, GALAXIES, SATELLITES]) {
+    for (const arr of [CEL_NAV_STARS, CATALOGUED_STARS, BLACK_HOLES, QUASARS, GALAXIES]) {
       const hit = arr.find((e) => e.id === id);
       if (hit) return hit.name;
     }
     return id;
   }
   return targetId;
-}
-
-// Eclipse lookup cache — the search costs ~10ms worst case, so we
-// memoize until the current DateTime passes the cached event or jumps
-// backward. Right?
-let _eclipseCache = null;
-function nextEclipses(dateTime) {
-  if (_eclipseCache
-      && dateTime >= _eclipseCache.from
-      && dateTime < _eclipseCache.horizon) {
-    return _eclipseCache.result;
-  }
-  const fromDate = dateTimeToDate(dateTime);
-  const result = findNextEclipses(fromDate);
-  // Refresh the cache when we pass either eclipse date, or after 30 days.
-  const eventDTs = [];
-  if (result.nextSolar) {
-    eventDTs.push(result.nextSolar.getTime() / TIME_ORIGIN.msPerDay - TIME_ORIGIN.ZeroDate);
-  }
-  if (result.nextLunar) {
-    eventDTs.push(result.nextLunar.getTime() / TIME_ORIGIN.msPerDay - TIME_ORIGIN.ZeroDate);
-  }
-  const horizon = eventDTs.length
-    ? Math.min(...eventDTs)
-    : dateTime + 30;
-  _eclipseCache = { from: dateTime - 0.01, horizon, result };
-  return result;
-}
-
-function formatCountdown(fromDate, toDate) {
-  const diffMs = toDate.getTime() - fromDate.getTime();
-  if (diffMs <= 0) return 'now';
-  const days = diffMs / 86400000;
-  if (days < 1) {
-    const hours = diffMs / 3600000;
-    const h = Math.floor(hours);
-    const m = Math.floor((hours - h) * 60);
-    return `in ${h}h ${m}m`;
-  }
-  if (days < 60) return `in ${Math.floor(days)} days`;
-  return `in ${Math.floor(days / 30.4375)} months`;
-}
-
-const ECLIPSE_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function shortDate(d) {
-  return `${ECLIPSE_MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()}`;
 }
 
 // Standard timezone offsets in minutes east of UTC. Fixed offsets only,
@@ -683,6 +636,8 @@ const FIELD_GROUPS = [
     tab: 'Tracker', groups: [
       { title: 'Ephemeris', rows: [
         { key: 'BodySource', label: 'Source', select: [
+          { value: 'epicycle',     label: "Epicycle-1 (pure-circle geocentric)" },
+          { value: 'epicycle2',    label: "Epicycle-2 (two-circle Ibn al-Shatir)" },
           { value: 'ptolemy',      label: "Ptolemy (Almagest deferent + epicycle)" },
         ]},
         { key: 'StarApplyPrecession', label: 'Precession',  bool: true },
@@ -724,11 +679,9 @@ const FIELD_GROUPS = [
                 ...BLACK_HOLES.map((x) => `star:${x.id}`),
                 ...QUASARS.map((x) => `star:${x.id}`),
                 ...GALAXIES.map((x) => `star:${x.id}`),
-                ...SATELLITES.map((x) => `star:${x.id}`),
               ],
               ShowCelNav: true, ShowBlackHoles: true,
               ShowQuasars: true, ShowGalaxies: true,
-              ShowSatellites: true,
             }) },
           { buttonLabel: 'Clear Trace',
             onClick: (m) => m.setState({ ClearTraceCount: (m.state.ClearTraceCount | 0) + 1 }) },
@@ -1058,30 +1011,6 @@ const FIELD_GROUPS = [
             label: s.name,
             color: celTheoMenuColor(s),
           })),
-        },
-      ]},
-      { title: 'Satellites', rows: [
-        { key: 'GPOverrideSatellites', label: 'GP Override', bool: true },
-        { label: '', buttonLabel: 'Enable All',
-          onClick: (m) => m.setState({
-            TrackerTargets: [
-              ...new Set([
-                ...(Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : []),
-                ...SATELLITES.map((x) => `star:${x.id}`),
-              ]),
-            ],
-            ShowSatellites: true,
-          }) },
-        { label: '', buttonLabel: 'Disable All',
-          onClick: (m) => {
-            const ids = new Set(SATELLITES.map((x) => `star:${x.id}`));
-            const cur = Array.isArray(m.state.TrackerTargets) ? m.state.TrackerTargets : [];
-            m.setState({ TrackerTargets: cur.filter((t) => !ids.has(t)) });
-          } },
-        { key: 'TrackerTargets', label: '', buttonGrid:
-          [...SATELLITES]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((x) => ({ value: `star:${x.id}`, label: x.name, color: '#66ff88' })),
         },
       ]},
     ],
@@ -1665,6 +1594,8 @@ export function buildControlPanel(host, model, demos) {
   const fmtLon = (v) => `Lon ${v >= 0 ? '+' : ''}${v.toFixed(4)}°`;
   const fmtSignedDeg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}°`;
   const EPHEM_NAMES = {
+    epicycle:     'Epicycle-1',
+    epicycle2:    'Epicycle-2',
     ptolemy:      'Ptolemy',
   };
   const refreshInfoBar = () => {
@@ -1759,7 +1690,6 @@ export function buildControlPanel(host, model, demos) {
       ShowCelestialBodies: false,
       ShowCelNav: false, ShowConstellations: false, ShowConstellationLines: false,
       ShowBlackHoles: false, ShowQuasars: false, ShowGalaxies: false,
-      ShowSatellites: false,
       ShowStars: false,
       ShowSunAnalemma: false, ShowMoonAnalemma: false,
       ShowGPPath: false, ShowDomeCaustic: false,
@@ -1776,7 +1706,6 @@ export function buildControlPanel(host, model, demos) {
     const allBlackHoles    = BLACK_HOLES.map(x => `star:${x.id}`);
     const allQuasars       = QUASARS.map(x => `star:${x.id}`);
     const allGalaxies      = GALAXIES.map(x => `star:${x.id}`);
-    const allSatellites    = SATELLITES.map(x => `star:${x.id}`);
     model.setState({
       ObserverFigure: 'nikki',
       ObserverLat: 45.0, ObserverLong: -100.0,
@@ -1808,7 +1737,7 @@ export function buildControlPanel(host, model, demos) {
       MapProjection: 'ae', MapProjectionGe: 'hq_equirect_night',
       GeneratedMap: 'default', MapArt: 'none',
       ShowPlanets: true, DarkBackground: true, ShowLogo: true,
-      BodySource: 'ptolemy',
+      BodySource: 'epicycle',
       StarApplyPrecession: false, StarApplyNutation: false,
       StarApplyAberration: false, StarTrepidation: true,
       StarfieldType: 'celnav', DynamicStars: true, PermanentNight: false,
@@ -1824,12 +1753,11 @@ export function buildControlPanel(host, model, demos) {
       ShowBlackHoles: true, GPOverrideBlackHoles: false,
       ShowQuasars: true, GPOverrideQuasars: false,
       ShowGalaxies: true, GPOverrideGalaxies: false,
-      ShowSatellites: true, GPOverrideSatellites: false,
       TrackerTargets: [
         ...PLANETS,
         ...allCelNav, ...allConstellation,
         ...allBlackHoles, ...allQuasars,
-        ...allGalaxies, ...allSatellites,
+        ...allGalaxies,
       ],
     });
   };
@@ -2950,12 +2878,6 @@ export function buildHud(hudEl, model) {
   moonPhaseRow.appendChild(canvas);
   moonPhaseRow.appendChild(moonLabel);
   moonBody.appendChild(moonPhaseRow);
-  const solarEcLine = document.createElement('div');
-  solarEcLine.className = 'line';
-  const lunarEcLine = document.createElement('div');
-  lunarEcLine.className = 'line';
-  moonBody.appendChild(solarEcLine);
-  moonBody.appendChild(lunarEcLine);
   moonWrapper.appendChild(moonBody);
   hudEl.appendChild(moonWrapper);
 
@@ -2982,15 +2904,6 @@ export function buildHud(hudEl, model) {
     lines[2].textContent = c.MoonAnglesGlobe.elevation >= 0
       ? `Moon: az ${fmt(c.MoonAnglesGlobe.azimuth)}°  el ${fmt(c.MoonAnglesGlobe.elevation)}°  phase ${(c.MoonPhaseFraction * 100).toFixed(0)}%`
       : `Moon: ${t('beyond_vault')}  phase ${(c.MoonPhaseFraction * 100).toFixed(0)}%`;
-
-    const ec = nextEclipses(s.DateTime);
-    const now = dateTimeToDate(s.DateTime);
-    solarEcLine.textContent = ec.nextSolar
-      ? `${t('next_solar_eclipse')}: ${shortDate(ec.nextSolar)}  ${formatCountdown(now, ec.nextSolar)}`
-      : `${t('next_solar_eclipse')}: —`;
-    lunarEcLine.textContent = ec.nextLunar
-      ? `${t('next_lunar_eclipse')}: ${shortDate(ec.nextLunar)}  ${formatCountdown(now, ec.nextLunar)}`
-      : `${t('next_lunar_eclipse')}: —`;
 
     // Waxing vs waning comes from the moon-sun longitude difference. When
     // the moon is east of the sun (RA diff 0..π) it's waxing toward full.

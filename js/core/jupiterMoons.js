@@ -14,9 +14,7 @@
 //               Drives the north-south wobble you see in the sky.
 //   l0        — where the moon was in its orbit at J2000.0, from
 //               Lieske (1979) — a purely observational fit, no
-//               heliocentric stage anywhere in it.
 //
-// No AU, no gravitational constant, no heliocentric distances.
 // The Galilean moons are scaled 5× their real apparent separations so
 // you can actually see them at the model's rendering scale. The ratios
 // between the four are preserved exactly as observed.
@@ -25,7 +23,7 @@ const DEG = Math.PI / 180;
 
 const degmod = (x) => ((x % 360) + 360) % 360;
 
-// JD of J2000.0 — a calendar reference point, not heliocentric.
+// JD of J2000.0 — calendar reference epoch.
 const JD_J2000 = 2451545.0;
 
 function julianDay(date) {

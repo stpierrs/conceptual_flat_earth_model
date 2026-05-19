@@ -8,7 +8,7 @@
 // `info-popup` for shared styling.
 
 const ART_SIZE = 96;        // canvas pixel grid
-const SCALE    = 4;         // chunky pixel-art zoom
+const SCALE    = 8;         // chunky pixel-art zoom (doubled)
 const W = ART_SIZE * SCALE;
 
 function pix(ctx, x, y, color, scale = SCALE) {
@@ -196,25 +196,6 @@ function drawGalaxy(ctx) {
   disc(ctx, cx, cy, 3, '#ffffff');
 }
 
-function drawSatellite(ctx) {
-  const cx = ART_SIZE / 2, cy = ART_SIZE / 2;
-  // Body
-  ctx.fillStyle = '#a0a0b0';
-  ctx.fillRect((cx - 3) * SCALE, (cy - 3) * SCALE, 6 * SCALE, 6 * SCALE);
-  ctx.fillStyle = '#404048';
-  ctx.fillRect((cx - 2) * SCALE, (cy - 2) * SCALE, 4 * SCALE, 4 * SCALE);
-  // Solar panels
-  ctx.fillStyle = '#3060a0';
-  ctx.fillRect((cx - 18) * SCALE, (cy - 4) * SCALE, 12 * SCALE, 8 * SCALE);
-  ctx.fillRect((cx + 6) * SCALE, (cy - 4) * SCALE, 12 * SCALE, 8 * SCALE);
-  ctx.fillStyle = '#80a8d0';
-  for (let i = -16; i <= -8; i += 2) ctx.fillRect((cx + i) * SCALE, (cy - 3) * SCALE, SCALE, 6 * SCALE);
-  for (let i = 8; i <= 16; i += 2)   ctx.fillRect((cx + i) * SCALE, (cy - 3) * SCALE, SCALE, 6 * SCALE);
-  // Antenna
-  ctx.fillStyle = '#e0e0e8';
-  for (let i = 0; i <= 6; i++) pix(ctx, cx, cy - 4 - i, '#e0e0e8');
-  pix(ctx, cx, cy - 11, '#ff4040');
-}
 
 function clearCanvas(ctx) {
   ctx.clearRect(0, 0, W, W);
@@ -425,7 +406,6 @@ export function buildTrackingInfoPopup(panelEl, model) {
     else if (kind === 'blackhole')  drawBlackHole(ctx);
     else if (kind === 'quasar')     drawQuasar(ctx);
     else if (kind === 'galaxy')     drawGalaxy(ctx);
-    else if (kind === 'satellite')  drawSatellite(ctx);
     else drawCelNavStar(ctx);
   }
 
@@ -433,11 +413,16 @@ export function buildTrackingInfoPopup(panelEl, model) {
     const s = model.state;
     const c = model.computed;
     const info = pickInfo(s, c);
+    panelEl.hidden = false;
     if (!info) {
-      panelEl.hidden = true;
+      clearCanvas(ctx);
+      drawSun(ctx);
+      elName.textContent = '—';
+      elCat.textContent  = 'No body selected';
+      elHeaderName.textContent = 'Tracking';
+      elBody.innerHTML = '<div class="ti-row" style="opacity:0.5;text-align:center;justify-content:center;">Search or select a body to track</div>';
       return;
     }
-    panelEl.hidden = false;
     elName.textContent = info.name || info.target;
     elCat.textContent  = categoryLabel(info);
     elHeaderName.textContent = `Tracking · ${info.name || info.target}`;
@@ -464,8 +449,7 @@ export function buildTrackingInfoPopup(panelEl, model) {
     // own `info.ra`/`info.dec` directly. Right?
     const r = (Number.isFinite(info.ra) && Number.isFinite(info.dec))
       ? { ra: info.ra, dec: info.dec }
-      : (info.sky-observationsReading
-         || info.ptolemyReading || null);
+      : (info.ptolemyReading || null);
     const ra  = r ? fmtH(r.ra)  : '—';
     const dec = r ? fmtSignedDms(r.dec * 180 / Math.PI) : '—';
     const mag = (info.mag != null && Number.isFinite(info.mag))

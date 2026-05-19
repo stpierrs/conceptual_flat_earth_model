@@ -11,23 +11,17 @@
 // any model-specific distance or scale; the renderer projects each
 // entry by its observed direction onto the dome. Right?
 //
-// Satellites (static + extras) are listed here too so the BSC
-// search and grid include them, but the satellite layer remains the
-// dynamic renderer.
-
 import { CEL_NAV_STARS }      from './celnavStars.js';
 import { CATALOGUED_STARS }   from './constellations.js';
 import { BLACK_HOLES }        from './blackHoles.js';
 import { GALAXIES }           from './galaxies.js';
 import { QUASARS }            from './quasars.js';
-import { SATELLITES }         from './satellites.js';
 import { NAMED_STARS_HYG }    from './_namedStarsHyg.js';
 import { NAMED_STARS_HYG_EXTRA } from './_namedStarsHygExtra.js';
 import { GALAXIES_EXTRA }     from './galaxiesExtra.js';
 import { GALAXIES_EXTRA2 }    from './galaxiesExtra2.js';
 import { QUASARS_EXTRA }      from './quasarsExtra.js';
 import { QUASARS_EXTRA2 }     from './quasarsExtra2.js';
-import { SATELLITES_EXTRA }   from './satellitesExtra.js';
 import { SOLAR_SYSTEM_BSC }   from './solarSystem.js';
 
 const COLOR_BY_CAT = {
@@ -37,7 +31,6 @@ const COLOR_BY_CAT = {
   galaxy:     0xff80c0,
   quasar:     0x40e0d0,
   named:      0xfff5d8,
-  satellite:  0x66ff88,
   planet:     0xffa060,
 };
 
@@ -48,7 +41,7 @@ function tag(list, cat, nativeRendered = false) {
     color: e.color != null ? e.color : COLOR_BY_CAT[cat],
     // entries flagged nativeRendered are skipped by the BSC layer's
     // own render pass — their dot is already painted by the cel-nav /
-    // catalogued / black-hole / galaxy / quasar / satellite / planet
+    // catalogued / black-hole / galaxy / quasar / planet
     // layer that owns them. Without this, ShowBsc paints them a
     // second time and the FPS halves once both layers are on.
     nativeRendered: nativeRendered || e.kind === 'planet',
@@ -61,14 +54,12 @@ const SOURCES = [
   ...tag(BLACK_HOLES,             'blackhole',  true),
   ...tag(GALAXIES,                'galaxy',     true),
   ...tag(QUASARS,                 'quasar',     true),
-  ...tag(SATELLITES,              'satellite',  true),
   ...tag(NAMED_STARS_HYG,         'named'),
   ...tag(NAMED_STARS_HYG_EXTRA,   'named'),
   ...tag(GALAXIES_EXTRA,          'galaxy'),
   ...tag(GALAXIES_EXTRA2,         'galaxy'),
   ...tag(QUASARS_EXTRA,           'quasar'),
   ...tag(QUASARS_EXTRA2,          'quasar'),
-  ...tag(SATELLITES_EXTRA,        'satellite'),
   ...tag(SOLAR_SYSTEM_BSC,        'planet'),
 ];
 

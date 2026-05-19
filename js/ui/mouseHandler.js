@@ -85,7 +85,7 @@ function resolveTargetAngles(targetId, c) {
   if (targetId.startsWith('star:')) {
     const id = targetId.slice(5);
     for (const list of [
-      c.CelNavStars, c.CataloguedStars, c.BlackHoles, c.Quasars, c.Galaxies, c.CelTheoStars, c.Satellites,
+      c.CelNavStars, c.CataloguedStars, c.BlackHoles, c.Quasars, c.Galaxies, c.CelTheoStars,
     ]) {
       if (!list) continue;
       const found = list.find((x) => x.id === id);
@@ -213,7 +213,7 @@ function collectHeavenlyCandidates(c, state) {
   }
   if (starsVisible(c, state)) {
     for (const list of [
-      c.CelNavStars, c.CataloguedStars, c.BlackHoles, c.Quasars, c.Galaxies, c.CelTheoStars, c.Satellites,
+      c.CelNavStars, c.CataloguedStars, c.BlackHoles, c.Quasars, c.Galaxies, c.CelTheoStars,
     ]) {
       if (!list) continue;
       for (const s of list) {

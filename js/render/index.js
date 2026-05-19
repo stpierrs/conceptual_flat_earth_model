@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { SceneManager } from './scene.js';
 import {
-  DiscBase, DiscGrid, Shadow, EclipseShadow, VaultOfHeavens, ObserversOpticalVault,
+  DiscBase, DiscGrid, Shadow, VaultOfHeavens, ObserversOpticalVault,
   CelestialMarker, Observer, Stars, LatitudeLines, GroundPoint,
   CelestialPoles, DeclinationCircles, Yggdrasil, MtMeru, ToroidalVortex,
   LongitudeRing, CelNavStars, TrackedGroundPoints, GeocentricMarkers, CatalogPointStars,
@@ -60,12 +60,6 @@ export class Renderer {
 
     this.shadow = new Shadow(FE_RADIUS);
     this.sm.world.add(this.shadow.group);
-
-    // solar-eclipse ground shadow (umbra + penumbra) drawn
-    // on the disc during active eclipse demos. Visibility gates on
-    // state.EclipseActive + state.EclipseKind === 'solar'.
-    this.eclipseShadow = new EclipseShadow(FE_RADIUS);
-    this.sm.world.add(this.eclipseShadow.group);
 
     this.latLines = new LatitudeLines(FE_RADIUS);
     this.sm.world.add(this.latLines.group);
@@ -151,9 +145,6 @@ export class Renderer {
     });
     this.sm.world.add(this.celTheoStars.group);
 
-    // Satellites ride the same generic renderer but default off
-    // (visibility is state-gated via ShowSatellites — the computed
-    // array is simply empty when the user hasn't enabled them).
     this.gpPathOverlay = new GPPathOverlay();
     this.sm.world.add(this.gpPathOverlay.group);
 
@@ -187,34 +178,9 @@ export class Renderer {
       worldSpaceKey: 'MoonMonthMarkersWorldSpace',
       name: 'moon-month-markers',
     });
-    this.eclipseMapSolar = new MonthMarkers({
-      color: '#ffd040', size: 0.010, clippingPlanes: [],
-      markersKey: 'EclipseMapSolar',
-      worldSpace: true, noLoop: true, maxLoopPts: 1,
-      name: 'eclipse-map-solar',
-    });
-    this.eclipseMapLunar = new MonthMarkers({
-      color: '#a0c8ff', size: 0.010, clippingPlanes: [],
-      markersKey: 'EclipseMapLunar',
-      worldSpace: true, noLoop: true, maxLoopPts: 1,
-      name: 'eclipse-map-lunar',
-    });
     this.sm.world.add(this.sunMonthMarkers.group);
     this.sm.world.add(this.sunMonthMarkersOpp.group);
     this.sm.world.add(this.moonMonthMarkers.group);
-    this.sm.world.add(this.eclipseMapSolar.group);
-    this.sm.world.add(this.eclipseMapLunar.group);
-
-    this.satelliteStars = new CatalogPointStars({
-      sourceKey: 'Satellites',
-      color: 0x66ff88,
-      domeSize: 4,
-      sphereSize: 3.5,
-      maxCount: 1024,
-      clippingPlanes: clipPlanes,
-      requireMembership: true,
-    });
-    this.sm.world.add(this.satelliteStars.group);
 
     this.constellations = new Constellations(clipPlanes);
     this.sm.world.add(this.constellations.group);
@@ -624,7 +590,6 @@ export class Renderer {
     this.latLines.group.visible      = !ge;
     this.longitudeRing.group.visible = !ge;
     this.shadow.group.visible        = !ge;
-    this.eclipseShadow.group.visible = !ge;
     this.vaultOfHeavens.group.visible = !ge;
     this.starfieldChart.group.visible = !ge;
     this.gpPathOverlay.group.visible = !ge;
@@ -658,19 +623,6 @@ export class Renderer {
     this.domeCaustic.update(m);
     this.discGrid.update(m);
     this.shadow.update(m);
-    // eclipse shadow + observer darkening feature-flagged off
-    // by default (`state.ShowEclipseShadow`). The mesh + darken
-    // calculations are skipped entirely; the rest of the eclipse
-    // demo system (date selection, playback, warning banner, autoplay
-    // queue) continues to run. Re-enable by flipping the state default to true.
-    if (s.ShowEclipseShadow) {
-      this.eclipseShadow.update(m);
-      const eclipseDark = this.eclipseShadow.computeObserverDarkFactor(m);
-      this.sm.setEclipseDarkFactor?.(eclipseDark);
-    } else {
-      this.eclipseShadow.group.visible = false;
-      this.sm.setEclipseDarkFactor?.(0);
-    }
     this.latLines.update(m);
     this.longitudeRing.update(m);
 
@@ -733,7 +685,6 @@ export class Renderer {
     this.quasarStars.update(m);
     this.galaxyStars.update(m);
     this.celTheoStars.update(m);
-    this.satelliteStars.update(m);
     this.gpPathOverlay.update(m);
     this.centralAngleArcs.update(m);
     this.stellariumTraces.update(m);
@@ -741,8 +692,6 @@ export class Renderer {
     this.sunMonthMarkers.update(m);
     this.sunMonthMarkersOpp.update(m);
     this.moonMonthMarkers.update(m);
-    this.eclipseMapSolar.update(m);
-    this.eclipseMapLunar.update(m);
     this.starfieldChart.update(m);
     this.constellations.update(m);
     this.flightRoutes.update(m);
@@ -1051,7 +1000,6 @@ export class Renderer {
       this.blackHoleStars && this.blackHoleStars.spherePoints,
       this.quasarStars && this.quasarStars.spherePoints,
       this.galaxyStars && this.galaxyStars.spherePoints,
-      this.satelliteStars && this.satelliteStars.spherePoints,
       this.constellations && this.constellations.sphereStars,
       this.constellations && this.constellations.sphereLines,
       this.sunMarker && this.sunMarker.sphereDot,
@@ -1390,7 +1338,6 @@ export class Renderer {
       blackhole:  0x9966ff,
       quasar:     0x40e0d0,
       galaxy:     0xff80c0,
-      satellite:  0x66ff88,
       bsc:        0xfff5d8,
       celtheo:    0xff8c00,
     };
@@ -1401,7 +1348,6 @@ export class Renderer {
         ['blackhole',  c.BlackHoles],
         ['quasar',     c.Quasars],
         ['galaxy',     c.Galaxies],
-        ['satellite',  c.Satellites],
         ['celtheo',    c.CelTheoStars],
       ];
       for (const [cat, list] of lookups) {

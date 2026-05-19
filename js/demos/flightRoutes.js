@@ -95,7 +95,6 @@ const SKY_HIDDEN = {
   ShowQuasars:             false,
   ShowGalaxies:            false,
   ShowCelTheo:             false,
-  ShowSatellites:          false,
   // Shadows / day-night shading off so the line-art map stays a
   // clean black backdrop. ShowShadow drives the FE disc shadow
   // overlay; ShowDayNightShadow drives the GE sphere terminator
@@ -103,7 +102,6 @@ const SKY_HIDDEN = {
   ShowShadow:              false,
   ShowDayNightShadow:      false,
   ShowDayNightSky:         false,
-  ShowEclipseShadow:       false,
 };
 
 // FE grid on; sun/moon GP drops off so the demo isn't visually

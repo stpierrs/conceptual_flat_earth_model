@@ -6,6 +6,8 @@ import { attachMouseHandler } from './ui/mouseHandler.js';
 import { attachKeyboardHandler } from './ui/keyboardHandler.js';
 import { buildControlPanel, buildHud, buildTrackerHud } from './ui/controlPanel.js';
 import { buildTrackingInfoPopup } from './ui/trackingInfoPopup.js';
+import { buildEpicycleOverlay } from './ui/epicycleOverlay.js';
+import { buildEclipseOverlay }  from './ui/eclipseOverlay.js';
 import { Demos } from './demos/index.js';
 import { attachUrlState } from './ui/urlState.js';
 import { setActiveProjection } from './core/canonical.js';
@@ -24,6 +26,29 @@ const trackerHudEl = document.getElementById('tracker-hud');
 if (trackerHudEl) buildTrackerHud(trackerHudEl, model);
 const trackingInfoEl = document.getElementById('tracking-info-popup');
 if (trackingInfoEl) buildTrackingInfoPopup(trackingInfoEl, model);
+if (viewEl_panel) buildEpicycleOverlay(viewEl_panel, model);
+let eclipseWrap = null;
+try {
+  eclipseWrap = viewEl_panel ? buildEclipseOverlay(viewEl_panel, model) : null;
+} catch (err) {
+  console.error('Eclipse overlay failed to initialise:', err);
+}
+const eclipseBtn  = document.getElementById('eclipse-predictor-btn');
+if (eclipseBtn) {
+  eclipseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Look up by ID each time — robust even if eclipseWrap closure is stale
+    const panel = document.getElementById('eclipse-overlay');
+    if (!panel) {
+      eclipseBtn.style.background = '#c00';
+      eclipseBtn.textContent = '⚠ Eclipse load failed';
+      return;
+    }
+    const showing = panel.style.display !== 'none';
+    panel.style.display = showing ? 'none' : '';
+    eclipseBtn.style.outline = showing ? '' : '3px solid orange';
+  });
+}
 
 // First load only — pick the browser's language if nothing is in the URL hash yet.
 const _hashHasLang = window.location.hash.includes('Language=');
@@ -335,11 +360,6 @@ onLangChange(refreshI18nNodes);
 refreshI18nNodes();
 
 attachUrlState(model, demos);
-
-// Legacy 'model-warning' DOM element — markup may still carry it.
-// Hide it on boot; the surrounding banner code is gone.
-const _legacyBanner = document.getElementById('model-warning');
-if (_legacyBanner) _legacyBanner.hidden = true;
 
 // Keep the app title and subtitle translated as language changes.
 const _titleEl = document.getElementById('app-title');
