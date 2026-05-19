@@ -687,7 +687,7 @@ export function buildEclipseOverlay(viewEl, model) {
     padding:      '0',
     fontFamily:   'ui-monospace, Menlo, monospace',
     color:        '#dfc87a',
-    zIndex:       '19',
+    zIndex:       '200',
     userSelect:   'none',
     overflow:     'hidden',
     zoom:         'var(--ui-zoom, 1)',
