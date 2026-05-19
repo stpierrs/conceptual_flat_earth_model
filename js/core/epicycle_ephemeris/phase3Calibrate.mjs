@@ -18,7 +18,7 @@ import { DEG, RAD, degmod, j2000Day, eclipticToEquatorial,
 import { SUN, MARS, JUPITER, SATURN, VENUS, MERCURY, NEPTUNE, URANUS } from './epiParams.js';
 
 // ── Load reference data ──────────────────────────────────────────────
-const REF = JSON.parse(readFileSync('/home/claude/epicycle_ephemeris/sky-reference_reference.json','utf8'));
+const REF = JSON.parse(readFileSync('/home/claude/epicycle_ephemeris/sky_reference.json','utf8'));
 
 // ── Angular separation (radians) between two (ra,dec) in radians ───
 function angSep(r1, r2) {

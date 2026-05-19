@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // buildEpiTables.mjs — generate ephemerisEpiTables.js
 //
-// Daily geocentric RA/Dec at 00:00 UTC, same format as sky-observations.js.
+// Daily geocentric RA/Dec at 00:00 UTC.
 // Usage: node buildEpiTables.mjs [yearFrom] [yearTo]
 // Default: 1900–2100
 

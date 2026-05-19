@@ -1,9 +1,7 @@
 // Position router — ask for a planet, get back (RA, Dec).
 //
-// Ptolemy is the runtime engine. Astropixels (sky-reference daily table) is
-// kept live for the eclipse demos only — it's the most accurate
-// sun/moon position for finding the exact eclipse minute, so that
-// one consumer stays wired. Everything else runs through Ptolemy.
+// Ptolemy is the fallback engine. Epicycle-1 and Epicycle-2 are the
+// primary pipelines, covering Sun through Neptune for any date.
 
 import * as ptol  from './ephemerisPtolemy.js';
 import * as epi1  from './epicycle_ephemeris/ephemerisEpicycle.js';

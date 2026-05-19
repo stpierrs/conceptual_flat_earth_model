@@ -37,8 +37,6 @@ js/core/epicycle_ephemeris/
   ephemerisEpiTablesRuntime.js Phase 3 runtime stub (needs ephemerisEpiTables.js to work)
   buildEpiTables.mjs          Generator: node buildEpiTables.mjs 1800 2200
   phase3Calibrate.mjs         Calibration optimizer (Nelder-Mead)
-  fetchsky-reference.mjs              Fetches reference data from sky-observations
-  parsesky-reference.mjs              Parses cached reference HTML into JSON
   epiTest.mjs                 Smoke test: node epiTest.mjs
   epiValidate.mjs             Error comparison vs reference positions
   ephemeris_integration_patch.js  Integration notes (readable comments)
@@ -227,8 +225,8 @@ Uranus/Neptune perturbation corrections added to both pipelines (`uranusLonCorr`
 Phases approximate — run `phase3Calibrate.mjs` to calibrate.
 
 ### Chunk 6 — Calibration for new bodies
-- Run `fetchsky-reference.mjs` / `phase3Calibrate.mjs` for Uranus, Neptune
-- Calibrate L0/M0 for Ceres, Vesta (Pluto/Pallas/Juno: not available from sky-observations)
+- Run `phase3Calibrate.mjs` for Uranus, Neptune
+- Calibrate L0/M0 for Ceres, Vesta, Pallas, Juno
 
 ### Chunk 7 — More bodies
 - Chiron (2060 Chiron) — centaur, a = 13.7 AU, notable in FE discussions
@@ -274,5 +272,5 @@ plus star IDs from ZODIAC_STARS, ECLIPTIC_GUIDE_STARS, BRIGHT_STARS.
   precession toggle rotates the whole starfield. The `BRIGHT_STARS` / `ZODIAC_STARS`
   arrays return raw J2000.0 positions.
 
-- To add a new pipeline (e.g., epicycle-model wrapper): follow the API contract above and
+- To add a new pipeline: follow the API contract above and
   add to `PIPES` and `FALLBACK_ORDER` in `js/core/ephemeris.js`.

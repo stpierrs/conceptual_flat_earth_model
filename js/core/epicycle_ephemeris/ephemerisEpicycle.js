@@ -99,10 +99,9 @@ function sunEquatorial(t) {
 
 // ── Moon ─────────────────────────────────────────────────────────
 //
-// Exact Kepler equation of centre + twenty-five perturbation terms
-// (observed perturbation truncated series) + six latitude terms.
-// Nutation in longitude applied to final ecliptic longitude;
-// secular obliquity used in ecliptic→equatorial conversion.
+// Kepler equation of centre + twenty-five perturbation terms
+// + six latitude terms. Nutation in longitude applied to final
+// ecliptic longitude; secular obliquity used in ecliptic→equatorial conversion.
 //
 // F = mean argument of latitude = mean longitude − ascending node.
 // D = mean elongation from Sun.
@@ -122,7 +121,7 @@ function moonEquatorial(t) {
   const nu    = trueAnomaly(E_deg, MOON.ecc);
   const eqc   = degmod180(nu - Mm);
 
-  // Twenty-five perturbation terms (observed perturbation truncated series)
+  // Twenty-five perturbation terms
   const tlong_geo = degmod(Lm + eqc
     + 1.2740 * sind(2*D - Mm)         // evection — Ptolemy's prosneusis
     + 0.6583 * sind(2*D)               // variation — Tycho Brahe
@@ -139,7 +138,7 @@ function moonEquatorial(t) {
     + 0.0267 * sind(2*D + Ms - Mm)
     + 0.0117 * sind(4*D - Mm)
     - 0.0111 * sind(2*D - 2*Ms)
-    // Additional longitude correction terms
+    // Additional longitude terms
     + 0.0153 * sind(2*D - 2*F)
     - 0.0125 * sind(Mm + 2*F)
     + 0.0110 * sind(Mm - 2*F)
@@ -156,7 +155,7 @@ function moonEquatorial(t) {
   const { dPsi, obl } = nutationAndObliquity(t);
   const tlong = degmod(tlong_geo + dPsi);
 
-  // Six latitude terms (latitude correction)
+  // Six latitude terms
   const Fact = degmod(tlong - Nm);
   const beta = MOON.inc * sind(Fact)
              - 0.2806 * sind(2*D - F)
