@@ -719,6 +719,8 @@ export function buildEclipseOverlay(viewEl, model) {
     fontFamily: 'inherit', flexShrink: '0',
   });
 
+  let lastModelDT = null;
+
   function applyModeStyle() {
     if (mode === 'astro') {
       modeBtn.textContent = 'ASTRO';
@@ -868,8 +870,6 @@ export function buildEclipseOverlay(viewEl, model) {
   makeResizer(handleL, (dx) => ({ dW: -dx, dX: 1 }));
 
   // ── Render loop ────────────────────────────────────────────────────────────
-  let lastModelDT = null;
-
   function frame() {
     requestAnimationFrame(frame);
     if (wrap.style.display === 'none') return;
