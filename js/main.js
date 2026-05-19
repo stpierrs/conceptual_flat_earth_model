@@ -34,11 +34,19 @@ try {
   console.error('Eclipse overlay failed to initialise:', err);
 }
 const eclipseBtn  = document.getElementById('eclipse-predictor-btn');
-if (eclipseBtn && eclipseWrap) {
-  eclipseBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    eclipseWrap.style.display = eclipseWrap.style.display === 'none' ? '' : 'none';
-  });
+if (eclipseBtn) {
+  if (!eclipseWrap) {
+    // buildEclipseOverlay failed — mark button so it's obvious
+    eclipseBtn.style.background = '#c00';
+    eclipseBtn.title = 'Eclipse overlay failed to load — check console';
+  } else {
+    eclipseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const showing = eclipseWrap.style.display !== 'none';
+      eclipseWrap.style.display = showing ? 'none' : '';
+      eclipseBtn.style.outline = showing ? '' : '3px solid orange';
+    });
+  }
 }
 
 // First load only — pick the browser's language if nothing is in the URL hash yet.
