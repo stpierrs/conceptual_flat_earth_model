@@ -7,8 +7,8 @@
 //   • eqCenter  — equation of centre (eccentric geometry)
 //   • eqAnomaly — equation of anomaly (epicycle geometry)
 //   • eclipticToEquatorial — (λ, β) → { ra, dec } in radians
-//   • solveKepler — iterative Kepler-equation solver used when
-//     fitting eccentricity from known true-anomaly observations
+//   • solveKepler — iterative eccentric-anomaly solver used when
+//     fitting eccentricity from known sky observations
 //
 // Frame of reference: Earth-centred throughout.  The Sun's mean
 // longitude is the only shared quantity between pipelines, and it
@@ -76,7 +76,7 @@ export function eclipticToEquatorial(lambdaDeg, betaDeg, oblDeg = OBLIQUITY_J200
 // arctan approximation — used ONLY for the Moon (which compensates
 // by multiplying the result by 2).  Do NOT use for planets; the
 // arctan formula represents epicycle-deferent geometry and gives
-// roughly half the correct Keplerian equation of centre.
+// roughly half the correct equation of centre.
 export function eqCenter(M, e) {
   return atand(e * sind(M) / (1 + e * cosd(M)));
 }

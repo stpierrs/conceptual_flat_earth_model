@@ -125,7 +125,7 @@ function moonEquatorial(t) {
   const tlong_geo = degmod(Lm + eqc
     + 1.2740 * sind(2*D - Mm)         // evection — Ptolemy's prosneusis
     + 0.6583 * sind(2*D)               // variation — Tycho Brahe
-    - 0.1858 * sind(Ms)                // annual equation — Kepler
+    - 0.1858 * sind(Ms)                // solar anomaly correction
     + 0.2136 * sind(2*Mm)              // second anomaly
     - 0.1140 * sind(2*F)               // argument-of-latitude term
     + 0.0588 * sind(2*D - 2*Mm)
@@ -174,16 +174,15 @@ function moonEquatorial(t) {
 // Steps:
 //   1. Mean longitude λ̄ + mean anomaly M from J2000.
 //   2. Equation of centre → true orbital longitude.
-//   3. Orbital radius rho = a(1−e²)/(1+e cos ν)  [observer orbit = 1].
-//   4. Planet orbital vector (rho cos λ, rho sin λ).
-//   5. Observer orbital vector from anti-Sun reference direction.
-//   6. Geocentric direction: angular offset of planet from observer.
+//   3. Body deferent radius rho = a(1−e²)/(1+e cos ν)  [Sun deferent = 1].
+//   4. Body position vector on its deferent (rho cos λ, rho sin λ).
+//   5. Sun's deferent vector subtracted — equivalent to Ptolemy's outer-planet
+//      rule: the epicycle centre tracks the Sun's mean longitude exactly.
+//   6. Geocentric direction: the angle of the resulting vector.
 //   7. Latitude from inclination and ascending node.
 //
-// This is the exact geocentric formula, not the epicycle approximation.
-// The "epicycle" here IS the observer's orbit — the vector subtraction is
-// geometrically identical to the Ptolemaic deferent+epicycle with
-// observer-orbit radius as the epicycle size.
+// The vector subtraction is geometrically identical to the Ptolemaic
+// deferent+epicycle construction. No physical distances are implied.
 // lonCorr: optional orbital longitude correction in degrees (for perturbations).
 function outerBody(t, p, lonCorr = 0) {
   const T      = t / 36525;
@@ -202,7 +201,7 @@ function outerBody(t, p, lonCorr = 0) {
   const xP = rho * cosd(lon_orb);
   const yP = rho * sind(lon_orb);
 
-  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
+  // Sun's deferent vector — the reference direction for all body epicycles
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);
@@ -224,8 +223,8 @@ function outerBody(t, p, lonCorr = 0) {
 
 // Inner planets (Venus, Mercury) use full vector geocentric approach.
 // The deferent tracks the Sun's mean longitude (Ptolemy's constraint).
-// Their orbital radius ratio a < 1 observer orbit, so after
-// subtracting the observer vector we get the geocentric direction.
+// Their deferent size ratio a < 1 (smaller than Sun's deferent), so after
+// subtracting the Sun's deferent vector we get the geocentric direction.
 function innerBody(t, p) {
   // Planet's mean anomaly in its orbit
   const M     = degmod(p.M0 + t * p.nanom);
@@ -241,7 +240,7 @@ function innerBody(t, p) {
   const xP = rho * cosd(lon_orb);
   const yP = rho * sind(lon_orb);
 
-  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
+  // Sun's deferent vector — the reference direction for all body epicycles
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);

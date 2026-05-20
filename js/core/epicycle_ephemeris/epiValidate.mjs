@@ -83,7 +83,7 @@ function refPlanet(name, t) {
   const xs_h = r * Math.cos(latH * RAD) * Math.cos(lonH * RAD);
   const ys_h = r * Math.cos(latH * RAD) * Math.sin(lonH * RAD);
   const zs_h = r * Math.sin(latH * RAD);
-  // Sun offset vector (approx: R = 1 AU at longitude sun.ra + 180°)
+  // Sun's deferent vector (radius ≈ 1, direction opposite Sun's longitude)
   const sun_lon_ecl = degmod(sun.ra * DEG + (sun.dec > 0 ? 90 : -90));  // rough
   // Better: recompute sun ecliptic longitude directly
   const Mref = degmod(357.52911 + 35999.05029 * T);

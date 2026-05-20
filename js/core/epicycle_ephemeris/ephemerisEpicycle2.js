@@ -180,7 +180,7 @@ function outerBody2(t, p, epi2, lonCorr = 0) {
   const xP = rho * cosd(lon_orb);
   const yP = rho * sind(lon_orb);
 
-  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
+  // Sun's deferent vector — the reference direction for all body epicycles
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);
@@ -217,7 +217,7 @@ function innerBody2(t, p, epi2) {
   const xP = rho * cosd(lon_orb);
   const yP = rho * sind(lon_orb);
 
-  // Observer orbital vector (anti-Sun reference direction, radius ≈ 1)
+  // Sun's deferent vector — the reference direction for all body epicycles
   const Msun    = degmod(SUN.M0 + t * SUN.nanom);
   const Csun    = 1.9146 * sind(Msun) + 0.019993 * sind(2 * Msun);
   const lon_sun = degmod(SUN.L0 + t * SUN.nlong + Csun);

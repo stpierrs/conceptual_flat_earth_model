@@ -66,8 +66,8 @@ The Sun's position enters only as a direction angle.
 
 Same as outer planets — full vector geocentric subtraction. The deferent
 constraint (inner planets track the Sun angularly) arises naturally
-because their semi-major axes are < 1 AU, so the vector
-subtraction always produces the correct elongation-bounded behaviour.
+because their deferent size ratio a < 1 (smaller than the Sun's deferent),
+so the vector subtraction always produces the correct elongation-bounded behaviour.
 
 ### Sun
 
@@ -83,7 +83,7 @@ Ascending node tracked for ecliptic latitude.
 
 ## Accuracy (Phase 1 — single circle)
 
-This is a **pure Keplerian** pipeline with no perturbation series.
+This is a **pure geometric** pipeline with no perturbation series.
 Expected accuracy for simplified elements:
 
 | Body | Typical error | Notes |
@@ -98,7 +98,7 @@ Expected accuracy for simplified elements:
 | Uranus | ~2–3° | slow, small perturbations |
 | Neptune | ~1–2° | slow, tiny perturbations |
 
-This is the same accuracy class as any simple Keplerian element set
+This is the same accuracy class as any single-epicycle geometric model
 without a perturbation series. It is **working correctly** — the errors
 are inherent in the single-term equation of centre.
 

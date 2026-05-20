@@ -10,14 +10,14 @@
 // synodic periods (cross-checked against observed synodic periods).
 // Eccentricities and apogee positions from epoch-2000.0 fitted elements,
 
-// Orbital size ratios (field `a`) express each body's mean orbital radius
-// as a multiple of the observer's (Earth's) mean orbital radius = 1.0.
+// Deferent size ratios (field `a`) express each body's deferent radius
+// as a multiple of the Sun's mean deferent radius (= 1 by definition).
 // All motion is purely angular — no physical distance scale is assumed.
 // Mean longitudes at epoch 2000.0 from fitted epoch elements (L₀ values).
 //
 // Inner-planet mean motions on the DEFERENT follow the Sun's mean
-// motion exactly (as Ptolemy observed) because Venus and Mercury
-// orbit interior to Earth — their deferent centre tracks the Sun.
+// motion exactly (as Ptolemy observed). The Sun's deferent defines the
+// reference circle; inner bodies ride epicycles whose centres track the Sun.
 // Their own motion around the epicycle carries the fast anomaly.
 //
 // ── Accuracy expectation ─────────────────────────────────────────
@@ -42,9 +42,9 @@
 // with r = 0, so the same outerBody() function handles it.
 //
 // Tropical year = 365.25636 days → nlong = 360 / 365.25636
-// Apogee (perihelion of Earth's orbit from geocentric view):
+// Sun's apogee (point of slowest angular motion, sky-observed):
 //   longitude ~102.9372° at J2000, advancing ~1.72°/century.
-// Eccentricity of Earth's orbit: e = 0.016709 at J2000.
+// Sun's deferent eccentricity (measured from sky observations): e = 0.016709.
 import { BSC_STARS } from './bscCatalog.js';
 export { BSC_STARS };
 
