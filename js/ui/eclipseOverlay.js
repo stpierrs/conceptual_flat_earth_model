@@ -676,9 +676,9 @@ export function buildEclipseOverlay(viewEl, model) {
   wrap.id = 'eclipse-overlay';
   Object.assign(wrap.style, {
     position:     'absolute',
-    top:          '60px',
-    left:         '50%',
-    transform:    'translateX(-50%)',
+    top:          '80px',
+    left:         '8px',
+    transform:    'none',
     width:        '310px',
     minWidth:     '200px',
     background:   'rgba(6,8,20,0.97)',

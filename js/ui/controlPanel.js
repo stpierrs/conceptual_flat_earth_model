@@ -2881,6 +2881,14 @@ export function buildHud(hudEl, model) {
   moonWrapper.appendChild(moonBody);
   hudEl.appendChild(moonWrapper);
 
+  // Eclipse Predictor button — nested below Live Moon Phases in the left HUD
+  const eclipseHudBtn = document.createElement('button');
+  eclipseHudBtn.id        = 'eclipse-predictor-btn';
+  eclipseHudBtn.type      = 'button';
+  eclipseHudBtn.className = 'moon-phase-header';
+  eclipseHudBtn.innerHTML = '<span class="tri">◎</span> Eclipse Predictor';
+  hudEl.appendChild(eclipseHudBtn);
+
   moonHeader.addEventListener('click', () => {
     model.setState({ MoonPhaseExpanded: !model.state.MoonPhaseExpanded });
   });
