@@ -7,7 +7,7 @@
 // Method: grid search over r2 ∈ [0, 0.20] × phase ∈ [0°, 360°],
 // then Nelder-Mead refinement from the best grid point.
 // The second-epicycle correction is purely additive to the geocentric
-// longitude — no heliocentric stage, no distance computation.
+// longitude — pure geocentric geometry, no distance computation.
 //
 // Output: updated EPI2 table for ephemerisEpicycle2.js.
 

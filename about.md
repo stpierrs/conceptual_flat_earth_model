@@ -185,7 +185,7 @@ The Tracker is the single source of truth for body visibility. Each sub-menu's *
 - **Source** — Ptolemy's deferent + epicycle (*Almagest*), ported via the Almagest Ephemeris Calculator. The runtime ephemeris for the model.
 - **Precession** — classical J2000-to-date precession applied to fixed-star RA / Dec. Off = stars stay at J2000 catalog values; On = they walk forward to the displayed date.
 - **Nutation** — short-period wobble of the celestial pole (~18.6 yr term). Small (~10″) but visible on tight tracker readouts.
-- **Aberration** — annual aberration: stars apparently shift up to ~20″ along an annual ellipse, observed as a yearly stellar parallax-like sway. Off = catalog-mean positions.
+- **Aberration** — sky aberration: stars apparently shift up to ~20″ in a yearly pattern as the sky's motion varies. Off = catalog-mean positions.
 - **Trepidation** — historical pre-Newtonian model of an oscillating obliquity. Provided alongside precession so users can compare how that older framework predicted the same phenomenon. Off by default.
 
 > **Note**: the **Precession / Nutation / Aberration** checkboxes apply to *fixed-star* RA/Dec only. Ptolemy's planet readings are deferent + epicycle (Almagest) — none of the modern corrections apply; the readings are intentionally historical.

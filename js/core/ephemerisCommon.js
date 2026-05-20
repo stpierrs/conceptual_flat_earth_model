@@ -216,7 +216,7 @@ export function apparentStarPosition(raJ2000, decJ2000, date, opts) {
     dec += dDec;
   }
 
-  // --- Annual aberration (first-order) ---
+  // --- Sky aberration (first-order) ---
   if (aberration) {
     const K_AB = 20.49552 * AS;
     const L0s  = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);

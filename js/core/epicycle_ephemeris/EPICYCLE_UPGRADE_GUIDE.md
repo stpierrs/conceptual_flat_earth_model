@@ -22,7 +22,7 @@ The base pipeline (commit `23dadad`) had:
 - Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune
 - ~24 fixed stars (ZODIAC_STARS + ECLIPTIC_GUIDE_STARS, hardcoded in epiParams)
 - Single-circle `outerBody()` using `eqCenter()` (arctan approximation) for the equation of centre
-- Moon: only 4 perturbation terms (evection, variation, annual equation, 2nd anomaly)
+- Moon: only 4 perturbation terms (evection, variation, solar anomaly correction, 2nd anomaly)
 - No perturbation corrections for Mars, Jupiter, Saturn, Uranus, Neptune
 - No Pluto, no asteroids
 
@@ -130,7 +130,7 @@ The original had 4 terms. Add 4 more from classical lunar theory:
 // Original 4 (keep these):
 + 1.2740 * sind(2*D - Mm)   // evection
 + 0.6583 * sind(2*D)         // variation
-- 0.1858 * sind(Ms)          // annual equation
+- 0.1858 * sind(Ms)          // solar anomaly correction
 + 0.2136 * sind(2*Mm)        // second anomaly
 // New terms 5–8:
 - 0.1140 * sind(2*F)          // argument-of-latitude term
@@ -176,7 +176,7 @@ if not already present and apply it: `lon_orb = degmod(lambda + nu - M + lonCorr
 
 ## Change 3 — Fix equation of centre; Mars-Jupiter perturbation series
 
-**Commit:** `503a7ea` — "Chunk 3: Fix Keplerian equation of centre + Mars perturbation"  
+**Commit:** `503a7ea` — "Chunk 3: Fix equation of centre + Mars perturbation"  
 **Files:** `epiCore.js`, `ephemerisEpicycle.js`, `ephemerisEpicycle2.js`
 
 ### 3a. Add three-term equation-of-centre to `epiCore.js`

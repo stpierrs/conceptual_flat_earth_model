@@ -107,7 +107,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 | Venus | 0.69° | 0.69° | Sub-degree |
 | Jupiter | 1.96° | 1.96° | Systematic offset |
 | Mercury | 2.54° | 2.54° | Large eccentricity |
-| Moon | ~15–20' | ~15–20' | Evection + variation + annual eq + 2nd anomaly |
+| Moon | ~15–20' | ~15–20' | Evection + variation + solar correction + 2nd anomaly |
 | Mars | ~1–2°* | ~0.5–1°* | *Chunk 3: equation-of-centre + Jupiter terms; post-fix estimate |
 | Uranus | ~2–3° | ~2–3° | Uncalibrated |
 | Neptune | ~1–2° | ~1–2° | Uncalibrated |
@@ -130,7 +130,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 4. **M₀ corrections**: Venus M₀ = 134.92°, Mercury M₀ = 171.29° (empirically fitted, not raw epoch-2000.0 values)
 
 5. **`eqCenter()` is NOT used for planets** — only for Moon (×2 kludge). All planets use
-   `eqCenterSeries()` (Chunk 3). The arctan formula gives ~half the Keplerian equation of
+   `eqCenterSeries()` (Chunk 3). The arctan formula gives ~half the equation of
    center; switching to equation-of-centre series gives the correct 2e sinM + ... expansion.
 
 ---
@@ -168,7 +168,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 - **Moon (both epi1 and epi2):** Added 4 classical perturbation terms to `moonEquatorial()`:
   - Evection `+1.274° sin(2D − M)` — Ptolemy's prosneusis (largest term)
   - Variation `+0.658° sin(2D)` — Tycho Brahe
-  - Annual equation `−0.186° sin(Ms)` — Kepler
+  - Solar anomaly correction `−0.186° sin(Ms)`
   - Second anomaly `+0.214° sin(2M)` — Ptolemy's second epicycle
   - Expected Moon accuracy: ~1° → ~15–20 arcmin
 - **Jupiter-Saturn great inequality (both epi1 and epi2):**
@@ -179,9 +179,9 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 - **epi2:** Added `lonCorr = 0` parameter to `outerBody2()`, plumbed through Jupiter/Saturn cases
 
 **Chunk 3 — equation-of-centre + Mars perturbation series (both pipelines)**
-- **Root cause found:** `eqCenter()` (arctan approximation) gives ~half the Keplerian equation
+- **Root cause found:** `eqCenter()` (arctan approximation) gives ~half the equation
   of center. For Mars (e=0.093) this was a ~5.3° peak error, explaining the 6.59° RMS.
-  The arctan formula is Ptolemaic epicycle geometry; the Keplerian formula is `2e sinM + ...`
+  The arctan formula is Ptolemaic epicycle geometry; the full series is `2e sinM + ...`
 - **Fix:** Added `eqCenterSeries(M, e)` to `epiCore.js` — three-term equation-of-centre series:
   `((2e - e³/4) sinM + (5e²/4) sin2M + (13e³/12) sin3M) × DEG`
 - **Applied** `eqCenterSeries` in `outerBody()`, `innerBody()` (epi1) and `outerBody2()`,
@@ -197,7 +197,7 @@ UI dropdown in `controlPanel.js` shows: Epicycle-1 / Epicycle-2 / Ptolemy
 **Language reframing + Chunk 4 + Chunk 5 (Session 3 continued)**
 - Scrubbed all "heliocentric" language from outerBody/innerBody/outerBody2/innerBody2.
   `a` field = orbital size ratio (observer mean orbit = 1.0). Variables renamed:
-  `r_earth`→`r_obs`, `xE/yE`→`xO/yO`, `lon_h`→`lon_orb`, `r`→`rho`.
+  Variables renamed for clarity: `r_earth`→`r_obs`, `xE/yE`→`xO/yO`, `lon_h`→`lon_orb`, `r`→`rho`.
 - Chunk 4 (secular T²): added `nlong2` (°/century²) to Mars, Jupiter, Saturn, Uranus,
   Neptune in epiParams.js. Applied as `(p.nlong2||0) × T²` correction to mean longitude.
   Effect < 0.001° per 100 years; meaningful only at multi-century ranges.
@@ -229,7 +229,7 @@ Phases approximate — run `phase3Calibrate.mjs` to calibrate.
 - Calibrate L0/M0 for Ceres, Vesta, Pallas, Juno
 
 ### Chunk 7 — More bodies
-- Chiron (2060 Chiron) — centaur, a = 13.7 AU, notable in FE discussions
+- Chiron (2060 Chiron) — centaur, a = 13.7 (Sun deferent = 1), notable in FE discussions
 - More main-belt asteroids: Hygiea (10), Interamnia (704)
 - Lunar apsides: expose perigee/apogee as trackable points
 
@@ -256,7 +256,7 @@ plus star IDs from ZODIAC_STARS, ECLIPTIC_GUIDE_STARS, BRIGHT_STARS.
 
 ## Technical Notes for Future Claude Instances
 
-- `outerBody(t, p)` in `ephemerisEpicycle.js` handles all bodies with `a > 1 AU`
+- `outerBody(t, p)` in `ephemerisEpicycle.js` handles all bodies with `a > 1` (Sun deferent = 1)
   (plus the inner ones via `innerBody`). Adding a new outer body = add constants
   to `epiParams.js` + one case in the switch + one entry in `SUPPORTED_BODIES`.
 
