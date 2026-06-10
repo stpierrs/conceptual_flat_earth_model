@@ -3,6 +3,11 @@
 Everything you need to add a working geocentric eclipse predictor overlay to a similar sky model.
 No external libraries. No distances. No mass. Pure angular sky geometry.
 
+Current repo note: this guide targets the browser app in `index.html` and `js/`.
+Run it with `python3 -m http.server 8000`, then open `http://localhost:8000`.
+The Rust core in `src/` is available through `cargo test` and the `fe-model`
+CLI, but the eclipse overlay still runs in JS.
+
 ---
 
 ## How It Works (the concept)

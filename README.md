@@ -10,14 +10,41 @@ ratio of the flat-earth disc radius.
 
 Hosted on GitHub Pages — see the "Pages" link on this repo.
 
-## Running locally
+## Run Locally
 
-No build step. It's a static site, but browsers block ES-module imports over
-`file://`, so you need any local HTTP server:
+The browser app is a static site. Browsers block ES-module imports over
+`file://`, so serve the repo with any local HTTP server:
 
-    python3 -m http.server 8000
+```sh
+python3 -m http.server 8000
+```
 
 Then open <http://localhost:8000>.
+
+## Rust core
+
+The Rust rewrite lives in `src/` as a dependency-free crate. It currently ports
+the computational core: scalar/vector/matrix math, projections, disc/dome
+geometry, frame transforms, compact sun/moon ephemeris, and the model compute
+snapshot.
+
+The Rust core is a native library and CLI. The GitHub Pages app still runs the
+static browser frontend in `index.html` and `js/`.
+
+Run the Rust tests:
+
+```sh
+cargo test
+```
+
+Print a computed model snapshot:
+
+```sh
+cargo run -- --date-time 2024-01-01T00:00:00Z --lat 32 --lon -100.8387 --json
+```
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for CLI flags, library usage, Capacitor
+commands, and publishing notes.
 
 ## Controls
 

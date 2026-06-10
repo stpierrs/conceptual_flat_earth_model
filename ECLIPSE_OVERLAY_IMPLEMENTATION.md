@@ -5,6 +5,11 @@ including the left-side toggle button that sits below your existing HUD buttons.
 
 All five source files are in the zip alongside this guide.
 
+Current repo note: the eclipse overlay is part of the browser app and runs in
+the JS runtime. Run the app with `python3 -m http.server 8000`, then open
+`http://localhost:8000`. The Rust core in `src/` is a native library/CLI and is
+not wired into this overlay yet.
+
 ---
 
 ## What You Get
