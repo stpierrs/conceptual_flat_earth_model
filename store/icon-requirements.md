@@ -21,6 +21,13 @@ Image Asset tool. iOS generates all required sizes via Xcode.
 You don't manually create every size — you give both tools the 1024×1024
 and they do the rest.
 
+Before syncing, install the project dependencies:
+
+```sh
+npm install
+npm run sync
+```
+
 ## How to create the icon (if you need a new one)
 - Photoshop / Illustrator / Affinity Designer: export at 1024×1024 PNG
 - Figma: free, works fine, export at 1x = 1024px

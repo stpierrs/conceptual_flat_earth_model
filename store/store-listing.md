@@ -70,6 +70,15 @@ flat earth, astronomy, Ptolemy, epicycle, solar system, simulator, eclipse, star
 
 ## What you need before submitting
 
+### Local build commands
+- Browser preview: `python3 -m http.server 8000`, then open `http://localhost:8000`
+- Rust core verification: `cargo test`
+- Capacitor setup: `npm install`
+- Native sync/open: `npm run sync`, `npm run open:android`, `npm run open:ios`
+
+The store builds package the static browser app through Capacitor. The Rust core
+is not bundled into the mobile app yet.
+
 ### Both stores
 - [ ] Privacy policy URL (host privacy-policy.html somewhere public — GitHub Pages works)
 - [ ] App icon: 1024×1024 PNG, no transparency, no rounded corners (stores apply their own mask)
